@@ -14,6 +14,8 @@ COLUMN_ALIASES = {
     "name": ["name", "item", "item name", "product", "product name"],
     "unit_type": ["unit", "unit_type", "uom", "measure"],
     "price": ["price", "rate", "mrp", "amount", "cost"],
+    "image_url": ["image_url", "image", "image url", "photo", "picture"],
+    "category": ["category", "cat", "type", "group"],
 }
 
 
@@ -68,6 +70,8 @@ async def import_products(
                 continue
             price = float(row[mapping["price"]])
             unit_type = str(row[mapping["unit_type"]]).strip() if "unit_type" in mapping else "unit"
+            image_url = str(row[mapping["image_url"]]).strip() if "image_url" in mapping and pd.notna(row[mapping["image_url"]]) else None
+            category = str(row[mapping["category"]]).strip() if "category" in mapping and pd.notna(row[mapping["category"]]) else None
 
             # extra columns -> attributes JSON
             used_cols = set(mapping.values())
@@ -94,11 +98,15 @@ async def import_products(
                 existing.price = price
                 existing.is_active = True
                 existing.attributes = extra
+                if image_url:
+                    existing.image_url = image_url
+                if category:
+                    existing.category = category
                 updated += 1
             else:
                 db.add(models.Product(
                     business_id=business_id, name=name, unit_type=unit_type,
-                    price=price, attributes=extra,
+                    price=price, attributes=extra, image_url=image_url, category=category,
                 ))
                 created += 1
         except Exception as e:

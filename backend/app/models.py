@@ -70,6 +70,8 @@ class Product(Base):
     unit_type = Column(String, nullable=False)  # kg, piece, litre, load, strip, etc.
     price = Column(Float, nullable=False)
     is_active = Column(Boolean, default=True)
+    image_url = Column(String, nullable=True)
+    category = Column(String, nullable=True, index=True)
     attributes = Column(JSONB, nullable=True, default=dict)  # flexible per-vertical fields
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

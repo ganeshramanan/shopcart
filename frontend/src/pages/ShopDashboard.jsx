@@ -8,7 +8,7 @@ export default function ShopDashboard() {
   const { user, refreshUser } = useAuth();
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [newProduct, setNewProduct] = useState({ name: "", unit_type: "kg", price: "" });
+  const [newProduct, setNewProduct] = useState({ name: "", unit_type: "kg", price: "", category: "", image_url: "" });
   const [editing, setEditing] = useState({}); // productId -> price being edited
   const [importResult, setImportResult] = useState(null);
   const [error, setError] = useState("");
@@ -38,7 +38,7 @@ export default function ShopDashboard() {
         ...newProduct,
         price: parseFloat(newProduct.price),
       });
-      setNewProduct({ name: "", unit_type: "kg", price: "" });
+      setNewProduct({ name: "", unit_type: "kg", price: "", category: "", image_url: "" });
       loadProducts();
     } catch (err) {
       setError(err.response?.data?.detail || "Could not add product");
@@ -107,6 +107,10 @@ export default function ShopDashboard() {
             onChange={(e) => setNewProduct({ ...newProduct, unit_type: e.target.value })} required />
           <input type="number" step="0.01" placeholder="Price" value={newProduct.price}
             onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })} required />
+          <input placeholder="Category (optional)" value={newProduct.category}
+            onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })} />
+          <input placeholder="Image URL (optional)" value={newProduct.image_url}
+            onChange={(e) => setNewProduct({ ...newProduct, image_url: e.target.value })} />
           <button type="submit">Add</button>
         </form>
       </div>
@@ -114,7 +118,12 @@ export default function ShopDashboard() {
       <h3>Catalog</h3>
       {products.map((p) => (
         <div key={p.id} className="card row">
-          <div>
+          <div className="row" style={{ gap: 10 }}>
+            <img
+              src={p.image_url || "https://placehold.co/60x60/CCCCCC/666666?text=?"}
+              alt={p.name}
+              style={{ width: 44, height: 44, borderRadius: 8, objectFit: "cover" }}
+            />
             <strong>{p.name}</strong> ({p.unit_type})
           </div>
           <div className="qty-control">
