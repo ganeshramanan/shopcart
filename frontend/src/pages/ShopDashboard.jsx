@@ -7,6 +7,7 @@ import { formatDate } from "../utils.js";
 import NewSale from "./NewSale.jsx";
 import PrintLabels from "./PrintLabels.jsx";
 import Analytics from "./Analytics.jsx";
+import StaffManagement from "./StaffManagement.jsx";
 
 const ORDER_STATUSES = ["placed", "confirmed", "packing", "ready", "dispatched", "delivered", "cancelled"];
 const STATUS_COLORS = {
@@ -219,11 +220,15 @@ export default function ShopDashboard() {
         <button className={tab === "analytics" ? "tab active" : "tab"} onClick={() => setTab("analytics")}>
           📊 Analytics
         </button>
+        <button className={tab === "staff" ? "tab active" : "tab"} onClick={() => setTab("staff")}>
+          👤 Staff
+        </button>
       </div>
 
       {tab === "newsale" && <NewSale products={products} businessId={businessId} />}
       {tab === "labels" && <PrintLabels products={products} businessId={businessId} onRefresh={loadProducts} />}
       {tab === "analytics" && <Analytics businessId={businessId} />}
+      {tab === "staff" && <StaffManagement />}
 
       {tab === "overview" && (
         <div>

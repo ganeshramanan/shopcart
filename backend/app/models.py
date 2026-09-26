@@ -24,6 +24,7 @@ class ApprovalStatusEnum(str, enum.Enum):
 class RoleEnum(str, enum.Enum):
     admin = "admin"          # platform owner (you)
     shop_owner = "shop_owner"
+    staff = "staff"           # limited-privilege POS-only account, managed by shop_owner
     customer = "customer"
 
 

@@ -8,12 +8,14 @@ import MyOrders from "./pages/MyOrders.jsx";
 import ShopDashboard from "./pages/ShopDashboard.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import Invoice from "./pages/Invoice.jsx";
+import StaffPOS from "./pages/StaffPOS.jsx";
 
 function TopBar() {
   const { user, logout } = useAuth();
   const isBoundCustomer = user?.role === "customer" && user?.business_id;
   const isShopOwner = user?.role === "shop_owner";
   const isAdmin = user?.role === "admin";
+  const isStaff = user?.role === "staff";
 
   return (
     <div className={isAdmin ? "topbar topbar-admin" : "topbar"}>
@@ -39,6 +41,7 @@ function TopBar() {
               {user.business_id && <Link to={`/shop/${user.business_id}`}>Preview My Shop</Link>}
             </>
           )}
+          {isStaff && <Link to="/pos">New Sale</Link>}
           {isBoundCustomer && (
             <>
               <Link to={`/shop/${user.business_id}`}>Catalog</Link>
@@ -46,7 +49,7 @@ function TopBar() {
             </>
           )}
           {!user && <Link to="/">Shops</Link>}
-          {user && !isShopOwner && !isBoundCustomer && !isAdmin && (
+          {user && !isShopOwner && !isBoundCustomer && !isAdmin && !isStaff && (
             <>
               <Link to="/">Shops</Link>
               <Link to="/orders">My Orders</Link>
@@ -75,6 +78,7 @@ function Protected({ children, role }) {
 function HomeRoute() {
   const { user } = useAuth();
   if (user?.role === "admin") return <Navigate to="/admin" replace />;
+  if (user?.role === "staff") return <Navigate to="/pos" replace />;
   if (user?.role === "customer" && user?.business_id) {
     return <Navigate to={`/shop/${user.business_id}`} replace />;
   }
@@ -95,8 +99,9 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/shop/:businessId" element={<Catalog />} />
           <Route path="/orders" element={<Protected><MyOrders /></Protected>} />
-          <Route path="/dashboard" element={<Protected><ShopDashboard /></Protected>} />
+          <Route path="/dashboard" element={<Protected role="shop_owner"><ShopDashboard /></Protected>} />
           <Route path="/admin" element={<Protected role="admin"><AdminDashboard /></Protected>} />
+          <Route path="/pos" element={<Protected role="staff"><StaffPOS /></Protected>} />
           <Route path="/invoice/:orderId" element={<Protected><Invoice /></Protected>} />
         </Routes>
       </div>

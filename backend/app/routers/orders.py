@@ -109,13 +109,13 @@ def update_order_status(
 def create_walk_in_order(
     payload: schemas.WalkInOrderCreate,
     db: Session = Depends(get_db),
-    user: models.User = Depends(require_role("admin", "shop_owner")),
+    user: models.User = Depends(require_role("admin", "shop_owner", "staff")),
 ):
-    """Shop owner creates a POS-style order for a walk-in customer who never
-    used the app. If a phone is given and matches an existing customer of
-    this shop, that account is reused; otherwise a lightweight guest record
-    is created (no password, is_guest=True). Order defaults to 'delivered'
-    since it's an instant in-person transaction."""
+    """Shop owner OR staff creates a POS-style order for a walk-in customer
+    who never used the app. If a phone is given and matches an existing
+    customer of this shop, that account is reused; otherwise a lightweight
+    guest record is created (no password, is_guest=True). Order defaults to
+    'delivered' since it's an instant in-person transaction."""
     if not user.business_id:
         raise HTTPException(status_code=400, detail="You need a business set up first")
     if not payload.items:
