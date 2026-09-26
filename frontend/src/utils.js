@@ -13,3 +13,12 @@ export function formatDate(isoString) {
     timeZone: "Asia/Kolkata",
   }) + " IST";
 }
+
+// Normalizes an Indian 10-digit number to the international format wa.me
+// needs (country code, no +, no spaces/dashes). Passes through unchanged
+// if it doesn't look like a plain 10-digit local number.
+export function normalizeIndianPhone(raw) {
+  const digits = raw.replace(/[^\d]/g, "");
+  if (digits.length === 10) return `91${digits}`;
+  return digits;
+}
