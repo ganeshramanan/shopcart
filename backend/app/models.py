@@ -43,7 +43,7 @@ class Business(Base):
 
     products = relationship("Product", back_populates="business", cascade="all, delete-orphan")
     users = relationship("User", back_populates="business")
-    orders = relationship("Order", back_populates="business")
+    orders = relationship("Order", back_populates="business", cascade="all, delete-orphan")
 
 
 class User(Base):

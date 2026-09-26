@@ -41,3 +41,26 @@ def get_business(business_id: str, db: Session = Depends(get_db)):
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Business not found")
     return biz
+
+
+@router.delete("/{business_id}")
+def delete_business(
+    business_id: str,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(require_role("admin", "shop_owner")),
+):
+    """Admin/owner cleanup tool — deletes a business and its products/orders (cascades)."""
+    biz = db.query(models.Business).filter(models.Business.id == business_id).first()
+    if not biz:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Business not found")
+    if user.role == "shop_owner" and str(user.business_id) != str(business_id):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Unlink any users pointing at this business (don't delete user accounts)
+    db.query(models.User).filter(models.User.business_id == business_id).update({"business_id": None})
+
+    db.delete(biz)
+    db.commit()
+    return {"detail": "Business deleted"}
