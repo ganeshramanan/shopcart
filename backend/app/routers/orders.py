@@ -103,3 +103,74 @@ def update_order_status(
     db.commit()
     db.refresh(order)
     return order
+
+
+@router.post("/walk-in", response_model=schemas.OrderOut)
+def create_walk_in_order(
+    payload: schemas.WalkInOrderCreate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(require_role("admin", "shop_owner")),
+):
+    """Shop owner creates a POS-style order for a walk-in customer who never
+    used the app. If a phone is given and matches an existing customer of
+    this shop, that account is reused; otherwise a lightweight guest record
+    is created (no password, is_guest=True). Order defaults to 'delivered'
+    since it's an instant in-person transaction."""
+    if not user.business_id:
+        raise HTTPException(status_code=400, detail="You need a business set up first")
+    if not payload.items:
+        raise HTTPException(status_code=400, detail="Order must have at least one item")
+
+    customer = None
+    if payload.customer_phone:
+        customer = (
+            db.query(models.User)
+            .filter(models.User.phone == payload.customer_phone, models.User.business_id == user.business_id)
+            .first()
+        )
+
+    if not customer:
+        customer = models.User(
+            name=payload.customer_name or "Walk-in Customer",
+            phone=payload.customer_phone,
+            role=models.RoleEnum.customer,
+            business_id=user.business_id,
+            is_guest=True,
+        )
+        db.add(customer)
+        db.flush()
+
+    order = models.Order(
+        business_id=user.business_id,
+        customer_id=customer.id,
+        notes=payload.notes,
+        status=models.OrderStatusEnum.delivered,
+    )
+    db.add(order)
+    db.flush()
+
+    total = 0.0
+    for item in payload.items:
+        product = db.query(models.Product).filter(models.Product.id == item.product_id).first()
+        if not product or not product.is_active:
+            raise HTTPException(status_code=400, detail=f"Product {item.product_id} unavailable")
+        if item.quantity <= 0:
+            raise HTTPException(status_code=400, detail="Quantity must be greater than zero")
+
+        line_total = round(product.price * item.quantity, 2)
+        total += line_total
+
+        db.add(models.OrderItem(
+            order_id=order.id,
+            product_id=product.id,
+            product_name_snapshot=product.name,
+            unit_type_snapshot=product.unit_type,
+            quantity=item.quantity,
+            unit_price_snapshot=product.price,
+            line_total=line_total,
+        ))
+
+    order.total_amount = round(total, 2)
+    db.commit()
+    db.refresh(order)
+    return order

@@ -124,3 +124,10 @@ class OrderOut(BaseModel):
 
 class OrderStatusUpdate(BaseModel):
     status: str
+
+
+class WalkInOrderCreate(BaseModel):
+    items: list[OrderItemCreate]
+    customer_name: Optional[str] = None
+    customer_phone: Optional[str] = None
+    notes: Optional[str] = None

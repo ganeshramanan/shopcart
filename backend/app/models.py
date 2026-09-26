@@ -57,8 +57,9 @@ class User(Base):
 
     id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
     name = Column(String, nullable=False)
-    phone = Column(String, unique=True, nullable=False, index=True)
-    password_hash = Column(String, nullable=False)
+    phone = Column(String, unique=True, nullable=True, index=True)
+    password_hash = Column(String, nullable=True)
+    is_guest = Column(Boolean, default=False, nullable=False)
     role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.customer)
     business_id = Column(UUID(as_uuid=False), ForeignKey("businesses.id"), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)

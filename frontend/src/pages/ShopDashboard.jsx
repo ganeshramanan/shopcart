@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { formatDate } from "../utils.js";
+import NewSale from "./NewSale.jsx";
 
 const ORDER_STATUSES = ["placed", "confirmed", "packing", "ready", "dispatched", "delivered", "cancelled"];
 const STATUS_COLORS = {
@@ -169,6 +170,9 @@ export default function ShopDashboard() {
       </div>
 
       <div className="dashboard-tabs">
+        <button className={tab === "newsale" ? "tab active" : "tab"} onClick={() => setTab("newsale")}>
+          🧾 New Sale
+        </button>
         <button className={tab === "overview" ? "tab active" : "tab"} onClick={() => setTab("overview")}>
           Orders {activeOrders.length > 0 && <span className="tab-badge">{activeOrders.length}</span>}
         </button>
@@ -185,6 +189,8 @@ export default function ShopDashboard() {
           Customers {customers.length > 0 && <span className="tab-badge" style={{ background: "#6b7280" }}>{customers.length}</span>}
         </button>
       </div>
+
+      {tab === "newsale" && <NewSale products={products} businessId={businessId} />}
 
       {tab === "overview" && (
         <div>
