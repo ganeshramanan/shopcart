@@ -56,7 +56,7 @@ const PAGE_TITLES = {
 export default function ShopDashboard() {
   const { user, refreshUser } = useAuth();
   const [tab, setTab] = useState("home");
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [editing, setEditing] = useState({});
@@ -236,12 +236,12 @@ export default function ShopDashboard() {
         collapsed={collapsed}
         onCollapse={setCollapsed}
         breakpoint="lg"
-        collapsedWidth={collapsed ? 0 : 80}
+        collapsedWidth={80}
         trigger={null}
         style={{ background: "#fff", borderRadius: 12, marginRight: 16, overflow: "hidden" }}
         width={220}
       >
-        <div style={{ padding: 12 }}>
+        <div style={{ padding: 12, textAlign: collapsed ? "center" : "left" }}>
           <Button
             type="text"
             icon={<MenuOutlined />}
