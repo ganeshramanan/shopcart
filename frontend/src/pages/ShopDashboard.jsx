@@ -4,6 +4,7 @@ import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { formatDate } from "../utils.js";
 import NewSale from "./NewSale.jsx";
+import PrintLabels from "./PrintLabels.jsx";
 
 const ORDER_STATUSES = ["placed", "confirmed", "packing", "ready", "dispatched", "delivered", "cancelled"];
 const STATUS_COLORS = {
@@ -188,9 +189,13 @@ export default function ShopDashboard() {
         <button className={tab === "customers" ? "tab active" : "tab"} onClick={() => setTab("customers")}>
           Customers {customers.length > 0 && <span className="tab-badge" style={{ background: "#6b7280" }}>{customers.length}</span>}
         </button>
+        <button className={tab === "labels" ? "tab active" : "tab"} onClick={() => setTab("labels")}>
+          🏷️ Print Labels
+        </button>
       </div>
 
       {tab === "newsale" && <NewSale products={products} businessId={businessId} />}
+      {tab === "labels" && <PrintLabels products={products} />}
 
       {tab === "overview" && (
         <div>

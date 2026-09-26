@@ -31,6 +31,8 @@ statements = [
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_guest BOOLEAN NOT NULL DEFAULT false;",
     "ALTER TABLE users ALTER COLUMN phone DROP NOT NULL;",
     "ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;",
+    "ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode VARCHAR;",
+    "CREATE UNIQUE INDEX IF NOT EXISTS ix_products_barcode ON products (barcode) WHERE barcode IS NOT NULL;",
 ]
 
 with engine.begin() as conn:

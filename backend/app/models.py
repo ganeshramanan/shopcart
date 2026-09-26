@@ -81,6 +81,7 @@ class Product(Base):
     is_active = Column(Boolean, default=True)
     image_url = Column(String, nullable=True)
     category = Column(String, nullable=True, index=True)
+    barcode = Column(String, unique=True, nullable=True, index=True)
     attributes = Column(JSONB, nullable=True, default=dict)  # flexible per-vertical fields
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

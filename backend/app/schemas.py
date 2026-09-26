@@ -59,6 +59,7 @@ class ProductCreate(BaseModel):
     price: float
     image_url: Optional[str] = None
     category: Optional[str] = None
+    barcode: Optional[str] = None
     attributes: Optional[dict[str, Any]] = {}
 
 
@@ -69,6 +70,7 @@ class ProductUpdate(BaseModel):
     is_active: Optional[bool] = None
     image_url: Optional[str] = None
     category: Optional[str] = None
+    barcode: Optional[str] = None
     attributes: Optional[dict[str, Any]] = None
 
 
@@ -82,6 +84,7 @@ class ProductOut(BaseModel):
     is_active: bool
     image_url: Optional[str] = None
     category: Optional[str] = None
+    barcode: Optional[str] = None
     attributes: Optional[dict[str, Any]] = {}
 
 

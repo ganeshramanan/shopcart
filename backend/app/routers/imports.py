@@ -1,4 +1,5 @@
 import io
+import random
 import pandas as pd
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
@@ -28,6 +29,16 @@ def _map_columns(columns: list[str]) -> dict:
                 mapping[field] = normalized[alias]
                 break
     return mapping
+
+
+def _generate_unique_barcode(db: Session) -> str:
+    """Same internal-use barcode scheme as products.py (2xx prefix, GS1's
+    reserved in-store range — never collides with real manufacturer codes)."""
+    for _ in range(10):
+        candidate = "2" + "".join(str(random.randint(0, 9)) for _ in range(11))
+        if not db.query(models.Product).filter(models.Product.barcode == candidate).first():
+            return candidate
+    raise RuntimeError("Could not generate a unique barcode after 10 attempts")
 
 
 @router.post("/import")
@@ -107,6 +118,7 @@ async def import_products(
                 db.add(models.Product(
                     business_id=business_id, name=name, unit_type=unit_type,
                     price=price, attributes=extra, image_url=image_url, category=category,
+                    barcode=_generate_unique_barcode(db),
                 ))
                 created += 1
         except Exception as e:

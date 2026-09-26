@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+import random
 
 from app.core.database import get_db
 from app import models, schemas
@@ -13,6 +14,19 @@ def _ensure_owns_business(user: models.User, business_id: str):
         return
     if user.role != "shop_owner" or str(user.business_id) != str(business_id):
         raise HTTPException(status_code=403, detail="Not authorized for this business")
+
+
+def _generate_unique_barcode(db: Session) -> str:
+    """Generates a unique internal-use barcode. GS1 reserves the 20-29 EAN-13
+    prefix range for in-store/internal use (never assigned to real retail
+    products), so codes here will never collide with a manufacturer's actual
+    barcode. Format: 2 + 11 random digits = 12 digits, Code128-scannable."""
+    for _ in range(10):
+        candidate = "2" + "".join(str(random.randint(0, 9)) for _ in range(11))
+        exists = db.query(models.Product).filter(models.Product.barcode == candidate).first()
+        if not exists:
+            return candidate
+    raise RuntimeError("Could not generate a unique barcode after 10 attempts")
 
 
 @router.get("", response_model=list[schemas.ProductOut])
@@ -34,7 +48,10 @@ def create_product(
     user: models.User = Depends(require_role("admin", "shop_owner")),
 ):
     _ensure_owns_business(user, business_id)
-    product = models.Product(business_id=business_id, **payload.model_dump())
+    data = payload.model_dump()
+    if not data.get("barcode"):
+        data["barcode"] = _generate_unique_barcode(db)
+    product = models.Product(business_id=business_id, **data)
     db.add(product)
     db.commit()
     db.refresh(product)
