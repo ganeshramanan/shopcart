@@ -44,8 +44,7 @@ def get_business(business_id: str, db: Session = Depends(get_db)):
 
 
 @router.delete("/{business_id}")
-def delete_business(
-    business_id: str,
+def delete_business(    business_id: str,
     db: Session = Depends(get_db),
     user: models.User = Depends(require_role("admin", "shop_owner")),
 ):
@@ -64,3 +63,59 @@ def delete_business(
     db.delete(biz)
     db.commit()
     return {"detail": "Business deleted"}
+
+
+@router.get("/{business_id}/customers")
+def list_customers(
+    business_id: str,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(require_role("admin", "shop_owner")),
+):
+    """List customers currently bound to this shop, with their order counts."""
+    if user.role == "shop_owner" and str(user.business_id) != str(business_id):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    customers = (
+        db.query(models.User)
+        .filter(models.User.business_id == business_id, models.User.role == "customer")
+        .all()
+    )
+    result = []
+    for c in customers:
+        order_count = db.query(models.Order).filter(models.Order.customer_id == c.id).count()
+        result.append({
+            "id": c.id,
+            "name": c.name,
+            "phone": c.phone,
+            "created_at": c.created_at,
+            "order_count": order_count,
+        })
+    return result
+
+
+@router.delete("/{business_id}/customers/{customer_id}")
+def remove_customer(
+    business_id: str,
+    customer_id: str,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(require_role("admin", "shop_owner")),
+):
+    """Unlink a customer from this shop (soft removal). Their account and past
+    order history are preserved — they just can no longer see/order from this
+    shop unless re-invited via a fresh signup link."""
+    from fastapi import HTTPException
+    if user.role == "shop_owner" and str(user.business_id) != str(business_id):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    customer = (
+        db.query(models.User)
+        .filter(models.User.id == customer_id, models.User.business_id == business_id)
+        .first()
+    )
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found for this shop")
+
+    customer.business_id = None
+    db.commit()
+    return {"detail": "Customer removed from shop"}

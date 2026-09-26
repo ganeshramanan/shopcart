@@ -20,6 +20,7 @@ export default function ShopDashboard() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
+  const [customers, setCustomers] = useState([]);
 
   const businessId = user?.business_id;
   const signupLink = businessId ? `${window.location.origin}/signup?shop=${businessId}` : "";
@@ -29,10 +30,15 @@ export default function ShopDashboard() {
     api.get(`/products?business_id=${businessId}`).then((res) => setProducts(res.data));
   };
   const loadOrders = () => api.get("/orders").then((res) => setOrders(res.data));
+  const loadCustomers = () => {
+    if (!businessId) return;
+    api.get(`/businesses/${businessId}/customers`).then((res) => setCustomers(res.data));
+  };
 
   useEffect(() => {
     loadProducts();
     loadOrders();
+    loadCustomers();
   }, [businessId]);
 
   if (!businessId) return <NoBusinessYet onCreated={refreshUser} />;
@@ -90,6 +96,14 @@ export default function ShopDashboard() {
   const updateStatus = async (orderId, status) => {
     await api.patch(`/orders/${orderId}/status`, { status });
     loadOrders();
+  };
+
+  const removeCustomer = async (customerId, name) => {
+    if (!window.confirm(`Remove ${name} from your shop? They will need a new signup link to order again. Their past orders are kept.`)) {
+      return;
+    }
+    await api.delete(`/businesses/${businessId}/customers/${customerId}`);
+    loadCustomers();
   };
 
   const filteredProducts = products.filter((p) =>
@@ -164,6 +178,9 @@ export default function ShopDashboard() {
         </button>
         <button className={tab === "import" ? "tab active" : "tab"} onClick={() => setTab("import")}>
           Bulk Import
+        </button>
+        <button className={tab === "customers" ? "tab active" : "tab"} onClick={() => setTab("customers")}>
+          Customers {customers.length > 0 && <span className="tab-badge" style={{ background: "#6b7280" }}>{customers.length}</span>}
         </button>
       </div>
 
@@ -280,6 +297,25 @@ export default function ShopDashboard() {
               {importResult.errors?.length > 0 && `, Errors: ${importResult.errors.length}`}
             </p>
           )}
+        </div>
+      )}
+
+      {tab === "customers" && (
+        <div>
+          {customers.length === 0 && <p className="empty-state">No customers yet. Share your signup link to invite them.</p>}
+          {customers.map((c) => (
+            <div key={c.id} className="card row">
+              <div>
+                <strong>{c.name}</strong>
+                <div className="inventory-meta">
+                  <a href={`tel:${c.phone}`}>{c.phone}</a> · {c.order_count} order{c.order_count !== 1 ? "s" : ""}
+                </div>
+              </div>
+              <button className="secondary" onClick={() => removeCustomer(c.id, c.name)}>
+                Remove
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>
