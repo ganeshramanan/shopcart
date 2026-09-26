@@ -26,6 +26,7 @@ statements = [
     "ALTER TABLE products ADD COLUMN IF NOT EXISTS image_url VARCHAR;",
     "ALTER TABLE products ADD COLUMN IF NOT EXISTS category VARCHAR;",
     "CREATE INDEX IF NOT EXISTS ix_products_category ON products (category);",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;",
 ]
 
 with engine.begin() as conn:

@@ -25,6 +25,7 @@ class UserOut(BaseModel):
     phone: str
     role: str
     business_id: Optional[str] = None
+    is_active: bool = True
 
 
 class Token(BaseModel):

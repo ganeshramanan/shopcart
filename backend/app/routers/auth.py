@@ -40,6 +40,8 @@ def login(payload: schemas.UserLogin, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.phone == payload.phone).first()
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid phone or password")
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Your account has been disabled. Contact the platform admin.")
 
     token = create_access_token({"sub": user.id, "role": user.role})
     return schemas.Token(access_token=token, user=user)

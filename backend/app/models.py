@@ -55,6 +55,7 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.customer)
     business_id = Column(UUID(as_uuid=False), ForeignKey("businesses.id"), nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     business = relationship("Business", back_populates="users")
