@@ -29,6 +29,10 @@ export default function ShopDashboard() {
   const [linkCopied, setLinkCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const [customers, setCustomers] = useState([]);
+  const [orderSearch, setOrderSearch] = useState("");
+  const [orderStatusFilter, setOrderStatusFilter] = useState("all");
+  const [orderStartDate, setOrderStartDate] = useState("");
+  const [orderEndDate, setOrderEndDate] = useState("");
 
   const businessId = user?.business_id;
   const signupLink = businessId ? `${window.location.origin}/signup?shop=${businessId}` : "";
@@ -122,6 +126,20 @@ export default function ShopDashboard() {
   const totalRevenue = orders
     .filter((o) => o.status === "delivered")
     .reduce((sum, o) => sum + o.total_amount, 0);
+
+  const filteredOrders = orders.filter((o) => {
+    const q = orderSearch.trim().toLowerCase();
+    const matchesSearch =
+      !q ||
+      (o.customer_name && o.customer_name.toLowerCase().includes(q)) ||
+      (o.customer_phone && o.customer_phone.includes(q)) ||
+      o.id.toLowerCase().includes(q);
+    const matchesStatus = orderStatusFilter === "all" || o.status === orderStatusFilter;
+    const orderDay = o.created_at.slice(0, 10); // YYYY-MM-DD
+    const matchesStart = !orderStartDate || orderDay >= orderStartDate;
+    const matchesEnd = !orderEndDate || orderDay <= orderEndDate;
+    return matchesSearch && matchesStatus && matchesStart && matchesEnd;
+  });
 
   return (
     <div>
@@ -232,8 +250,38 @@ export default function ShopDashboard() {
 
       {tab === "overview" && (
         <div>
-          {orders.length === 0 && <p className="empty-state">No orders yet.</p>}
-          {orders.map((o) => (
+          <div className="card">
+            <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
+              <input
+                placeholder="Search by customer name, phone, or order ID..."
+                value={orderSearch}
+                onChange={(e) => setOrderSearch(e.target.value)}
+                style={{ flex: 1, minWidth: 200, marginBottom: 0 }}
+              />
+              <select
+                style={{ width: "auto", marginBottom: 0 }}
+                value={orderStatusFilter}
+                onChange={(e) => setOrderStatusFilter(e.target.value)}
+              >
+                <option value="all">All statuses</option>
+                {ORDER_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <input type="date" style={{ width: "auto", marginBottom: 0 }} value={orderStartDate} onChange={(e) => setOrderStartDate(e.target.value)} />
+              <span style={{ color: "#9ca3af" }}>to</span>
+              <input type="date" style={{ width: "auto", marginBottom: 0 }} value={orderEndDate} onChange={(e) => setOrderEndDate(e.target.value)} />
+              {(orderSearch || orderStatusFilter !== "all" || orderStartDate || orderEndDate) && (
+                <button
+                  className="secondary"
+                  onClick={() => { setOrderSearch(""); setOrderStatusFilter("all"); setOrderStartDate(""); setOrderEndDate(""); }}
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+
+          {filteredOrders.length === 0 && <p className="empty-state">No orders match your filters.</p>}
+          {filteredOrders.map((o) => (
             <div key={o.id} className="card order-card">
               <div className="row">
                 <div>
