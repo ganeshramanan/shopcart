@@ -19,8 +19,10 @@ export default function ShopDashboard() {
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const businessId = user?.business_id;
+  const signupLink = businessId ? `${window.location.origin}/signup?shop=${businessId}` : "";
 
   const loadProducts = () => {
     if (!businessId) return;
@@ -126,6 +128,27 @@ export default function ShopDashboard() {
         <div className="stat-card">
           <div className="stat-value">₹{totalRevenue.toFixed(0)}</div>
           <div className="stat-label">Revenue (Delivered)</div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginBottom: 20 }}>
+        <strong>Your customer signup link</strong>
+        <p className="dashboard-subtitle">
+          Share this with your customers (WhatsApp, or print as a QR code) so they can
+          sign up directly to your shop — they'll never see other shops on the platform.
+        </p>
+        <div className="row" style={{ gap: 8 }}>
+          <input readOnly value={signupLink} onFocus={(e) => e.target.select()} />
+          <button
+            className="secondary"
+            onClick={() => {
+              navigator.clipboard.writeText(signupLink);
+              setLinkCopied(true);
+              setTimeout(() => setLinkCopied(false), 1500);
+            }}
+          >
+            {linkCopied ? "Copied!" : "Copy"}
+          </button>
         </div>
       </div>
 
