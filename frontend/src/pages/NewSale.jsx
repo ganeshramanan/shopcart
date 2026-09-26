@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
+import BarcodeScanner from "../components/BarcodeScanner.jsx";
 
 export default function NewSale({ products, businessId }) {
   const [cart, setCart] = useState({}); // product_id -> quantity
@@ -9,6 +10,8 @@ export default function NewSale({ products, businessId }) {
   const [customerPhone, setCustomerPhone] = useState("");
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState("");
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scanMessage, setScanMessage] = useState("");
   const navigate = useNavigate();
 
   const step = (unit) => (unit === "kg" || unit === "litre" ? 0.5 : 1);
@@ -38,6 +41,17 @@ export default function NewSale({ products, businessId }) {
     .filter(Boolean);
 
   const total = cartLines.reduce((sum, l) => sum + l.lineTotal, 0);
+
+  const handleScan = (barcode) => {
+    const product = products.find((p) => p.barcode === barcode);
+    if (product) {
+      setQty(product.id, (cart[product.id] || 0) + step(product.unit_type));
+      setScanMessage(`✓ Added: ${product.name}`);
+    } else {
+      setScanMessage(`⚠ No product found for barcode ${barcode}`);
+    }
+    setTimeout(() => setScanMessage(""), 2500);
+  };
 
   const generateBill = async () => {
     if (cartLines.length === 0) {
@@ -79,6 +93,18 @@ export default function NewSale({ products, businessId }) {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+
+      <div className="row" style={{ gap: 8, marginBottom: 12 }}>
+        <button onClick={() => setScannerOpen(true)}>📷 Scan Barcode</button>
+        {scanMessage && <span style={{ fontSize: 13, fontWeight: 600 }}>{scanMessage}</span>}
+      </div>
+
+      {scannerOpen && (
+        <BarcodeScanner
+          onScan={handleScan}
+          onClose={() => setScannerOpen(false)}
+        />
+      )}
 
       <div className="catalog-layout">
         <div className="product-grid">
