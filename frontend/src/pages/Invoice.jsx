@@ -173,12 +173,12 @@ export default function Invoice() {
             style={{ width: 200 }}
           />
           <Button icon={<WhatsAppOutlined />} loading={sharing} onClick={sharePdfOnWhatsApp}>
-            Send PDF on WhatsApp
+            Send Bill on WhatsApp
           </Button>
         </Space>
         <div style={{ marginTop: 4 }}>
           <Text type="secondary" style={{ fontSize: 12 }}>
-            On mobile, this attaches the actual PDF via your phone's share sheet (WhatsApp will be an option there). On desktop, WhatsApp Desktop isn't a share target, so it opens a WhatsApp Web chat with a text summary instead.
+            On mobile, "Send Bill" attaches the actual PDF via your phone's share sheet. On desktop, it opens WhatsApp Web with a text summary (WhatsApp Desktop apps can't receive files from browsers).
           </Text>
         </div>
       </div>
