@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import Base, engine
-from app.routers import auth, businesses, products, orders, imports, admin
+from app.routers import auth, businesses, products, orders, imports, admin, analytics
 
 # Create tables on startup (fine for learning/MVP; use Alembic migrations later)
 Base.metadata.create_all(bind=engine)
@@ -27,6 +27,7 @@ app.include_router(products.router)
 app.include_router(imports.router)
 app.include_router(orders.router)
 app.include_router(admin.router)
+app.include_router(analytics.router)
 
 
 @app.get("/")
