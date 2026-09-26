@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -22,14 +23,31 @@ def _ensure_owns_business(user: models.User, business_id: str):
 def get_analytics(
     business_id: str,
     days: int = 30,
+    start_date: Optional[str] = None,  # YYYY-MM-DD, overrides `days` if provided
+    end_date: Optional[str] = None,    # YYYY-MM-DD, defaults to now
     db: Session = Depends(get_db),
     user: models.User = Depends(require_role("admin", "shop_owner")),
 ):
-    """Aggregated sales analytics for a business over the last N days.
-    Pure read/aggregation over existing Order/OrderItem data — no new tables."""
+    """Aggregated sales analytics for a business, either over the last N days
+    (default) or a custom [start_date, end_date] window. Pure read/aggregation
+    over existing Order/OrderItem data — no new tables."""
     _ensure_owns_business(user, business_id)
 
-    since = datetime.utcnow() - timedelta(days=days)
+    if start_date:
+        try:
+            since = datetime.strptime(start_date, "%Y-%m-%d")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="start_date must be in YYYY-MM-DD format")
+    else:
+        since = datetime.utcnow() - timedelta(days=days)
+
+    if end_date:
+        try:
+            until = datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)  # inclusive of end day
+        except ValueError:
+            raise HTTPException(status_code=400, detail="end_date must be in YYYY-MM-DD format")
+    else:
+        until = datetime.utcnow() + timedelta(days=1)
 
     # Only count orders that represent completed sales (excludes cancelled)
     base_q = (
@@ -37,6 +55,7 @@ def get_analytics(
         .filter(
             models.Order.business_id == business_id,
             models.Order.created_at >= since,
+            models.Order.created_at < until,
             models.Order.status != models.OrderStatusEnum.cancelled,
         )
     )
@@ -69,6 +88,7 @@ def get_analytics(
         .filter(
             models.Order.business_id == business_id,
             models.Order.created_at >= since,
+            models.Order.created_at < until,
             models.Order.status != models.OrderStatusEnum.cancelled,
         )
         .group_by(models.OrderItem.product_name_snapshot)
