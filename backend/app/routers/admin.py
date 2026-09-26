@@ -60,6 +60,28 @@ def reject_shop_owner(
     return {"detail": "Rejected", "approval_status": owner.approval_status}
 
 
+@router.delete("/shop-owners/{owner_id}")
+def delete_shop_owner(
+    owner_id: str,
+    db: Session = Depends(get_db),
+    _admin: models.User = Depends(require_role("admin")),
+):
+    """Super-admin only: permanently delete a shop owner's account.
+    Only allowed if they have no business attached — delete their business
+    first (which also unlinks them) if they've already onboarded."""
+    owner = db.query(models.User).filter(models.User.id == owner_id, models.User.role == "shop_owner").first()
+    if not owner:
+        raise HTTPException(status_code=404, detail="Shop owner not found")
+    if owner.business_id:
+        raise HTTPException(
+            status_code=400,
+            detail="This shop owner still has a business attached. Delete their business first.",
+        )
+    db.delete(owner)
+    db.commit()
+    return {"detail": "Shop owner deleted"}
+
+
 @router.patch("/shop-owners/{owner_id}/toggle-active")
 def toggle_shop_owner_active(
     owner_id: str,

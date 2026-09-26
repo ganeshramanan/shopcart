@@ -12,6 +12,10 @@ export default function Login() {
   const submit = async (e) => {
     e.preventDefault();
     setError("");
+    if (!/^\d{6,15}$/.test(phone)) {
+      setError("Please enter a valid phone number (digits only, no name or spaces).");
+      return;
+    }
     try {
       const user = await login(phone, password);
       if (user.role === "customer" && user.business_id) {
@@ -27,9 +31,21 @@ export default function Login() {
   return (
     <div className="card" style={{ maxWidth: 420, margin: "0 auto" }}>
       <h2>Login</h2>
+      <p style={{ color: "#6b7280", fontSize: 13, marginTop: -8 }}>
+        Log in with the <strong>phone number</strong> you signed up with — not your name.
+      </p>
       {error && <div className="error">{error}</div>}
       <form onSubmit={submit}>
-        <input placeholder="Phone number" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+        <label style={{ fontSize: 12, color: "#6b7280", fontWeight: 600 }}>Phone Number</label>
+        <input
+          placeholder="e.g. 9876543210"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value.replace(/[^\d]/g, ""))}
+          inputMode="numeric"
+          maxLength={15}
+          required
+        />
+        <label style={{ fontSize: 12, color: "#6b7280", fontWeight: 600 }}>Password</label>
         <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         <button type="submit">Login</button>
       </form>

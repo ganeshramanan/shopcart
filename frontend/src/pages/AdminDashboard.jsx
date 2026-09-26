@@ -40,6 +40,16 @@ export default function AdminDashboard() {
     load();
   };
 
+  const deleteOwner = async (ownerId, name) => {
+    if (!window.confirm(`Permanently delete ${name}'s account? This cannot be undone.`)) return;
+    try {
+      await api.delete(`/admin/shop-owners/${ownerId}`);
+      load();
+    } catch (err) {
+      alert(err.response?.data?.detail || "Could not delete this shop owner");
+    }
+  };
+
   const pendingOwners = owners.filter((o) => o.approval_status === "pending");
   const decidedOwners = owners.filter((o) => o.approval_status !== "pending");
 
@@ -102,11 +112,16 @@ export default function AdminDashboard() {
               {o.phone} · {o.business_name ? `${o.business_name} (${o.business_type})` : "No business yet"}
             </div>
           </div>
-          {o.approval_status === "approved" && (
-            <button className={o.is_active ? "secondary" : ""} onClick={() => toggleActive(o.id)}>
-              {o.is_active ? "Disable" : "Enable"}
-            </button>
-          )}
+          <div className="row" style={{ gap: 8, width: "auto" }}>
+            {o.approval_status === "approved" && (
+              <button className={o.is_active ? "secondary" : ""} onClick={() => toggleActive(o.id)}>
+                {o.is_active ? "Disable" : "Enable"}
+              </button>
+            )}
+            {!o.business_id && (
+              <button className="secondary" onClick={() => deleteOwner(o.id, o.name)}>Delete</button>
+            )}
+          </div>
         </div>
       ))}
 
