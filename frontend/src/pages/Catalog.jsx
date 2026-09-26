@@ -17,25 +17,41 @@ export default function Catalog() {
     api.get(`/products?business_id=${businessId}`).then((res) => setProducts(res.data));
   }, [businessId]);
 
+  const step = (unit) => (unit === "kg" || unit === "litre" ? 0.5 : 1);
+
   const setQty = (productId, qty) => {
-    setCart((prev) => ({ ...prev, [productId]: Math.max(0, Math.round(qty * 100) / 100) }));
+    setCart((prev) => {
+      const rounded = Math.max(0, Math.round(qty * 100) / 100);
+      if (rounded === 0) {
+        const next = { ...prev };
+        delete next[productId];
+        return next;
+      }
+      return { ...prev, [productId]: rounded };
+    });
   };
 
   const categories = ["All", ...new Set(products.map((p) => p.category).filter(Boolean))];
   const visibleProducts =
     activeCategory === "All" ? products : products.filter((p) => p.category === activeCategory);
 
-  const total = products.reduce((sum, p) => sum + (cart[p.id] || 0) * p.price, 0);
-  const itemCount = Object.values(cart).filter((q) => q > 0).length;
+  const cartLines = Object.entries(cart)
+    .map(([productId, qty]) => {
+      const product = products.find((p) => p.id === productId);
+      if (!product) return null;
+      return { product, qty, lineTotal: product.price * qty };
+    })
+    .filter(Boolean);
+
+  const total = cartLines.reduce((sum, l) => sum + l.lineTotal, 0);
+  const itemCount = cartLines.length;
 
   const placeOrder = async () => {
     if (!user) return navigate("/login");
     setError("");
     setPlacing(true);
     try {
-      const items = Object.entries(cart)
-        .filter(([, qty]) => qty > 0)
-        .map(([product_id, quantity]) => ({ product_id, quantity }));
+      const items = cartLines.map((l) => ({ product_id: l.product.id, quantity: l.qty }));
       await api.post("/orders", { business_id: businessId, items });
       setCart({});
       navigate("/orders");
@@ -65,38 +81,74 @@ export default function Catalog() {
         </div>
       )}
 
-      <div className="product-grid">
-        {visibleProducts.map((p) => (
-          <div key={p.id} className="product-card">
-            <img
-              src={p.image_url || "https://placehold.co/300x300/CCCCCC/666666?text=No+Image"}
-              alt={p.name}
-              className="product-image"
-            />
-            <div className="product-info">
-              <strong className="product-name">{p.name}</strong>
-              <div className="product-price">₹{p.price} / {p.unit_type}</div>
-              {(cart[p.id] || 0) > 0 ? (
-                <div className="qty-control full-width">
-                  <button onClick={() => setQty(p.id, (cart[p.id] || 0) - (p.unit_type === "kg" || p.unit_type === "litre" ? 0.5 : 1))}>-</button>
-                  <span>{cart[p.id]}</span>
-                  <button onClick={() => setQty(p.id, (cart[p.id] || 0) + (p.unit_type === "kg" || p.unit_type === "litre" ? 0.5 : 1))}>+</button>
-                </div>
-              ) : (
-                <button
-                  className="add-btn"
-                  onClick={() => setQty(p.id, p.unit_type === "kg" || p.unit_type === "litre" ? 0.5 : 1)}
-                >
-                  + Add
-                </button>
-              )}
+      <div className="catalog-layout">
+        <div className="product-grid">
+          {visibleProducts.map((p) => (
+            <div key={p.id} className="product-card">
+              <img
+                src={p.image_url || "https://placehold.co/300x300/CCCCCC/666666?text=No+Image"}
+                alt={p.name}
+                className="product-image"
+              />
+              <div className="product-info">
+                <strong className="product-name">{p.name}</strong>
+                <div className="product-price">₹{p.price} / {p.unit_type}</div>
+                {(cart[p.id] || 0) > 0 ? (
+                  <div className="qty-control full-width">
+                    <button onClick={() => setQty(p.id, (cart[p.id] || 0) - step(p.unit_type))}>-</button>
+                    <span>{cart[p.id]}</span>
+                    <button onClick={() => setQty(p.id, (cart[p.id] || 0) + step(p.unit_type))}>+</button>
+                  </div>
+                ) : (
+                  <button className="add-btn" onClick={() => setQty(p.id, step(p.unit_type))}>
+                    + Add
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        <div className="cart-panel">
+          <h3>Your Cart</h3>
+          {itemCount === 0 ? (
+            <p className="cart-empty">No items added yet. Tap "+ Add" on a product to start.</p>
+          ) : (
+            <>
+              <div className="cart-lines">
+                {cartLines.map(({ product, qty, lineTotal }) => (
+                  <div key={product.id} className="cart-line">
+                    <img
+                      src={product.image_url || "https://placehold.co/60x60/CCCCCC/666666?text=?"}
+                      alt={product.name}
+                      className="cart-line-image"
+                    />
+                    <div className="cart-line-info">
+                      <div className="cart-line-name">{product.name}</div>
+                      <div className="qty-control">
+                        <button onClick={() => setQty(product.id, qty - step(product.unit_type))}>-</button>
+                        <span>{qty} {product.unit_type}</span>
+                        <button onClick={() => setQty(product.id, qty + step(product.unit_type))}>+</button>
+                      </div>
+                    </div>
+                    <div className="cart-line-total">₹{lineTotal.toFixed(2)}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="cart-summary-row">
+                <span>{itemCount} item(s)</span>
+                <strong>₹{total.toFixed(2)}</strong>
+              </div>
+              <button className="place-order-btn" onClick={placeOrder} disabled={placing}>
+                {placing ? "Placing..." : "Place Order"}
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {itemCount > 0 && (
-        <div className="total-bar">
+        <div className="total-bar mobile-only">
           <span>{itemCount} item(s) · ₹{total.toFixed(2)}</span>
           <button onClick={placeOrder} disabled={placing}>
             {placing ? "Placing..." : "Place Order"}

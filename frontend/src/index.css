@@ -1,6 +1,6 @@
 * { box-sizing: border-box; font-family: -apple-system, system-ui, sans-serif; }
 body { margin: 0; background: #f6f7f9; color: #1a1a1a; }
-.container { max-width: 960px; margin: 0 auto; padding: 16px; }
+.container { max-width: 1240px; margin: 0 auto; padding: 16px; }
 .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 button { background: #2563eb; color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; }
@@ -31,3 +31,25 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
 .product-name { font-size: 13px; line-height: 1.3; min-height: 34px; }
 .product-price { font-size: 13px; color: #374151; font-weight: 600; }
 .add-btn { background: #fff; color: #2563eb; border: 1px solid #2563eb; border-radius: 8px; padding: 6px; font-weight: 600; margin-top: auto; }
+
+/* Catalog + Cart split layout (right pane, Zepto-style) */
+.catalog-layout { display: flex; gap: 16px; align-items: flex-start; }
+.catalog-layout .product-grid { flex: 1; padding-bottom: 24px; }
+.cart-panel { width: 300px; flex-shrink: 0; background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
+.cart-panel h3 { margin-top: 0; }
+.cart-empty { color: #6b7280; font-size: 13px; }
+.cart-lines { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+.cart-line { display: flex; align-items: center; gap: 8px; }
+.cart-line-image { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+.cart-line-info { flex: 1; min-width: 0; }
+.cart-line-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cart-line-total { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.cart-summary-row { display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid #e5e7eb; margin-bottom: 10px; font-size: 14px; }
+.place-order-btn { width: 100%; padding: 10px; font-size: 14px; }
+.total-bar.mobile-only { display: none; }
+
+@media (max-width: 720px) {
+  .catalog-layout { flex-direction: column; }
+  .cart-panel { display: none; }
+  .total-bar.mobile-only { display: flex; }
+}
