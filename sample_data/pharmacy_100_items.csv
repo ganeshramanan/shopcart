@@ -1,0 +1,104 @@
+Name,Category,Unit,Price,Image_URL,requires_prescription,wiki_term
+Paracetamol 500mg,Pain Relief,strip,18,https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/Paracetamol-skeletal.svg/330px-Paracetamol-skeletal.svg.png,False,Paracetamol
+Ibuprofen 400mg,Pain Relief,strip,25,https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/Ibuprofen-3D-balls.png/330px-Ibuprofen-3D-balls.png,False,Ibuprofen
+Aspirin 75mg,Pain Relief,strip,15,https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6a/Acetylsalicylic_acid.jpg/330px-Acetylsalicylic_acid.jpg,False,Aspirin
+Diclofenac Gel,Pain Relief,tube,85,https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/Diclofenac.svg/330px-Diclofenac.svg.png,False,Diclofenac
+Volini Spray,Pain Relief,bottle,180,https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/Opium_pod_cut_to_demonstrate_fluid_extraction1.jpg/330px-Opium_pod_cut_to_demonstrate_fluid_extraction1.jpg,False,Analgesic
+Combiflam Tablet,Pain Relief,strip,32,https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/Ibuprofen-3D-balls.png/330px-Ibuprofen-3D-balls.png,False,Ibuprofen
+Naproxen 250mg,Pain Relief,strip,40,https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/Naproxen2DACS.svg/330px-Naproxen2DACS.svg.png,True,Naproxen
+Tramadol 50mg,Pain Relief,strip,55,https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Tramadol_as_a_racemic_mixture.svg/330px-Tramadol_as_a_racemic_mixture.svg.png,True,Tramadol
+Cetirizine 10mg,Fever & Cold,strip,12,https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Cetirizine_structure.svg/330px-Cetirizine_structure.svg.png,False,Cetirizine
+Paracetamol Syrup (Children),Fever & Cold,bottle,65,https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/Paracetamol-skeletal.svg/330px-Paracetamol-skeletal.svg.png,False,Paracetamol
+Vicks Vaporub,Fever & Cold,jar,95,https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/Menthol_Crystals.JPG/330px-Menthol_Crystals.JPG,False,Menthol
+Benadryl Cough Syrup,Fever & Cold,bottle,110,https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Cough_medicine.jpg/330px-Cough_medicine.jpg,False,Cough_syrup
+Crocin Advance,Fever & Cold,strip,28,https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/Paracetamol-skeletal.svg/330px-Paracetamol-skeletal.svg.png,False,Paracetamol
+Sinarest Tablet,Fever & Cold,strip,35,https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Rhinovirus_isosurface.png/330px-Rhinovirus_isosurface.png,False,Common_cold
+Levocetirizine 5mg,Fever & Cold,strip,20,https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Levocetirizine_structure_2.svg/330px-Levocetirizine_structure_2.svg.png,False,Levocetirizine
+D-Cold Total,Fever & Cold,strip,30,https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Rhinovirus_isosurface.png/330px-Rhinovirus_isosurface.png,False,Common_cold
+Azithromycin 500mg,Antibiotics,strip,95,https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/Azithromycin.svg/330px-Azithromycin.svg.png,True,Azithromycin
+Amoxicillin 500mg,Antibiotics,strip,75,https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/Amoxicillin-from-xtal-3D-bs-17.png/330px-Amoxicillin-from-xtal-3D-bs-17.png,True,Amoxicillin
+Ciprofloxacin 500mg,Antibiotics,strip,60,https://placehold.co/400x400/2A9D8F/FFFFFF?text=Ciprofloxacin%0A500mg&font=roboto,True,Ciprofloxacin
+Doxycycline 100mg,Antibiotics,strip,50,https://placehold.co/400x400/2A9D8F/FFFFFF?text=Doxycycline%0A100mg&font=roboto,True,Doxycycline
+Metronidazole 400mg,Antibiotics,strip,40,https://placehold.co/400x400/2A9D8F/FFFFFF?text=Metronidazole%0A400mg&font=roboto,True,Metronidazole
+Cefixime 200mg,Antibiotics,strip,110,https://placehold.co/400x400/2A9D8F/FFFFFF?text=Cefixime%0A200mg&font=roboto,True,Cefixime
+Ofloxacin 200mg,Antibiotics,strip,65,https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Ofloxacin_chemical_structure.svg/330px-Ofloxacin_chemical_structure.svg.png,True,Ofloxacin
+Antacid Gel (Digene),Digestive Care,bottle,85,https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Antacid-L478.jpg/330px-Antacid-L478.jpg,False,Antacid
+Omeprazole 20mg,Digestive Care,strip,45,https://placehold.co/400x400/8D5A97/FFFFFF?text=Omeprazole%0A20mg&font=roboto,False,Omeprazole
+ORS Powder,Digestive Care,pack,20,https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/Oral_rehydration_solution.xcf/330px-Oral_rehydration_solution.xcf.png,False,Oral_rehydration_therapy
+Domperidone 10mg,Digestive Care,strip,30,https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Domperidone-from-xtal-3D-bs-17.png/330px-Domperidone-from-xtal-3D-bs-17.png,False,Domperidone
+Eno Fruit Salt,Digestive Care,pack,15,https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Antacid-L478.jpg/330px-Antacid-L478.jpg,False,Antacid
+Lactulose Syrup,Digestive Care,bottle,120,https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cf/Lactulose_structure.svg/330px-Lactulose_structure.svg.png,False,Lactulose
+Ranitidine 150mg,Digestive Care,strip,35,https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Ranitidine.svg/330px-Ranitidine.svg.png,False,Ranitidine
+Multivitamin Tablets,Vitamins & Supplements,bottle,150,https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/B_vitamin_supplement_tablets.jpg/330px-B_vitamin_supplement_tablets.jpg,False,Multivitamin
+Vitamin C 500mg,Vitamins & Supplements,bottle,130,https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/L-Ascorbic_acid.svg/330px-L-Ascorbic_acid.svg.png,False,Vitamin_C
+Vitamin D3 Sachet,Vitamins & Supplements,pack,90,https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/Cholecalciferol2.svg/330px-Cholecalciferol2.svg.png,False,Vitamin_D
+Calcium + D3 Tablets,Vitamins & Supplements,bottle,160,https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2f/500_mg_calcium_supplements_with_vitamin_D.jpg/330px-500_mg_calcium_supplements_with_vitamin_D.jpg,False,Calcium_supplement
+Zinc Tablets,Vitamins & Supplements,bottle,110,https://placehold.co/400x400/F2C14E/FFFFFF?text=Zinc%0ATablets&font=roboto,False,Zinc_supplement
+Iron Folic Acid Tablets,Vitamins & Supplements,strip,45,https://placehold.co/400x400/F2C14E/FFFFFF?text=Iron%0AFolic%0AAcid%0ATablets&font=roboto,False,Folic_acid
+Fish Oil Omega-3 Capsules,Vitamins & Supplements,bottle,320,https://placehold.co/400x400/F2C14E/FFFFFF?text=Fish%0AOil%0AOmega-3%0ACapsules&font=roboto,False,Fish_oil
+Protein Powder,Vitamins & Supplements,tin,899,https://placehold.co/400x400/F2C14E/FFFFFF?text=Protein%0APowder&font=roboto,False,Whey_protein
+Biotin Tablets,Vitamins & Supplements,bottle,250,https://placehold.co/400x400/F2C14E/FFFFFF?text=Biotin%0ATablets&font=roboto,False,Biotin
+Glucometer Test Strips,Diabetes Care,pack,450,https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/Glucose_meters.jpg/330px-Glucose_meters.jpg,False,Glucose_meter
+Insulin Syringe,Diabetes Care,pack,90,https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1d/Syringe2.jpg/330px-Syringe2.jpg,True,Insulin_syringe
+Metformin 500mg,Diabetes Care,strip,25,https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Metformin.svg/330px-Metformin.svg.png,True,Metformin
+Glimepiride 2mg,Diabetes Care,strip,40,https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Glimepiride.svg/330px-Glimepiride.svg.png,True,Glimepiride
+Diabetic Foot Cream,Diabetes Care,tube,180,https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Neuropathic_heel_ulcer_diabetic.jpg/330px-Neuropathic_heel_ulcer_diabetic.jpg,False,Diabetic_foot
+Sugar Free Sachets,Diabetes Care,box,60,https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/No-Calorie-Sweetener-Packets.jpg/330px-No-Calorie-Sweetener-Packets.jpg,False,Sugar_substitute
+Calamine Lotion,Skin Care,bottle,75,https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Calamine_lotion.png/330px-Calamine_lotion.png,False,Calamine
+Betadine Ointment,Skin Care,tube,65,https://upload.wikimedia.org/wikipedia/commons/3/3f/ExAntiseptic.jpg,False,Povidone-iodine
+Clotrimazole Cream,Skin Care,tube,55,https://thumb.wikimedia.org/wikipedia/commons/thumb/b/be/Clotrimazole.svg/330px-Clotrimazole.svg.png,False,Clotrimazole
+Moisturizing Lotion,Skin Care,bottle,190,https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/White_Petrolatum1.jpg/330px-White_Petrolatum1.jpg,False,Moisturizer
+Sunscreen SPF50,Skin Care,tube,320,https://placehold.co/400x400/E8A0BF/FFFFFF?text=Sunscreen%0ASPF50&font=roboto,False,Sunscreen
+Acne Gel,Skin Care,tube,140,https://placehold.co/400x400/E8A0BF/FFFFFF?text=Acne%0AGel&font=roboto,False,Acne
+Antifungal Powder,Skin Care,bottle,85,https://placehold.co/400x400/E8A0BF/FFFFFF?text=Antifungal%0APowder&font=roboto,False,Antifungal
+Cotton Roll,First Aid,pack,40,https://placehold.co/400x400/6C757D/FFFFFF?text=Cotton%0ARoll&font=roboto,False,Cotton
+Adhesive Bandage Strips,First Aid,box,35,https://placehold.co/400x400/6C757D/FFFFFF?text=Adhesive%0ABandage%0AStrips&font=roboto,False,Adhesive_bandage
+Antiseptic Liquid (Dettol),First Aid,bottle,95,https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ca/Peroxid_vod%C3%ADku.jpg/330px-Peroxid_vod%C3%ADku.jpg,False,Antiseptic
+Gauze Bandage Roll,First Aid,piece,25,https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Akhilleus_Patroklos_Antikensammlung_Berlin_F2278.jpg/330px-Akhilleus_Patroklos_Antikensammlung_Berlin_F2278.jpg,False,Bandage
+Crepe Bandage,First Aid,piece,45,https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Akhilleus_Patroklos_Antikensammlung_Berlin_F2278.jpg/330px-Akhilleus_Patroklos_Antikensammlung_Berlin_F2278.jpg,False,Bandage
+Hydrogen Peroxide,First Aid,bottle,40,https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Wasserstoffperoxid.svg/330px-Wasserstoffperoxid.svg.png,False,Hydrogen_peroxide
+Thermometer (Digital),First Aid,piece,150,https://placehold.co/400x400/6C757D/FFFFFF?text=Thermometer%0A%28Digital%29&font=roboto,False,Medical_thermometer
+Burn Ointment,First Aid,tube,70,https://upload.wikimedia.org/wikipedia/commons/8/87/Hand2ndburn.jpg,False,Burn
+Baby Diapers (Pack of 20),Baby Care,pack,350,https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/Disposablediaper.JPG/330px-Disposablediaper.JPG,False,Diaper
+Baby Powder,Baby Care,bottle,120,https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Talc-177589.jpg/330px-Talc-177589.jpg,False,Talcum_powder
+Baby Lotion,Baby Care,bottle,180,https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Banff_Centre_lotion_and_shampoo.jpg/330px-Banff_Centre_lotion_and_shampoo.jpg,False,Lotion
+Gripe Water,Baby Care,bottle,85,https://placehold.co/400x400/70C1B3/FFFFFF?text=Gripe%0AWater&font=roboto,False,Gripe_water
+Baby Shampoo,Baby Care,bottle,160,https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/Hair_wash_with_shampoo.jpg/330px-Hair_wash_with_shampoo.jpg,False,Shampoo
+Baby Wipes,Baby Care,pack,95,https://placehold.co/400x400/70C1B3/FFFFFF?text=Baby%0AWipes&font=roboto,False,Wet_wipe
+Feeding Bottle Cleanser,Baby Care,bottle,130,https://placehold.co/400x400/70C1B3/FFFFFF?text=Feeding%0ABottle%0ACleanser&font=roboto,False,Detergent
+Hand Sanitizer 500ml,Personal Hygiene,bottle,150,https://placehold.co/400x400/AF7AC5/FFFFFF?text=Hand%0ASanitizer%0A500ml&font=roboto,False,Hand_sanitizer
+Face Masks (Pack of 50),Personal Hygiene,pack,200,https://placehold.co/400x400/AF7AC5/FFFFFF?text=Face%0AMasks%0A%28Pack%0Aof%0A50%29&font=roboto,False,Surgical_mask
+Hand Wash Liquid,Personal Hygiene,bottle,90,https://placehold.co/400x400/AF7AC5/FFFFFF?text=Hand%0AWash%0ALiquid&font=roboto,False,Liquid_soap
+Sanitary Pads,Personal Hygiene,pack,65,https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Sanitary_towel.jpg/330px-Sanitary_towel.jpg,False,Sanitary_napkin
+Toothbrush (Soft),Personal Hygiene,piece,40,https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/Toothbrush_20050716_004.jpg/330px-Toothbrush_20050716_004.jpg,False,Toothbrush
+Mouthwash,Personal Hygiene,bottle,130,https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Mouthwash_PresiDent_2023_Russia.png/330px-Mouthwash_PresiDent_2023_Russia.png,False,Mouthwash
+Nail Cutter Set,Personal Hygiene,piece,60,https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Nail-clippers-variety.jpg/330px-Nail-clippers-variety.jpg,False,Nail_clipper
+Chyawanprash,Ayurvedic,jar,220,https://thumb.wikimedia.org/wikipedia/en/thumb/e/e2/Chyawanprash_spoonful.JPG/330px-Chyawanprash_spoonful.JPG,False,Chyawanprash
+Ashwagandha Capsules,Ayurvedic,bottle,280,https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/WithaniaFruit.jpg/330px-WithaniaFruit.jpg,False,Withania_somnifera
+Triphala Powder,Ayurvedic,pack,90,https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bc/A_view_of_Honey_Terminalia_chebula_%28Kadukkaai%29.jpg/330px-A_view_of_Honey_Terminalia_chebula_%28Kadukkaai%29.jpg,False,Triphala
+Neem Tablets,Ayurvedic,bottle,150,https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7b/Neem_Tree_in_Rajasthan%2C_India.jpg/330px-Neem_Tree_in_Rajasthan%2C_India.jpg,False,Azadirachta_indica
+Giloy Juice,Ayurvedic,bottle,175,https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0e/Tinospora_cordifolia.jpg/330px-Tinospora_cordifolia.jpg,False,Tinospora_cordifolia
+Amla Juice,Ayurvedic,bottle,160,https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/Phyllanthus_officinalis.jpg/330px-Phyllanthus_officinalis.jpg,False,Phyllanthus_emblica
+Herbal Hair Oil,Ayurvedic,bottle,195,https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Velocipede_hair_oil_-_highly_perfumed_by_T.P._Spencer_%26_Co.%2C_New_York_LCCN2004671461.jpg/330px-Velocipede_hair_oil_-_highly_perfumed_by_T.P._Spencer_%26_Co.%2C_New_York_LCCN2004671461.jpg,False,Hair_oil
+Digital Blood Pressure Monitor,Medical Devices,piece,1800,https://placehold.co/400x400/4A4E69/FFFFFF?text=Digital%0ABlood%0APressure%0AMonitor&font=roboto,False,Sphygmomanometer
+Pulse Oximeter,Medical Devices,piece,950,https://placehold.co/400x400/4A4E69/FFFFFF?text=Pulse%0AOximeter&font=roboto,False,Pulse_oximetry
+Nebulizer Machine,Medical Devices,piece,2200,https://placehold.co/400x400/4A4E69/FFFFFF?text=Nebulizer%0AMachine&font=roboto,False,Nebulizer
+Weighing Scale (Digital),Medical Devices,piece,850,https://placehold.co/400x400/4A4E69/FFFFFF?text=Weighing%0AScale%0A%28Digital%29&font=roboto,False,Weighing_scale
+Hot Water Bag,Medical Devices,piece,220,https://upload.wikimedia.org/wikipedia/commons/8/8a/W%C3%A4rmflaschealt1.jpg,False,Hot_water_bottle
+Ice Bag,Medical Devices,piece,180,https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Daiso_instant_cold_pack_300g.jpg/330px-Daiso_instant_cold_pack_300g.jpg,False,Ice_pack
+Knee Support Brace,Medical Devices,piece,350,https://thumb.wikimedia.org/wikipedia/commons/thumb/8/81/Defense.gov_photo_essay_120707-A-8536E-269.jpg/330px-Defense.gov_photo_essay_120707-A-8536E-269.jpg,False,Knee_pad
+Wheelchair (Basic),Medical Devices,piece,4500,https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Man_in_wheelchair_with_AFO_braces_and_crutches_b.jpg/330px-Man_in_wheelchair_with_AFO_braces_and_crutches_b.jpg,False,Wheelchair
+Walking Stick,Medical Devices,piece,300,https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Une_canne_de_marchand_Ch%C3%A2lus.jpg/330px-Une_canne_de_marchand_Ch%C3%A2lus.jpg,False,Walking_stick
+N95 Mask (Pack of 10),Personal Hygiene,pack,250,https://thumb.wikimedia.org/wikipedia/commons/thumb/4/48/SH9550-Cropped.jpg/330px-SH9550-Cropped.jpg,False,Respirator
+Deworming Tablets,Digestive Care,strip,20,https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/Anthelmintic_effect_of_papain_on_Heligmosomoides_bakeri.ogv/330px--Anthelmintic_effect_of_papain_on_Heligmosomoides_bakeri.ogv.jpg,False,Anthelmintic
+Laxative Syrup,Digestive Care,bottle,95,https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Glycerin_suppositories.jpg/330px-Glycerin_suppositories.jpg,False,Laxative
+Cough Lozenges,Fever & Cold,pack,40,https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Hustenbonbon.JPG/330px-Hustenbonbon.JPG,False,Throat_lozenge
+Nasal Spray,Fever & Cold,bottle,110,https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Action_photo_of_nasal_spray_on_a_black_background.jpg/330px-Action_photo_of_nasal_spray_on_a_black_background.jpg,False,Nasal_spray
+Steam Inhaler,Medical Devices,piece,450,https://placehold.co/400x400/4A4E69/FFFFFF?text=Steam%0AInhaler&font=roboto,False,Steam_inhalation
+Muscle Relaxant Tablet,Pain Relief,strip,45,https://placehold.co/400x400/E63946/FFFFFF?text=Muscle%0ARelaxant%0ATablet&font=roboto,True,Muscle_relaxant
+Anti-allergy Syrup,Fever & Cold,bottle,80,https://placehold.co/400x400/F4A261/FFFFFF?text=Anti-allergy%0ASyrup&font=roboto,False,Antihistamine
+Eye Drops (Lubricant),First Aid,bottle,65,https://placehold.co/400x400/6C757D/FFFFFF?text=Eye%0ADrops%0A%28Lubricant%29&font=roboto,False,Eye_drop
+Ear Drops,First Aid,bottle,55,https://upload.wikimedia.org/wikipedia/commons/3/3c/Cexidal_cipro_otic_italy.jpg,False,Ear_drop
+Glucose Powder (Glucon-D),Digestive Care,pack,120,https://placehold.co/400x400/8D5A97/FFFFFF?text=Glucose%0APowder%0A%28Glucon-D%29&font=roboto,False,Glucose
+Vitamin B Complex,Vitamins & Supplements,bottle,140,https://placehold.co/400x400/F2C14E/FFFFFF?text=Vitamin%0AB%0AComplex&font=roboto,False,B_vitamins
+Probiotic Capsules,Digestive Care,bottle,260,https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Yogurt%2C_Samoa%2C_Yoggi_original.JPG/330px-Yogurt%2C_Samoa%2C_Yoggi_original.JPG,False,Probiotic
