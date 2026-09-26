@@ -10,14 +10,36 @@ import ShopDashboard from "./pages/ShopDashboard.jsx";
 function TopBar() {
   const { user, logout } = useAuth();
   const isBoundCustomer = user?.role === "customer" && user?.business_id;
+  const isShopOwner = user?.role === "shop_owner";
 
   return (
     <div className="topbar">
-      <div>
-        {!isBoundCustomer && <Link to="/">Shops</Link>}
-        {isBoundCustomer && <Link to={`/shop/${user.business_id}`}>Catalog</Link>}
-        {user && <Link to="/orders">My Orders</Link>}
-        {user?.role === "shop_owner" && <Link to="/dashboard">Dashboard</Link>}
+      <div className="topbar-left">
+        <Link to="/" className="brand">
+          <span className="brand-mark">🛒</span>
+          <span className="brand-name">ShopCart</span>
+        </Link>
+        <nav className="topbar-links">
+          {isShopOwner && (
+            <>
+              <Link to="/dashboard">Dashboard</Link>
+              {user.business_id && <Link to={`/shop/${user.business_id}`}>Preview My Shop</Link>}
+            </>
+          )}
+          {isBoundCustomer && (
+            <>
+              <Link to={`/shop/${user.business_id}`}>Catalog</Link>
+              <Link to="/orders">My Orders</Link>
+            </>
+          )}
+          {!user && <Link to="/">Shops</Link>}
+          {user && !isShopOwner && !isBoundCustomer && (
+            <>
+              <Link to="/">Shops</Link>
+              <Link to="/orders">My Orders</Link>
+            </>
+          )}
+        </nav>
       </div>
       <div>
         {user ? (
@@ -38,10 +60,11 @@ function Protected({ children }) {
 
 function HomeRoute() {
   const { user } = useAuth();
-  // A customer bound to a single shop never sees the multi-shop browse list —
-  // they're taken straight to their shop's catalog.
   if (user?.role === "customer" && user?.business_id) {
     return <Navigate to={`/shop/${user.business_id}`} replace />;
+  }
+  if (user?.role === "shop_owner") {
+    return <Navigate to="/dashboard" replace />;
   }
   return <BusinessList />;
 }

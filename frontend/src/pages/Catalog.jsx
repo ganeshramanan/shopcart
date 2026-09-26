@@ -6,6 +6,7 @@ import { useAuth } from "../auth/AuthContext.jsx";
 export default function Catalog() {
   const { businessId } = useParams();
   const [products, setProducts] = useState([]);
+  const [business, setBusiness] = useState(null);
   const [cart, setCart] = useState({}); // product_id -> quantity
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState("");
@@ -15,6 +16,7 @@ export default function Catalog() {
 
   useEffect(() => {
     api.get(`/products?business_id=${businessId}`).then((res) => setProducts(res.data));
+    api.get(`/businesses/${businessId}`).then((res) => setBusiness(res.data)).catch(() => {});
   }, [businessId]);
 
   const step = (unit) => (unit === "kg" || unit === "litre" ? 0.5 : 1);
@@ -64,7 +66,8 @@ export default function Catalog() {
 
   return (
     <div>
-      <h2>Catalog</h2>
+      <h2>{business ? business.name : "Catalog"}</h2>
+      {business?.type && <p className="dashboard-subtitle" style={{ marginTop: -8, marginBottom: 12 }}>{business.type}</p>}
       {error && <div className="error">{error}</div>}
 
       {categories.length > 1 && (
