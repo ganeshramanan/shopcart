@@ -35,8 +35,21 @@ statements = [
     "CREATE UNIQUE INDEX IF NOT EXISTS ix_products_barcode ON products (barcode) WHERE barcode IS NOT NULL;",
 ]
 
+# Adding an enum value must run outside a transaction block in Postgres <12,
+# and cannot be combined with other DDL in the same statement — run separately.
+enum_statements = [
+    "ALTER TYPE roleenum ADD VALUE IF NOT EXISTS 'staff';",
+]
+
 with engine.begin() as conn:
     for stmt in statements:
+        print(f"Running: {stmt}")
+        conn.execute(text(stmt))
+
+# ALTER TYPE ... ADD VALUE must autocommit (no surrounding transaction)
+with engine.connect() as conn:
+    conn.execute(text("COMMIT"))
+    for stmt in enum_statements:
         print(f"Running: {stmt}")
         conn.execute(text(stmt))
 
