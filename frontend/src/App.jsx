@@ -7,6 +7,7 @@ import Catalog from "./pages/Catalog.jsx";
 import MyOrders from "./pages/MyOrders.jsx";
 import ShopDashboard from "./pages/ShopDashboard.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
+import Invoice from "./pages/Invoice.jsx";
 
 function TopBar() {
   const { user, logout } = useAuth();
@@ -96,6 +97,7 @@ export default function App() {
           <Route path="/orders" element={<Protected><MyOrders /></Protected>} />
           <Route path="/dashboard" element={<Protected><ShopDashboard /></Protected>} />
           <Route path="/admin" element={<Protected role="admin"><AdminDashboard /></Protected>} />
+          <Route path="/invoice/:orderId" element={<Protected><Invoice /></Protected>} />
         </Routes>
       </div>
     </AuthProvider>

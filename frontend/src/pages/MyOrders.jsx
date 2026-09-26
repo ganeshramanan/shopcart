@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../api";
 import { formatDate } from "../utils.js";
 
@@ -27,7 +28,10 @@ export default function MyOrders() {
               </li>
             ))}
           </ul>
-          <strong>Total: ₹{o.total_amount}</strong>
+          <div className="row">
+            <strong>Total: ₹{o.total_amount}</strong>
+            <Link to={`/invoice/${o.id}`}><button className="secondary">View Bill</button></Link>
+          </div>
         </div>
       ))}
     </div>

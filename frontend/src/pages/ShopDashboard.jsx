@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { formatDate } from "../utils.js";
@@ -221,6 +222,7 @@ export default function ShopDashboard() {
                   <li key={it.id}>{it.product_name_snapshot} — {it.quantity} {it.unit_type_snapshot}</li>
                 ))}
               </ul>
+              <Link to={`/invoice/${o.id}`}><button className="secondary" style={{ marginTop: 8 }}>View Bill</button></Link>
             </div>
           ))}
         </div>
