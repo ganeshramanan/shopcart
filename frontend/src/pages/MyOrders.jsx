@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api";
+import { formatDate } from "../utils.js";
 
 export default function MyOrders() {
   const [orders, setOrders] = useState([]);
@@ -18,6 +19,7 @@ export default function MyOrders() {
             <strong>Order #{o.id.slice(0, 8)}</strong>
             <span className="badge">{o.status}</span>
           </div>
+          <div className="order-timestamp">{formatDate(o.created_at)}</div>
           <ul>
             {o.items.map((it) => (
               <li key={it.id}>

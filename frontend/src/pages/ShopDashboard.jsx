@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { formatDate } from "../utils.js";
 
 const ORDER_STATUSES = ["placed", "confirmed", "packing", "ready", "dispatched", "delivered", "cancelled"];
 const STATUS_COLORS = {
@@ -192,6 +193,7 @@ export default function ShopDashboard() {
               <div className="row">
                 <div>
                   <strong>#{o.id.slice(0, 8)} — ₹{o.total_amount}</strong>
+                  <div className="order-timestamp">{formatDate(o.created_at)}</div>
                   {o.customer_name && (
                     <div className="order-customer">
                       {o.customer_name}
