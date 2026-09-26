@@ -41,6 +41,28 @@ def _generate_unique_barcode(db: Session) -> str:
     raise RuntimeError("Could not generate a unique barcode after 10 attempts")
 
 
+@router.post("/backfill-barcodes")
+def backfill_barcodes(
+    business_id: str,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(require_role("admin", "shop_owner")),
+):
+    """One-time utility: assigns a barcode to any existing product that
+    doesn't have one yet (e.g. products created before this feature shipped)."""
+    if user.role == "shop_owner" and str(user.business_id) != str(business_id):
+        raise HTTPException(status_code=403, detail="Not authorized for this business")
+
+    products = (
+        db.query(models.Product)
+        .filter(models.Product.business_id == business_id, models.Product.barcode.is_(None))
+        .all()
+    )
+    for p in products:
+        p.barcode = _generate_unique_barcode(db)
+    db.commit()
+    return {"updated": len(products)}
+
+
 @router.post("/import")
 async def import_products(
     business_id: str,
@@ -113,6 +135,8 @@ async def import_products(
                     existing.image_url = image_url
                 if category:
                     existing.category = category
+                if not existing.barcode:
+                    existing.barcode = _generate_unique_barcode(db)
                 updated += 1
             else:
                 db.add(models.Product(

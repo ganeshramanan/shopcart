@@ -195,7 +195,7 @@ export default function ShopDashboard() {
       </div>
 
       {tab === "newsale" && <NewSale products={products} businessId={businessId} />}
-      {tab === "labels" && <PrintLabels products={products} />}
+      {tab === "labels" && <PrintLabels products={products} businessId={businessId} onRefresh={loadProducts} />}
 
       {tab === "overview" && (
         <div>

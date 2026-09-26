@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import JsBarcode from "jsbarcode";
+import api from "../api";
 
 function BarcodeLabel({ product }) {
   const svgRef = useRef(null);
@@ -28,9 +29,10 @@ function BarcodeLabel({ product }) {
   );
 }
 
-export default function PrintLabels({ products }) {
+export default function PrintLabels({ products, businessId, onRefresh }) {
   const [selected, setSelected] = useState({});
   const [search, setSearch] = useState("");
+  const [backfilling, setBackfilling] = useState(false);
 
   const toggle = (id) => setSelected((prev) => ({ ...prev, [id]: !prev[id] }));
 
@@ -41,6 +43,18 @@ export default function PrintLabels({ products }) {
   };
 
   const clearAll = () => setSelected({});
+
+  const missingCount = products.filter((p) => !p.barcode).length;
+
+  const backfillBarcodes = async () => {
+    setBackfilling(true);
+    try {
+      await api.post(`/products/backfill-barcodes?business_id=${businessId}`);
+      if (onRefresh) await onRefresh();
+    } finally {
+      setBackfilling(false);
+    }
+  };
 
   const filtered = products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
   const selectedProducts = products.filter((p) => selected[p.id]);
@@ -53,6 +67,16 @@ export default function PrintLabels({ products }) {
           Each label shows a scannable barcode + product name + price — cut and stick
           on the item (works for loose/bulk items too, not just packaged goods).
         </p>
+
+        {missingCount > 0 && (
+          <div className="card row" style={{ background: "#fef3c7" }}>
+            <span>{missingCount} product(s) don't have a barcode yet (added before this feature).</span>
+            <button onClick={backfillBarcodes} disabled={backfilling}>
+              {backfilling ? "Assigning..." : "Assign Barcodes"}
+            </button>
+          </div>
+        )}
+
         <input
           className="catalog-search"
           placeholder="Search products..."
