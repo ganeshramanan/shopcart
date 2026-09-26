@@ -108,6 +108,14 @@ class Order(Base):
     customer = relationship("User", back_populates="orders")
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
 
+    @property
+    def customer_name(self):
+        return self.customer.name if self.customer else None
+
+    @property
+    def customer_phone(self):
+        return self.customer.phone if self.customer else None
+
 
 class OrderItem(Base):
     __tablename__ = "order_items"

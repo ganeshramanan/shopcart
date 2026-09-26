@@ -58,7 +58,7 @@ def list_orders(
     business_id: str | None = None,
 ):
     """Customers see their own orders; shop owners see all orders for their business."""
-    q = db.query(models.Order).options(joinedload(models.Order.items))
+    q = db.query(models.Order).options(joinedload(models.Order.items), joinedload(models.Order.customer))
     if user.role == "customer":
         q = q.filter(models.Order.customer_id == user.id)
     elif user.role == "shop_owner":

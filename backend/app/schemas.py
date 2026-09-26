@@ -111,6 +111,8 @@ class OrderOut(BaseModel):
     id: str
     business_id: str
     customer_id: str
+    customer_name: Optional[str] = None
+    customer_phone: Optional[str] = None
     status: str
     total_amount: float
     notes: Optional[str] = None

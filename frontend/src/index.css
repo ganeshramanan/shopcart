@@ -67,6 +67,8 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
 .tab-badge { background: #ef4444; color: white; border-radius: 999px; font-size: 11px; padding: 1px 7px; margin-left: 6px; }
 .empty-state { color: #6b7280; text-align: center; padding: 30px 0; }
 .order-card { border-left: 4px solid #e5e7eb; }
+.order-customer { font-size: 12px; color: #6b7280; margin-top: 2px; }
+.order-customer a { color: #2563eb; text-decoration: none; }
 .order-items-list { margin: 8px 0 0; padding-left: 18px; color: #374151; font-size: 13px; }
 .inventory-row { align-items: center; }
 .inventory-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }

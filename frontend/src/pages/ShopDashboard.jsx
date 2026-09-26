@@ -173,7 +173,17 @@ export default function ShopDashboard() {
           {orders.map((o) => (
             <div key={o.id} className="card order-card">
               <div className="row">
-                <strong>#{o.id.slice(0, 8)} — ₹{o.total_amount}</strong>
+                <div>
+                  <strong>#{o.id.slice(0, 8)} — ₹{o.total_amount}</strong>
+                  {o.customer_name && (
+                    <div className="order-customer">
+                      {o.customer_name}
+                      {o.customer_phone && (
+                        <> · <a href={`tel:${o.customer_phone}`}>{o.customer_phone}</a></>
+                      )}
+                    </div>
+                  )}
+                </div>
                 <select
                   value={o.status}
                   onChange={(e) => updateStatus(o.id, e.target.value)}
