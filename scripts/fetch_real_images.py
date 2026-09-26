@@ -68,8 +68,9 @@ def fetch_thumbnail(title: str) -> str | None:
             data = json.load(resp)
             thumb = data.get("thumbnail", {}).get("source")
             if thumb:
-                # request a slightly bigger, consistent size
-                thumb = thumb.replace("/330px-", "/400px-")
+                # Strip tracking query params; keep the original working width variant
+                # (resizing via /Npx- replacement is unreliable — not all widths exist)
+                thumb = thumb.split("?")[0]
             return thumb
     except Exception:
         return None
