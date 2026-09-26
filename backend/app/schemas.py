@@ -26,6 +26,7 @@ class UserOut(BaseModel):
     role: str
     business_id: Optional[str] = None
     is_active: bool = True
+    approval_status: str = "approved"
 
 
 class Token(BaseModel):

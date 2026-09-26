@@ -16,6 +16,13 @@ def create_business(
 ):
     """Create a new business (a new 'tenant' — provision shop, pharmacy, laundry, etc.).
     If the creator is a shop_owner with no business yet, auto-link them as its owner."""
+    if user.role == "shop_owner" and user.approval_status != models.ApprovalStatusEnum.approved:
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=403,
+            detail="Your shop registration is pending Cartbi's approval. You'll be able to create your business once approved.",
+        )
+
     biz = models.Business(**payload.model_dump())
     db.add(biz)
     db.flush()

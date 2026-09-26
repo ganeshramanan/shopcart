@@ -27,6 +27,10 @@ statements = [
     "ALTER TABLE products ADD COLUMN IF NOT EXISTS category VARCHAR;",
     "CREATE INDEX IF NOT EXISTS ix_products_category ON products (category);",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS approval_status VARCHAR NOT NULL DEFAULT 'approved';",
+    # Existing shop owners created before this feature should not be retroactively
+    # locked out — they're auto-approved. Only NEW shop_owner signups going
+    # forward default to 'pending' (enforced in application code, not here).
 ]
 
 with engine.begin() as conn:

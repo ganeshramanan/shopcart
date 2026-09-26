@@ -18,6 +18,8 @@ export default function Signup() {
       const user = await signup(payload);
       if (user.role === "customer" && user.business_id) {
         navigate(`/shop/${user.business_id}`);
+      } else if (user.role === "shop_owner") {
+        navigate("/dashboard");
       } else {
         navigate("/");
       }

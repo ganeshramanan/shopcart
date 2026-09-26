@@ -21,12 +21,43 @@ def list_shop_owners(db: Session = Depends(get_db), _admin: models.User = Depend
             "name": o.name,
             "phone": o.phone,
             "is_active": o.is_active,
+            "approval_status": o.approval_status,
             "created_at": o.created_at,
             "business_id": o.business_id,
             "business_name": biz.name if biz else None,
             "business_type": biz.type if biz else None,
         })
     return result
+
+
+@router.patch("/shop-owners/{owner_id}/approve")
+def approve_shop_owner(
+    owner_id: str,
+    db: Session = Depends(get_db),
+    _admin: models.User = Depends(require_role("admin")),
+):
+    """Super-admin only: approve a pending shop owner so they can create their business."""
+    owner = db.query(models.User).filter(models.User.id == owner_id, models.User.role == "shop_owner").first()
+    if not owner:
+        raise HTTPException(status_code=404, detail="Shop owner not found")
+    owner.approval_status = models.ApprovalStatusEnum.approved
+    db.commit()
+    return {"detail": "Approved", "approval_status": owner.approval_status}
+
+
+@router.patch("/shop-owners/{owner_id}/reject")
+def reject_shop_owner(
+    owner_id: str,
+    db: Session = Depends(get_db),
+    _admin: models.User = Depends(require_role("admin")),
+):
+    """Super-admin only: reject a pending shop owner's registration."""
+    owner = db.query(models.User).filter(models.User.id == owner_id, models.User.role == "shop_owner").first()
+    if not owner:
+        raise HTTPException(status_code=404, detail="Shop owner not found")
+    owner.approval_status = models.ApprovalStatusEnum.rejected
+    db.commit()
+    return {"detail": "Rejected", "approval_status": owner.approval_status}
 
 
 @router.patch("/shop-owners/{owner_id}/toggle-active")

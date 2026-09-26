@@ -41,7 +41,7 @@ export default function ShopDashboard() {
     loadCustomers();
   }, [businessId]);
 
-  if (!businessId) return <NoBusinessYet onCreated={refreshUser} />;
+  if (!businessId) return <NoBusinessYet onCreated={refreshUser} approvalStatus={user?.approval_status} />;
 
   const addProduct = async (e) => {
     e.preventDefault();
@@ -322,7 +322,7 @@ export default function ShopDashboard() {
   );
 }
 
-function NoBusinessYet({ onCreated }) {
+function NoBusinessYet({ onCreated, approvalStatus }) {
   const [form, setForm] = useState({ name: "", type: "provision" });
   const [error, setError] = useState("");
 
@@ -336,6 +336,31 @@ function NoBusinessYet({ onCreated }) {
       setError(err.response?.data?.detail || "Could not create business");
     }
   };
+
+  if (approvalStatus === "pending") {
+    return (
+      <div className="card" style={{ maxWidth: 480 }}>
+        <h3>⏳ Pending Approval</h3>
+        <p className="dashboard-subtitle">
+          Thanks for registering with Cartbi! Your shop registration is currently
+          under review. You'll be able to set up your business as soon as
+          Cartbi approves your account.
+        </p>
+      </div>
+    );
+  }
+
+  if (approvalStatus === "rejected") {
+    return (
+      <div className="card" style={{ maxWidth: 480 }}>
+        <h3>Registration Not Approved</h3>
+        <p className="dashboard-subtitle">
+          Your shop registration was not approved. Please contact Cartbi support
+          if you believe this is a mistake.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="card" style={{ maxWidth: 480 }}>

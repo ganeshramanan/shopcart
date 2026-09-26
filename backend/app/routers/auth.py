@@ -20,12 +20,22 @@ def signup(payload: schemas.UserSignup, db: Session = Depends(get_db)):
         if not biz:
             raise HTTPException(status_code=400, detail="Selected shop not found")
 
+    # New shop owners require Cartbi's approval before they can create a
+    # business. Customers are approved by default (they're just joining an
+    # existing shop via a signup link).
+    approval_status = (
+        models.ApprovalStatusEnum.pending
+        if payload.role == "shop_owner"
+        else models.ApprovalStatusEnum.approved
+    )
+
     user = models.User(
         name=payload.name,
         phone=payload.phone,
         password_hash=hash_password(payload.password),
         role=payload.role,
         business_id=payload.business_id,
+        approval_status=approval_status,
     )
     db.add(user)
     db.commit()
