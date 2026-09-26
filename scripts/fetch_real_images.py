@@ -60,20 +60,22 @@ CATEGORY_COLORS = {
 }
 
 
-def fetch_thumbnail(title: str) -> str | None:
+def fetch_thumbnail(title: str, retries: int = 3) -> str | None:
     url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{urllib.parse.quote(title)}"
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "ShopCartLearningProject/1.0"})
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.load(resp)
-            thumb = data.get("thumbnail", {}).get("source")
-            if thumb:
-                # Strip tracking query params; keep the original working width variant
-                # (resizing via /Npx- replacement is unreliable — not all widths exist)
-                thumb = thumb.split("?")[0]
-            return thumb
-    except Exception:
-        return None
+    for attempt in range(retries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "ShopCartLearningProject/1.0"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.load(resp)
+                thumb = data.get("thumbnail", {}).get("source")
+                if thumb:
+                    # Strip tracking query params; keep the original working width variant
+                    # (resizing via /Npx- replacement is unreliable — not all widths exist)
+                    thumb = thumb.split("?")[0]
+                return thumb
+        except Exception:
+            time.sleep(1.5 * (attempt + 1))  # back off and retry — handles transient 429s
+    return None
 
 
 def main():
@@ -96,7 +98,7 @@ def main():
             encoded = urllib.parse.quote(name.replace(" ", "\n"))
             row["Image_URL"] = f"https://placehold.co/400x400/{color}/FFFFFF?text={encoded}&font=roboto"
             fallback += 1
-        time.sleep(0.05)  # be polite to Wikipedia's API
+        time.sleep(0.2)  # be polite to Wikipedia's API and avoid rate-limit fallbacks
 
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=["Name", "Category", "Unit", "Price", "Image_URL"])
