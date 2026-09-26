@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { QRCodeSVG } from "qrcode.react";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { formatDate } from "../utils.js";
@@ -25,6 +26,7 @@ export default function ShopDashboard() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
+  const [showQr, setShowQr] = useState(false);
   const [customers, setCustomers] = useState([]);
 
   const businessId = user?.business_id;
@@ -153,11 +155,12 @@ export default function ShopDashboard() {
       <div className="card" style={{ marginBottom: 20 }}>
         <strong>Your customer signup link</strong>
         <p className="dashboard-subtitle">
-          Share this with your customers (WhatsApp, or print as a QR code) so they can
-          sign up directly to your shop — they'll never see other shops on the platform.
+          Share this with your customers via WhatsApp or let them scan the QR
+          code so they can sign up directly to your shop — they'll never see
+          other shops on the platform.
         </p>
-        <div className="row" style={{ gap: 8 }}>
-          <input readOnly value={signupLink} onFocus={(e) => e.target.select()} />
+        <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+          <input readOnly value={signupLink} onFocus={(e) => e.target.select()} style={{ flex: 1, minWidth: 200 }} />
           <button
             className="secondary"
             onClick={() => {
@@ -168,7 +171,27 @@ export default function ShopDashboard() {
           >
             {linkCopied ? "Copied!" : "Copy"}
           </button>
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(`Join our shop on ShopCart to place orders directly: ${signupLink}`)}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <button>Share on WhatsApp</button>
+          </a>
+          <button className="secondary" onClick={() => setShowQr((v) => !v)}>
+            {showQr ? "Hide QR" : "Show QR Code"}
+          </button>
         </div>
+        {showQr && (
+          <div style={{ marginTop: 16, textAlign: "center" }}>
+            <div style={{ display: "inline-block", background: "#fff", padding: 12, borderRadius: 8 }}>
+              <QRCodeSVG value={signupLink} size={180} />
+            </div>
+            <p style={{ fontSize: 12, color: "#6b7280", marginTop: 8 }}>
+              Print this and stick it at your counter — customers can scan to sign up.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="dashboard-tabs">
