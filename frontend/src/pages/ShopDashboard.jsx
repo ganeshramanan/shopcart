@@ -68,6 +68,7 @@ export default function ShopDashboard() {
   const [orderSearch, setOrderSearch] = useState("");
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
   const [orderDateRange, setOrderDateRange] = useState(null);
+  const [customerSearch, setCustomerSearch] = useState("");
   const [addForm] = Form.useForm();
 
   const businessId = user?.business_id;
@@ -216,15 +217,26 @@ export default function ShopDashboard() {
   ];
 
   const customerColumns = [
-    { title: "Name", dataIndex: "name", key: "name" },
-    { title: "Phone", dataIndex: "phone", key: "phone", render: (p) => <a href={`tel:${p}`}>{p}</a> },
-    { title: "Orders", dataIndex: "order_count", key: "order_count", width: 100 },
+    {
+      title: "Name", dataIndex: "name", key: "name",
+      render: (name, c) => (
+        <span>
+          <Text strong>{name}</Text>{" "}
+          {c.is_guest && <Tag color="default">Walk-in</Tag>}
+        </span>
+      ),
+    },
+    { title: "Phone", dataIndex: "phone", key: "phone", render: (p) => p ? <a href={`tel:${p}`}>{p}</a> : <Text type="secondary">—</Text> },
+    { title: "Orders", dataIndex: "order_count", key: "order_count", width: 90 },
+    { title: "Total Spent", dataIndex: "total_spent", key: "total_spent", width: 120, render: (v) => `₹${v}` },
     {
       title: "", key: "actions", width: 100,
       render: (_, c) => (
-        <Popconfirm title={`Remove ${c.name}?`} onConfirm={() => removeCustomer(c.id)}>
-          <Button size="small" danger>Remove</Button>
-        </Popconfirm>
+        !c.is_guest && (
+          <Popconfirm title={`Remove ${c.name}?`} onConfirm={() => removeCustomer(c.id)}>
+            <Button size="small" danger>Remove</Button>
+          </Popconfirm>
+        )
       ),
     },
   ];
@@ -445,13 +457,25 @@ export default function ShopDashboard() {
           )}
 
           {tab === "customers" && (
-            <Table
-              dataSource={customers}
-              columns={customerColumns}
-              rowKey="id"
-              pagination={{ pageSize: 15 }}
-              locale={{ emptyText: <Empty description="No customers yet. Share your signup link to invite them." /> }}
-            />
+            <>
+              <Input
+                placeholder="Search by name or phone..."
+                value={customerSearch}
+                onChange={(e) => setCustomerSearch(e.target.value)}
+                style={{ marginBottom: 12, maxWidth: 320 }}
+                allowClear
+              />
+              <Table
+                dataSource={customers.filter((c) => {
+                  const q = customerSearch.trim().toLowerCase();
+                  return !q || c.name.toLowerCase().includes(q) || (c.phone && c.phone.includes(q));
+                })}
+                columns={customerColumns}
+                rowKey="id"
+                pagination={{ pageSize: 15 }}
+                locale={{ emptyText: <Empty description="No customers yet. Share your signup link to invite them." /> }}
+              />
+            </>
           )}
         </div>
       </Content>

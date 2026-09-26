@@ -78,8 +78,11 @@ def list_customers(
     db: Session = Depends(get_db),
     user: models.User = Depends(require_role("admin", "shop_owner")),
 ):
-    """List customers currently bound to this shop who have a registered
-    account (excludes anonymous/walk-in guest customers created via POS)."""
+    """List everyone who has ordered from this shop — both registered
+    customers (signed up via the shop's link) and walk-in/guest customers
+    captured at POS billing. Walk-ins are flagged via is_guest so the
+    frontend can label them, and their phone is included so the shop owner
+    can search/recognize repeat walk-in customers too."""
     if user.role == "shop_owner" and str(user.business_id) != str(business_id):
         from fastapi import HTTPException
         raise HTTPException(status_code=403, detail="Not authorized")
@@ -89,19 +92,25 @@ def list_customers(
         .filter(
             models.User.business_id == business_id,
             models.User.role == "customer",
-            models.User.is_guest == False,  # noqa: E712
         )
         .all()
     )
     result = []
     for c in customers:
-        order_count = db.query(models.Order).filter(models.Order.customer_id == c.id).count()
+        orders = db.query(models.Order).filter(models.Order.customer_id == c.id).all()
+        # Skip guest customers with zero orders and no phone — these are
+        # noise (e.g. a walk-in sale that failed after the guest record was
+        # created) rather than a real customer worth showing.
+        if c.is_guest and not orders and not c.phone:
+            continue
         result.append({
             "id": c.id,
             "name": c.name,
             "phone": c.phone,
+            "is_guest": c.is_guest,
             "created_at": c.created_at,
-            "order_count": order_count,
+            "order_count": len(orders),
+            "total_spent": round(sum(o.total_amount for o in orders), 2),
         })
     return result
 

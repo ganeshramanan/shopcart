@@ -69,7 +69,7 @@ export default function Invoice() {
     }
   };
 
-  const downloadPdf = () => {
+  const buildPdfDoc = () => {
     const doc = new jsPDF();
     let y = 20;
 
@@ -119,7 +119,41 @@ export default function Invoice() {
     doc.setFont(undefined, "bold");
     doc.text(`Total: ₹${order.total_amount}`, 140, y);
 
-    doc.save(`invoice-${order.id.slice(0, 8)}.pdf`);
+    return doc;
+  };
+
+  const downloadPdf = () => {
+    buildPdfDoc().save(`invoice-${order.id.slice(0, 8)}.pdf`);
+  };
+
+  const [sharing, setSharing] = useState(false);
+
+  const sharePdfOnWhatsApp = async () => {
+    const doc = buildPdfDoc();
+    const blob = doc.output("blob");
+    const fileName = `invoice-${order.id.slice(0, 8)}.pdf`;
+    const file = new File([blob], fileName, { type: "application/pdf" });
+
+    // Web Share API with file support works on mobile browsers (Android
+    // Chrome, iOS Safari) and lets the user pick WhatsApp directly with the
+    // actual PDF attached. Desktop browsers don't support sharing files,
+    // so we fall back to the text-only wa.me link there.
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      setSharing(true);
+      try {
+        await navigator.share({
+          files: [file],
+          title: `${business?.name || "ShopCart"} — Bill`,
+          text: `Bill from ${business?.name || "ShopCart"} — Order #${order.id.slice(0, 8)}`,
+        });
+      } catch (err) {
+        // User cancelled the share sheet — not an error worth surfacing
+      } finally {
+        setSharing(false);
+      }
+    } else {
+      shareOnWhatsApp();
+    }
   };
 
   return (
@@ -135,8 +169,15 @@ export default function Invoice() {
             onChange={(e) => setWaPhone(e.target.value.replace(/[^\d]/g, ""))}
             style={{ width: 200 }}
           />
-          <Button icon={<WhatsAppOutlined />} onClick={shareOnWhatsApp}>Send on WhatsApp</Button>
+          <Button icon={<WhatsAppOutlined />} loading={sharing} onClick={sharePdfOnWhatsApp}>
+            Send PDF on WhatsApp
+          </Button>
         </Space>
+        <div style={{ marginTop: 4 }}>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            On mobile, this attaches the actual PDF. On desktop browsers (which can't share files), it falls back to a text-only WhatsApp message.
+          </Text>
+        </div>
       </div>
 
       <div className="invoice-sheet">
