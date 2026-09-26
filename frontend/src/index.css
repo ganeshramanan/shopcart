@@ -28,6 +28,7 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
 
 /* Zepto-style category chips */
 .category-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px; }
+.catalog-search { max-width: 400px; margin-bottom: 4px; }
 .chip { background: #fff; color: #374151; border: 1px solid #d1d5db; padding: 6px 14px; border-radius: 999px; white-space: nowrap; font-size: 13px; }
 .chip.active { background: #2563eb; color: white; border-color: #2563eb; }
 

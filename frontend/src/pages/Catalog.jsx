@@ -11,6 +11,7 @@ export default function Catalog() {
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [search, setSearch] = useState("");
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -34,8 +35,11 @@ export default function Catalog() {
   };
 
   const categories = ["All", ...new Set(products.map((p) => p.category).filter(Boolean))];
-  const visibleProducts =
-    activeCategory === "All" ? products : products.filter((p) => p.category === activeCategory);
+  const visibleProducts = products.filter((p) => {
+    const matchesCategory = activeCategory === "All" || p.category === activeCategory;
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   const cartLines = Object.entries(cart)
     .map(([productId, qty]) => {
@@ -70,6 +74,13 @@ export default function Catalog() {
       {business?.type && <p className="dashboard-subtitle" style={{ marginTop: -8, marginBottom: 12 }}>{business.type}</p>}
       {error && <div className="error">{error}</div>}
 
+      <input
+        className="catalog-search"
+        placeholder="Search products..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
       {categories.length > 1 && (
         <div className="category-scroll">
           {categories.map((c) => (
@@ -86,6 +97,9 @@ export default function Catalog() {
 
       <div className="catalog-layout">
         <div className="product-grid">
+          {visibleProducts.length === 0 && (
+            <p className="empty-state" style={{ gridColumn: "1 / -1" }}>No products match your search.</p>
+          )}
           {visibleProducts.map((p) => (
             <div key={p.id} className="product-card">
               <img
