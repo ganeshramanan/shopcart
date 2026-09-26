@@ -8,6 +8,7 @@ button.secondary { background: #e5e7eb; color: #111; }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; width: 100%; margin-bottom: 8px; }
 .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: #111827; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.topbar-admin { background: #1e1b4b; }
 .topbar-left { display: flex; align-items: center; gap: 24px; }
 .brand { display: flex; align-items: center; gap: 8px; text-decoration: none; color: white; }
 .brand-mark { font-size: 20px; }

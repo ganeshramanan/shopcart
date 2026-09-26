@@ -6,6 +6,11 @@ export default function AdminDashboard() {
   const [businesses, setBusinesses] = useState([]);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    document.title = "Cartbi — Platform Admin";
+    return () => { document.title = "ShopCart — Order Simple, Bill Right"; };
+  }, []);
+
   const load = () => {
     api.get("/admin/shop-owners").then((res) => setOwners(res.data)).catch((e) => setError(e.response?.data?.detail || "Failed to load"));
     api.get("/admin/businesses").then((res) => setBusinesses(res.data)).catch(() => {});
@@ -21,8 +26,8 @@ export default function AdminDashboard() {
   return (
     <div>
       <div className="dashboard-header">
-        <h2>Super Admin</h2>
-        <p className="dashboard-subtitle">Platform-wide view of every shop and its owner</p>
+        <h2>Cartbi Platform Overview</h2>
+        <p className="dashboard-subtitle">Manage every shop and shop owner running on ShopCart</p>
       </div>
 
       {error && <div className="error">{error}</div>}

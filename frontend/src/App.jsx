@@ -15,14 +15,23 @@ function TopBar() {
   const isAdmin = user?.role === "admin";
 
   return (
-    <div className="topbar">
+    <div className={isAdmin ? "topbar topbar-admin" : "topbar"}>
       <div className="topbar-left">
         <Link to="/" className="brand">
-          <span className="brand-mark">🛒</span>
-          <span className="brand-name">ShopCart</span>
+          {isAdmin ? (
+            <>
+              <span className="brand-mark">⚙️</span>
+              <span className="brand-name">Cartbi</span>
+            </>
+          ) : (
+            <>
+              <span className="brand-mark">🛒</span>
+              <span className="brand-name">ShopCart</span>
+            </>
+          )}
         </Link>
         <nav className="topbar-links">
-          {isAdmin && <Link to="/admin">Super Admin</Link>}
+          {isAdmin && <Link to="/admin">Platform Overview</Link>}
           {isShopOwner && (
             <>
               <Link to="/dashboard">Dashboard</Link>
