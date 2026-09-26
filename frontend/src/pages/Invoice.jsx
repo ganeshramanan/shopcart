@@ -133,11 +133,15 @@ export default function Invoice() {
     const fileName = `invoice-${order.id.slice(0, 8)}.pdf`;
     const file = new File([blob], fileName, { type: "application/pdf" });
 
-    // Web Share API with file support works on mobile browsers (Android
-    // Chrome, iOS Safari) and lets the user pick WhatsApp directly with the
-    // actual PDF attached. Desktop browsers don't support sharing files,
-    // so we fall back to the text-only wa.me link there.
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    // Web Share API with files is also present on desktop Safari/Chrome, but
+    // there it opens the OS-level share sheet (Mail, AirDrop, etc.) — WhatsApp
+    // Desktop isn't registered as a share target there, so it never shows up.
+    // Only use the native file-share flow on actual mobile devices, where the
+    // WhatsApp app IS registered as a share target. Everywhere else, go
+    // straight to the text-only wa.me link.
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
       setSharing(true);
       try {
         await navigator.share({
@@ -174,7 +178,7 @@ export default function Invoice() {
         </Space>
         <div style={{ marginTop: 4 }}>
           <Text type="secondary" style={{ fontSize: 12 }}>
-            On mobile, this attaches the actual PDF. On desktop browsers (which can't share files), it falls back to a text-only WhatsApp message.
+            On mobile, this attaches the actual PDF via your phone's share sheet (WhatsApp will be an option there). On desktop, WhatsApp Desktop isn't a share target, so it opens a WhatsApp Web chat with a text summary instead.
           </Text>
         </div>
       </div>
