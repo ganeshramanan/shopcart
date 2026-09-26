@@ -78,14 +78,19 @@ def list_customers(
     db: Session = Depends(get_db),
     user: models.User = Depends(require_role("admin", "shop_owner")),
 ):
-    """List customers currently bound to this shop, with their order counts."""
+    """List customers currently bound to this shop who have a registered
+    account (excludes anonymous/walk-in guest customers created via POS)."""
     if user.role == "shop_owner" and str(user.business_id) != str(business_id):
         from fastapi import HTTPException
         raise HTTPException(status_code=403, detail="Not authorized")
 
     customers = (
         db.query(models.User)
-        .filter(models.User.business_id == business_id, models.User.role == "customer")
+        .filter(
+            models.User.business_id == business_id,
+            models.User.role == "customer",
+            models.User.is_guest == False,  # noqa: E712
+        )
         .all()
     )
     result = []
