@@ -18,6 +18,7 @@ export default function Invoice() {
   const [business, setBusiness] = useState(null);
   const [error, setError] = useState("");
   const [waPhone, setWaPhone] = useState("");
+  const [sharing, setSharing] = useState(false);
 
   useEffect(() => {
     api.get(`/orders/${orderId}`)
@@ -125,8 +126,6 @@ export default function Invoice() {
   const downloadPdf = () => {
     buildPdfDoc().save(`invoice-${order.id.slice(0, 8)}.pdf`);
   };
-
-  const [sharing, setSharing] = useState(false);
 
   const sharePdfOnWhatsApp = async () => {
     const doc = buildPdfDoc();
