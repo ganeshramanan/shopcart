@@ -9,10 +9,13 @@ import ShopDashboard from "./pages/ShopDashboard.jsx";
 
 function TopBar() {
   const { user, logout } = useAuth();
+  const isBoundCustomer = user?.role === "customer" && user?.business_id;
+
   return (
     <div className="topbar">
       <div>
-        <Link to="/">Shops</Link>
+        {!isBoundCustomer && <Link to="/">Shops</Link>}
+        {isBoundCustomer && <Link to={`/shop/${user.business_id}`}>Catalog</Link>}
         {user && <Link to="/orders">My Orders</Link>}
         {user?.role === "shop_owner" && <Link to="/dashboard">Dashboard</Link>}
       </div>
@@ -33,13 +36,23 @@ function Protected({ children }) {
   return children;
 }
 
+function HomeRoute() {
+  const { user } = useAuth();
+  // A customer bound to a single shop never sees the multi-shop browse list —
+  // they're taken straight to their shop's catalog.
+  if (user?.role === "customer" && user?.business_id) {
+    return <Navigate to={`/shop/${user.business_id}`} replace />;
+  }
+  return <BusinessList />;
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <TopBar />
       <div className="container">
         <Routes>
-          <Route path="/" element={<BusinessList />} />
+          <Route path="/" element={<HomeRoute />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/shop/:businessId" element={<Catalog />} />

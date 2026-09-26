@@ -13,15 +13,19 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      await login(phone, password);
-      navigate("/");
+      const user = await login(phone, password);
+      if (user.role === "customer" && user.business_id) {
+        navigate(`/shop/${user.business_id}`);
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       setError(err.response?.data?.detail || "Login failed");
     }
   };
 
   return (
-    <div className="card">
+    <div className="card" style={{ maxWidth: 420, margin: "0 auto" }}>
       <h2>Login</h2>
       {error && <div className="error">{error}</div>}
       <form onSubmit={submit}>

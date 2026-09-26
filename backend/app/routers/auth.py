@@ -15,6 +15,11 @@ def signup(payload: schemas.UserSignup, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="Phone number already registered")
 
+    if payload.business_id:
+        biz = db.query(models.Business).filter(models.Business.id == payload.business_id).first()
+        if not biz:
+            raise HTTPException(status_code=400, detail="Selected shop not found")
+
     user = models.User(
         name=payload.name,
         phone=payload.phone,
