@@ -9,11 +9,13 @@ export default function Invoice() {
   const [order, setOrder] = useState(null);
   const [business, setBusiness] = useState(null);
   const [error, setError] = useState("");
+  const [waPhone, setWaPhone] = useState("");
 
   useEffect(() => {
     api.get(`/orders/${orderId}`)
       .then((res) => {
         setOrder(res.data);
+        if (res.data.customer_phone) setWaPhone(res.data.customer_phone);
         return api.get(`/businesses/${res.data.business_id}`);
       })
       .then((res) => setBusiness(res.data))
@@ -40,8 +42,23 @@ export default function Invoice() {
     return encodeURIComponent(text);
   };
 
+  // Normalizes an Indian 10-digit number to the international format
+  // wa.me needs (country code, no +, no spaces/dashes).
+  const normalizePhone = (raw) => {
+    const digits = raw.replace(/[^\d]/g, "");
+    if (digits.length === 10) return `91${digits}`;
+    return digits;
+  };
+
   const shareOnWhatsApp = () => {
-    window.open(`https://wa.me/?text=${buildWhatsAppText()}`, "_blank");
+    const text = buildWhatsAppText();
+    if (waPhone.trim()) {
+      const phone = normalizePhone(waPhone);
+      window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
+    } else {
+      // No number entered — fall back to WhatsApp's contact picker
+      window.open(`https://wa.me/?text=${text}`, "_blank");
+    }
   };
 
   const downloadPdf = () => {
@@ -99,11 +116,17 @@ export default function Invoice() {
 
   return (
     <div>
-      <div className="no-print" style={{ marginBottom: 16, display: "flex", gap: 8 }}>
+      <div className="no-print" style={{ marginBottom: 16, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
         <Link to="/orders"><button className="secondary">← Back</button></Link>
         <button onClick={() => window.print()}>Print</button>
         <button onClick={downloadPdf}>Download PDF</button>
-        <button className="secondary" onClick={shareOnWhatsApp}>Share on WhatsApp</button>
+        <input
+          placeholder="Customer's WhatsApp number"
+          value={waPhone}
+          onChange={(e) => setWaPhone(e.target.value.replace(/[^\d]/g, ""))}
+          style={{ width: "auto", minWidth: 160, marginBottom: 0 }}
+        />
+        <button className="secondary" onClick={shareOnWhatsApp}>Send on WhatsApp</button>
       </div>
 
       <div className="invoice-sheet">
