@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Input, Row, Col, Card, Button, Badge, Empty, Typography, Affix, Alert, Image } from "antd";
+import { PlusOutlined, MinusOutlined, SearchOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
+
+const { Title, Text } = Typography;
 
 export default function Catalog() {
   const { businessId } = useParams();
   const [products, setProducts] = useState([]);
   const [business, setBusiness] = useState(null);
-  const [cart, setCart] = useState({}); // product_id -> quantity
+  const [cart, setCart] = useState({});
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
@@ -70,107 +74,120 @@ export default function Catalog() {
 
   return (
     <div>
-      <h2>{business ? business.name : "Catalog"}</h2>
-      {business?.type && <p className="dashboard-subtitle" style={{ marginTop: -8, marginBottom: 12 }}>{business.type}</p>}
-      {error && <div className="error">{error}</div>}
+      <Title level={3} style={{ marginBottom: 0 }}>{business ? business.name : "Catalog"}</Title>
+      {business?.type && <Text type="secondary">{business.type}</Text>}
+      {error && <Alert type="error" message={error} showIcon style={{ margin: "12px 0" }} />}
 
-      <input
-        className="catalog-search"
+      <Input
+        prefix={<SearchOutlined />}
         placeholder="Search products..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
+        style={{ maxWidth: 400, margin: "16px 0 12px" }}
+        allowClear
       />
 
       {categories.length > 1 && (
-        <div className="category-scroll">
+        <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 12 }}>
           {categories.map((c) => (
-            <button
+            <Button
               key={c}
-              className={c === activeCategory ? "chip active" : "chip"}
+              type={c === activeCategory ? "primary" : "default"}
+              shape="round"
+              size="small"
               onClick={() => setActiveCategory(c)}
             >
               {c}
-            </button>
+            </Button>
           ))}
         </div>
       )}
 
-      <div className="catalog-layout">
-        <div className="product-grid">
-          {visibleProducts.length === 0 && (
-            <p className="empty-state" style={{ gridColumn: "1 / -1" }}>No products match your search.</p>
-          )}
-          {visibleProducts.map((p) => (
-            <div key={p.id} className="product-card">
-              <img
-                src={p.image_url || "https://placehold.co/300x300/CCCCCC/666666?text=No+Image"}
-                alt={p.name}
-                className="product-image"
-              />
-              <div className="product-info">
-                <strong className="product-name">{p.name}</strong>
-                <div className="product-price">₹{p.price} / {p.unit_type}</div>
-                {(cart[p.id] || 0) > 0 ? (
-                  <div className="qty-control full-width">
-                    <button onClick={() => setQty(p.id, (cart[p.id] || 0) - step(p.unit_type))}>-</button>
-                    <span>{cart[p.id]}</span>
-                    <button onClick={() => setQty(p.id, (cart[p.id] || 0) + step(p.unit_type))}>+</button>
-                  </div>
-                ) : (
-                  <button className="add-btn" onClick={() => setQty(p.id, step(p.unit_type))}>
-                    + Add
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="cart-panel">
-          <h3>Your Cart</h3>
-          {itemCount === 0 ? (
-            <p className="cart-empty">No items added yet. Tap "+ Add" on a product to start.</p>
+      <Row gutter={16}>
+        <Col xs={24} lg={17}>
+          {visibleProducts.length === 0 ? (
+            <Empty description="No products match your search" style={{ marginTop: 40 }} />
           ) : (
-            <>
-              <div className="cart-lines">
-                {cartLines.map(({ product, qty, lineTotal }) => (
-                  <div key={product.id} className="cart-line">
-                    <img
-                      src={product.image_url || "https://placehold.co/60x60/CCCCCC/666666?text=?"}
-                      alt={product.name}
-                      className="cart-line-image"
-                    />
-                    <div className="cart-line-info">
-                      <div className="cart-line-name">{product.name}</div>
-                      <div className="qty-control">
-                        <button onClick={() => setQty(product.id, qty - step(product.unit_type))}>-</button>
-                        <span>{qty} {product.unit_type}</span>
-                        <button onClick={() => setQty(product.id, qty + step(product.unit_type))}>+</button>
-                      </div>
+            <Row gutter={[12, 12]}>
+              {visibleProducts.map((p) => (
+                <Col key={p.id} xs={12} sm={8} md={6}>
+                  <Card
+                    size="small"
+                    cover={
+                      <Image
+                        src={p.image_url || "https://placehold.co/300x300/CCCCCC/666666?text=No+Image"}
+                        alt={p.name}
+                        height={120}
+                        style={{ objectFit: "cover" }}
+                        preview={false}
+                      />
+                    }
+                  >
+                    <Text strong style={{ fontSize: 13, display: "block", minHeight: 34 }}>{p.name}</Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>₹{p.price} / {p.unit_type}</Text>
+                    <div style={{ marginTop: 8 }}>
+                      {(cart[p.id] || 0) > 0 ? (
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#2563eb", borderRadius: 8, padding: "2px 4px" }}>
+                          <Button size="small" type="text" style={{ color: "#fff" }} icon={<MinusOutlined />} onClick={() => setQty(p.id, (cart[p.id] || 0) - step(p.unit_type))} />
+                          <Text style={{ color: "#fff", fontWeight: 600 }}>{cart[p.id]}</Text>
+                          <Button size="small" type="text" style={{ color: "#fff" }} icon={<PlusOutlined />} onClick={() => setQty(p.id, (cart[p.id] || 0) + step(p.unit_type))} />
+                        </div>
+                      ) : (
+                        <Button size="small" block onClick={() => setQty(p.id, step(p.unit_type))}>+ Add</Button>
+                      )}
                     </div>
-                    <div className="cart-line-total">₹{lineTotal.toFixed(2)}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="cart-summary-row">
-                <span>{itemCount} item(s)</span>
-                <strong>₹{total.toFixed(2)}</strong>
-              </div>
-              <button className="place-order-btn" onClick={placeOrder} disabled={placing}>
-                {placing ? "Placing..." : "Place Order"}
-              </button>
-            </>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
           )}
-        </div>
-      </div>
+        </Col>
+
+        <Col xs={0} lg={7}>
+          <Affix offsetTop={16}>
+            <Card title="Your Cart">
+              {itemCount === 0 ? (
+                <Text type="secondary">No items added yet. Tap "+ Add" on a product to start.</Text>
+              ) : (
+                <>
+                  {cartLines.map(({ product, qty, lineTotal }) => (
+                    <div key={product.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                      <img src={product.image_url || "https://placehold.co/60x60/CCCCCC/666666?text=?"} alt={product.name}
+                        style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <Text strong style={{ fontSize: 13, display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{product.name}</Text>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <Button size="small" icon={<MinusOutlined />} onClick={() => setQty(product.id, qty - step(product.unit_type))} />
+                          <Text style={{ fontSize: 12 }}>{qty} {product.unit_type}</Text>
+                          <Button size="small" icon={<PlusOutlined />} onClick={() => setQty(product.id, qty + step(product.unit_type))} />
+                        </div>
+                      </div>
+                      <Text strong style={{ fontSize: 13 }}>₹{lineTotal.toFixed(2)}</Text>
+                    </div>
+                  ))}
+                  <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #f0f0f0", paddingTop: 10, marginBottom: 10 }}>
+                    <Text>{itemCount} item(s)</Text>
+                    <Text strong>₹{total.toFixed(2)}</Text>
+                  </div>
+                  <Button type="primary" block loading={placing} onClick={placeOrder}>Place Order</Button>
+                </>
+              )}
+            </Card>
+          </Affix>
+        </Col>
+      </Row>
 
       {itemCount > 0 && (
-        <div className="total-bar mobile-only">
-          <span>{itemCount} item(s) · ₹{total.toFixed(2)}</span>
-          <button onClick={placeOrder} disabled={placing}>
-            {placing ? "Placing..." : "Place Order"}
-          </button>
-        </div>
+        <Affix offsetBottom={0} className="mobile-only-affix">
+          <div style={{ background: "#111827", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: "12px 12px 0 0" }}>
+            <Text style={{ color: "#fff" }}>
+              <Badge count={itemCount} style={{ marginRight: 8 }} /> ₹{total.toFixed(2)}
+            </Text>
+            <Button type="primary" loading={placing} onClick={placeOrder} icon={<ShoppingCartOutlined />}>
+              Place Order
+            </Button>
+          </div>
+        </Affix>
       )}
     </div>
   );

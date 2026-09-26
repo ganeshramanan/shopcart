@@ -134,3 +134,8 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
   .pos-sidebar { position: fixed; top: 0; left: -260px; height: 100%; width: 240px; z-index: 999; margin-right: 0; border-radius: 0; transition: left 0.2s ease; overflow-y: auto; }
   .pos-sidebar.open { left: 0; box-shadow: 4px 0 12px rgba(0,0,0,0.15); }
 }
+
+.mobile-only-affix { display: none; }
+@media (max-width: 991px) {
+  .mobile-only-affix { display: block; position: fixed !important; bottom: 0; left: 0; width: 100%; z-index: 500; }
+}

@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { jsPDF } from "jspdf";
+import { Button, Input, Space, Tag, Typography, Divider } from "antd";
+import { ArrowLeftOutlined, PrinterOutlined, DownloadOutlined, WhatsAppOutlined } from "@ant-design/icons";
 import api from "../api";
 import { formatDate } from "../utils.js";
+
+const { Title, Text } = Typography;
+const STATUS_COLORS = {
+  placed: "gold", confirmed: "blue", packing: "purple", ready: "cyan",
+  dispatched: "geekblue", delivered: "green", cancelled: "red",
+};
 
 export default function Invoice() {
   const { orderId } = useParams();
@@ -116,29 +124,31 @@ export default function Invoice() {
 
   return (
     <div>
-      <div className="no-print" style={{ marginBottom: 16, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-        <Link to="/orders"><button className="secondary">← Back</button></Link>
-        <button onClick={() => window.print()}>Print</button>
-        <button onClick={downloadPdf}>Download PDF</button>
-        <input
-          placeholder="Customer's WhatsApp number"
-          value={waPhone}
-          onChange={(e) => setWaPhone(e.target.value.replace(/[^\d]/g, ""))}
-          style={{ width: "auto", minWidth: 160, marginBottom: 0 }}
-        />
-        <button className="secondary" onClick={shareOnWhatsApp}>Send on WhatsApp</button>
+      <div className="no-print" style={{ marginBottom: 16 }}>
+        <Space wrap>
+          <Link to="/orders"><Button icon={<ArrowLeftOutlined />}>Back</Button></Link>
+          <Button icon={<PrinterOutlined />} onClick={() => window.print()}>Print</Button>
+          <Button icon={<DownloadOutlined />} onClick={downloadPdf}>Download PDF</Button>
+          <Input
+            placeholder="Customer's WhatsApp number"
+            value={waPhone}
+            onChange={(e) => setWaPhone(e.target.value.replace(/[^\d]/g, ""))}
+            style={{ width: 200 }}
+          />
+          <Button icon={<WhatsAppOutlined />} onClick={shareOnWhatsApp}>Send on WhatsApp</Button>
+        </Space>
       </div>
 
       <div className="invoice-sheet">
         <div className="invoice-header">
           <div>
-            <h2 style={{ margin: 0 }}>{business?.name || "ShopCart"}</h2>
-            <p style={{ margin: "2px 0", color: "#6b7280" }}>{business?.type}</p>
+            <Title level={3} style={{ margin: 0 }}>{business?.name || "ShopCart"}</Title>
+            <Text type="secondary">{business?.type}</Text>
           </div>
           <div style={{ textAlign: "right" }}>
-            <div><strong>Order #{order.id.slice(0, 8)}</strong></div>
-            <div style={{ color: "#6b7280", fontSize: 13 }}>{formatDate(order.created_at)}</div>
-            <span className="badge" style={{ marginTop: 4, display: "inline-block" }}>{order.status}</span>
+            <Text strong>Order #{order.id.slice(0, 8)}</Text>
+            <div><Text type="secondary" style={{ fontSize: 13 }}>{formatDate(order.created_at)}</Text></div>
+            <Tag color={STATUS_COLORS[order.status]} style={{ marginTop: 4 }}>{order.status}</Tag>
           </div>
         </div>
 

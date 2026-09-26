@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { List, Card, Tag, Typography, Empty } from "antd";
+import { RightOutlined } from "@ant-design/icons";
 import api from "../api";
+
+const { Title } = Typography;
 
 export default function BusinessList() {
   const [businesses, setBusinesses] = useState([]);
@@ -11,19 +15,24 @@ export default function BusinessList() {
 
   return (
     <div>
-      <h2>Shops</h2>
-      {businesses.length === 0 && <p>No shops yet. Ask a shop owner to sign up and create one.</p>}
-      {businesses.map((b) => (
-        <Link key={b.id} to={`/shop/${b.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-          <div className="card row">
-            <div>
-              <strong>{b.name}</strong>
-              <div><span className="badge">{b.type}</span></div>
-            </div>
-            <span>→</span>
-          </div>
-        </Link>
-      ))}
+      <Title level={3}>Shops</Title>
+      {businesses.length === 0 && <Empty description="No shops yet. Ask a shop owner to sign up and create one." />}
+      <List
+        dataSource={businesses}
+        renderItem={(b) => (
+          <Link to={`/shop/${b.id}`}>
+            <Card style={{ marginBottom: 12 }} hoverable>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <strong>{b.name}</strong>
+                  <div><Tag>{b.type}</Tag></div>
+                </div>
+                <RightOutlined />
+              </div>
+            </Card>
+          </Link>
+        )}
+      />
     </div>
   );
 }
