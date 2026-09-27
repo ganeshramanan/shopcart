@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Card, Tag, Typography, Empty, Button, Space, Input, Select } from "antd";
+import { Card, Tag, Typography, Empty, Button, Space, Input, Select, DatePicker } from "antd";
 import { ReloadOutlined, RedoOutlined } from "@ant-design/icons";
 import api from "../api";
 import { formatDate } from "../utils.js";
@@ -17,6 +17,7 @@ export default function MyOrders() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [dateRange, setDateRange] = useState(null);
   const navigate = useNavigate();
 
   const load = () => {
@@ -49,7 +50,11 @@ export default function MyOrders() {
       o.id.toLowerCase().includes(q) ||
       o.items.some((it) => it.product_name_snapshot.toLowerCase().includes(q));
     const matchesStatus = statusFilter === "all" || o.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const orderDay = o.created_at.slice(0, 10);
+    const matchesRange =
+      !dateRange ||
+      (orderDay >= dateRange[0].format("YYYY-MM-DD") && orderDay <= dateRange[1].format("YYYY-MM-DD"));
+    return matchesSearch && matchesStatus && matchesRange;
   });
 
   return (
@@ -73,8 +78,9 @@ export default function MyOrders() {
           style={{ width: 160 }}
           options={[{ value: "all", label: "All statuses" }, ...ORDER_STATUSES.map((s) => ({ value: s, label: s }))]}
         />
-        {(search || statusFilter !== "all") && (
-          <Button onClick={() => { setSearch(""); setStatusFilter("all"); }}>Clear</Button>
+        <DatePicker.RangePicker value={dateRange} onChange={setDateRange} />
+        {(search || statusFilter !== "all" || dateRange) && (
+          <Button onClick={() => { setSearch(""); setStatusFilter("all"); setDateRange(null); }}>Clear</Button>
         )}
       </Space>
 

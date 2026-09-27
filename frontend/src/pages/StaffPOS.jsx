@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Tabs, Card, Tag, Typography, Empty, Button, Input, Select, Space } from "antd";
+import { Tabs, Card, Tag, Typography, Empty, Button, Input, Select, Space, DatePicker } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
@@ -22,6 +22,7 @@ function StaffOrders({ businessId }) {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [dateRange, setDateRange] = useState(null);
 
   const load = () => {
     setRefreshing(true);
@@ -47,7 +48,11 @@ function StaffOrders({ businessId }) {
       (o.customer_phone && o.customer_phone.includes(q)) ||
       o.id.toLowerCase().includes(q);
     const matchesStatus = statusFilter === "all" || o.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const orderDay = o.created_at.slice(0, 10);
+    const matchesRange =
+      !dateRange ||
+      (orderDay >= dateRange[0].format("YYYY-MM-DD") && orderDay <= dateRange[1].format("YYYY-MM-DD"));
+    return matchesSearch && matchesStatus && matchesRange;
   });
 
   return (
@@ -67,8 +72,9 @@ function StaffOrders({ businessId }) {
             style={{ width: 160 }}
             options={[{ value: "all", label: "All statuses" }, ...ORDER_STATUSES.map((s) => ({ value: s, label: s }))]}
           />
-          {(search || statusFilter !== "all") && (
-            <Button onClick={() => { setSearch(""); setStatusFilter("all"); }}>Clear</Button>
+          <DatePicker.RangePicker value={dateRange} onChange={setDateRange} />
+          {(search || statusFilter !== "all" || dateRange) && (
+            <Button onClick={() => { setSearch(""); setStatusFilter("all"); setDateRange(null); }}>Clear</Button>
           )}
           <Button icon={<ReloadOutlined />} onClick={load} loading={refreshing}>Refresh</Button>
         </Space>
