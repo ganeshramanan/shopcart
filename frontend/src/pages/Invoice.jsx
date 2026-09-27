@@ -46,9 +46,9 @@ export default function Invoice() {
     if (window.history.length > 2) {
       navigate(-1);
     } else if (user?.role === "shop_owner") {
-      navigate("/dashboard");
+      navigate("/dashboard?tab=overview");
     } else if (user?.role === "staff") {
-      navigate("/pos");
+      navigate("/pos?tab=orders");
     } else {
       navigate("/orders");
     }

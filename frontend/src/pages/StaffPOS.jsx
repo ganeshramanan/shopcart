@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Tabs, Card, Tag, Typography, Empty, Button } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import api from "../api";
@@ -68,6 +69,7 @@ function StaffSignupLink({ businessId }) {
 
 export default function StaffPOS() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [business, setBusiness] = useState(null);
 
@@ -96,7 +98,7 @@ export default function StaffPOS() {
   return (
     <div>
       {business && <ShopBanner business={business} compact />}
-      <Tabs defaultActiveKey="newsale" items={items} />
+      <Tabs defaultActiveKey={searchParams.get("tab") || "newsale"} items={items} />
     </div>
   );
 }

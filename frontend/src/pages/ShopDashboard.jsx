@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   Layout, Menu, Card, Row, Col, Button, Input, Select, DatePicker,
   Table, Tag, Space, Badge, Form, Upload, message, Popconfirm, Empty, Typography,
@@ -60,7 +60,13 @@ const PAGE_TITLES = {
 
 export default function ShopDashboard() {
   const { user, refreshUser } = useAuth();
-  const [tab, setTab] = useState("home");
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Allow deep-linking to a specific tab via ?tab=overview (used by
+  // Invoice.jsx's "Back" button so it returns to the Orders tab specifically,
+  // not just the dashboard's default Home tab). Kept in sync both ways:
+  // reading it on mount, and writing it back whenever the tab changes, so
+  // browser back/forward and shared links both land on the right tab.
+  const [tab, setTab] = useState(searchParams.get("tab") || "home");
   const [collapsed, setCollapsed] = useState(false);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -331,7 +337,10 @@ export default function ShopDashboard() {
 
   const [pageTitle, pageSubtitle] = PAGE_TITLES[tab] || ["", ""];
 
-  const selectTab = (key) => setTab(key);
+  const selectTab = (key) => {
+    setTab(key);
+    setSearchParams(key === "home" ? {} : { tab: key }, { replace: false });
+  };
 
   const inventoryColumns = [
     {
