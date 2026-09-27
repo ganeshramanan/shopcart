@@ -328,21 +328,23 @@ export default function Catalog() {
                 </div>
               ) : (
                 <>
-                  {cartLines.map(({ product, qty, lineTotal }) => (
-                    <div key={product.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                      <img src={product.image_url || "https://placehold.co/60x60/CCCCCC/666666?text=?"} alt={product.name}
-                        style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <Text strong style={{ fontSize: 13, display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{product.name}</Text>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <Button size="small" icon={<MinusOutlined />} onClick={() => setQty(product.id, qty - step(product.unit_type))} />
-                          <Text style={{ fontSize: 12 }}>{qty} {product.unit_type}</Text>
-                          <Button size="small" icon={<PlusOutlined />} onClick={() => setQty(product.id, qty + step(product.unit_type))} />
+                  <div className="catalog-cart-items-scroll">
+                    {cartLines.map(({ product, qty, lineTotal }) => (
+                      <div key={product.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                        <img src={product.image_url || "https://placehold.co/60x60/CCCCCC/666666?text=?"} alt={product.name}
+                          style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <Text strong style={{ fontSize: 13, display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{product.name}</Text>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <Button size="small" icon={<MinusOutlined />} onClick={() => setQty(product.id, qty - step(product.unit_type))} />
+                            <Text style={{ fontSize: 12 }}>{qty} {product.unit_type}</Text>
+                            <Button size="small" icon={<PlusOutlined />} onClick={() => setQty(product.id, qty + step(product.unit_type))} />
+                          </div>
                         </div>
+                        <Text strong style={{ fontSize: 13 }}>₹{lineTotal.toFixed(2)}</Text>
                       </div>
-                      <Text strong style={{ fontSize: 13 }}>₹{lineTotal.toFixed(2)}</Text>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                   <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #f0f0f0", paddingTop: 10, marginBottom: 10 }}>
                     <Text>{itemCount} item(s)</Text>
                     <Text strong className="catalog-price" style={{ fontSize: 16 }}>₹{total.toFixed(2)}</Text>

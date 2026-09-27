@@ -280,6 +280,15 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
   border-radius: 16px !important;
   box-shadow: 0 4px 16px rgba(0,0,0,0.06);
 }
+/* Cap the cart's item list at a fixed height with its own scrollbar, so
+   adding many items never pushes the total/Place Order button off-screen —
+   they stay pinned right below the scrollable list instead of growing the
+   whole card indefinitely. */
+.catalog-cart-items-scroll {
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
 .catalog-empty-state {
   text-align: center;
   padding: 60px 20px;
