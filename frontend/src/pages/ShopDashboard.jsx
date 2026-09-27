@@ -445,17 +445,18 @@ export default function ShopDashboard() {
                     style={{ marginTop: 8 }}
                     items={[{
                       key: "howto",
-                      label: <Text type="secondary" style={{ fontSize: 12 }}>How to get an image link from Google Drive (one-time setup) →</Text>,
+                      label: <Text type="secondary" style={{ fontSize: 12 }}>How to get an image link (one-time setup) →</Text>,
                       children: (
                         <div style={{ fontSize: 12, color: "#6b7280" }}>
+                          <Text type="warning" style={{ display: "block", marginBottom: 6 }}>
+                            Note: Google Drive/Photos links don't work here — Google blocks their
+                            images from being shown on other websites. Use a free image host instead:
+                          </Text>
                           <ol style={{ paddingLeft: 18, margin: 0 }}>
-                            <li>Upload your shop's photo/logo to <a href="https://drive.google.com" target="_blank" rel="noreferrer">Google Drive</a></li>
-                            <li>Right-click the file → <strong>Share</strong> → set access to <strong>"Anyone with the link"</strong></li>
-                            <li>Copy the share link — it looks like <code>https://drive.google.com/file/d/FILE_ID/view</code></li>
-                            <li>Copy just the <strong>FILE_ID</strong> part (the long code between <code>/d/</code> and <code>/view</code>)</li>
-                            <li>Paste this into the field above, replacing FILE_ID with your code:<br />
-                              <code>https://drive.google.com/uc?export=view&id=FILE_ID</code>
-                            </li>
+                            <li>Go to <a href="https://postimages.org" target="_blank" rel="noreferrer">postimages.org</a> (free, no signup needed)</li>
+                            <li>Click <strong>Choose images</strong> and upload your shop's photo/logo</li>
+                            <li>After upload, find the <strong>"Direct link"</strong> field on the results page</li>
+                            <li>Copy that Direct link and paste it into the field above</li>
                           </ol>
                         </div>
                       ),
