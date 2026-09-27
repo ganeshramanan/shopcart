@@ -424,10 +424,15 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
 /* Staff Orders — items collapsed behind a "N items — view" toggle by
    default (so a 20+ item order doesn't dominate the screen), expanding
    into a clean scrollable vertical list — name left, qty right — instead
-   of a wrapped tag cloud that got dense/unreadable on big orders. */
+   of a wrapped tag cloud that got dense/unreadable on big orders.
+   macOS/most browsers hide scrollbars until actively scrolling, so a
+   fade-out gradient + text hint are used as the real scroll indicator
+   (the styled scrollbar below is a bonus for browsers that do show one). */
+.staff-order-items-wrap { position: relative; }
 .staff-order-items-list {
+  position: relative;
   margin-top: 8px;
-  max-height: 240px;
+  max-height: 220px;
   overflow-y: auto;
   border: 1px solid #f0f0f0;
   border-radius: 8px;
@@ -438,6 +443,14 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
 .staff-order-items-list::-webkit-scrollbar { width: 6px; }
 .staff-order-items-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
 .staff-order-items-list::-webkit-scrollbar-track { background: transparent; }
+.staff-order-items-fade {
+  position: absolute;
+  bottom: 0; left: 0; right: 6px;
+  height: 28px;
+  background: linear-gradient(to bottom, rgba(250,250,250,0), rgba(250,250,250,0.95));
+  border-radius: 0 0 8px 8px;
+  pointer-events: none;
+}
 .staff-order-item-row {
   display: flex;
   justify-content: space-between;
@@ -453,24 +466,34 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
 
 /* My Orders (customer) — same collapsed-items pattern as Staff Orders,
    with the per-line price breakdown customers care about kept once
-   expanded (qty x price = line total). */
+   expanded (qty x price = line total). macOS/most browsers hide
+   scrollbars until actively scrolling, so a CSS-styled scrollbar alone
+   is invisible at rest — added a fade-out gradient + explicit "scroll
+   to see all N items" text hint instead, which don't rely on the OS
+   ever showing a scrollbar at all. */
+.myorders-items-list-wrap { position: relative; }
 .myorders-items-list {
   position: relative;
   margin-top: 8px;
-  max-height: 260px;
+  max-height: 220px;
   overflow-y: auto;
   border: 1px solid #f0f0f0;
   border-radius: 8px;
   background: #fafafa;
-  /* Visible scrollbar (not just on hover) so a scrollable list doesn't
-     look like it just abruptly cuts off with no indication there's more
-     content below. */
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
 }
 .myorders-items-list::-webkit-scrollbar { width: 6px; }
 .myorders-items-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
 .myorders-items-list::-webkit-scrollbar-track { background: transparent; }
+.myorders-items-fade {
+  position: absolute;
+  bottom: 0; left: 0; right: 6px;
+  height: 28px;
+  background: linear-gradient(to bottom, rgba(250,250,250,0), rgba(250,250,250,0.95));
+  border-radius: 0 0 8px 8px;
+  pointer-events: none;
+}
 .myorders-item-row {
   display: flex;
   justify-content: space-between;

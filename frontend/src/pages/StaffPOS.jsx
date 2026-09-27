@@ -21,9 +21,11 @@ const STATUS_BORDER_COLORS = {
   placed: "#eab308", confirmed: "#2563eb", packing: "#a855f7", ready: "#06b6d4",
   dispatched: "#4338ca", delivered: "#16a34a", cancelled: "#dc2626",
 };
+const VISIBLE_ROWS_BEFORE_SCROLL = 6;
 
 function StaffOrderCard({ order: o }) {
   const [expanded, setExpanded] = useState(false);
+  const needsScroll = o.items.length > VISIBLE_ROWS_BEFORE_SCROLL;
 
   return (
     <Card
@@ -69,14 +71,24 @@ function StaffOrderCard({ order: o }) {
       </Button>
 
       {expanded && (
-        <div className="staff-order-items-list">
-          {o.items.map((it) => (
-            <div key={it.id} className="staff-order-item-row">
-              <span className="staff-order-item-name">{it.product_name_snapshot}</span>
-              <span className="staff-order-item-qty">{it.quantity} {it.unit_type_snapshot}</span>
+        <>
+          <div className="staff-order-items-wrap">
+            <div className="staff-order-items-list">
+              {o.items.map((it) => (
+                <div key={it.id} className="staff-order-item-row">
+                  <span className="staff-order-item-name">{it.product_name_snapshot}</span>
+                  <span className="staff-order-item-qty">{it.quantity} {it.unit_type_snapshot}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+            {needsScroll && <div className="staff-order-items-fade" />}
+          </div>
+          {needsScroll && (
+            <Text type="secondary" style={{ fontSize: 11, display: "block", marginTop: 4 }}>
+              ↓ Scroll to see all {o.items.length} items
+            </Text>
+          )}
+        </>
       )}
 
       <div style={{ marginTop: 10 }}>

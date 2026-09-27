@@ -16,8 +16,11 @@ const STATUS_COLORS = {
 // pattern as StaffPOS's order cards — a big order (10+ items) shouldn't
 // dominate the card. Kept the per-line price breakdown customers care
 // about (qty × price = line total) once expanded.
+const VISIBLE_ROWS_BEFORE_SCROLL = 6;
+
 function OrderCard({ order: o, onReorder }) {
   const [expanded, setExpanded] = useState(false);
+  const needsScroll = o.items.length > VISIBLE_ROWS_BEFORE_SCROLL;
 
   return (
     <Card style={{ marginBottom: 12, marginTop: 16 }}>
@@ -40,14 +43,24 @@ function OrderCard({ order: o, onReorder }) {
       </Button>
 
       {expanded && (
-        <div className="myorders-items-list">
-          {o.items.map((it) => (
-            <div key={it.id} className="myorders-item-row">
-              <span className="myorders-item-name">{it.product_name_snapshot} — {it.quantity} {it.unit_type_snapshot}</span>
-              <span className="myorders-item-total">× ₹{it.unit_price_snapshot} = ₹{it.line_total}</span>
+        <>
+          <div className="myorders-items-list-wrap">
+            <div className="myorders-items-list">
+              {o.items.map((it) => (
+                <div key={it.id} className="myorders-item-row">
+                  <span className="myorders-item-name">{it.product_name_snapshot} — {it.quantity} {it.unit_type_snapshot}</span>
+                  <span className="myorders-item-total">× ₹{it.unit_price_snapshot} = ₹{it.line_total}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+            {needsScroll && <div className="myorders-items-fade" />}
+          </div>
+          {needsScroll && (
+            <Text type="secondary" style={{ fontSize: 11, display: "block", marginTop: 4 }}>
+              ↓ Scroll to see all {o.items.length} items
+            </Text>
+          )}
+        </>
       )}
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
