@@ -18,6 +18,7 @@ import NewSale from "./NewSale.jsx";
 import PrintLabels from "./PrintLabels.jsx";
 import Analytics from "./Analytics.jsx";
 import StaffManagement from "./StaffManagement.jsx";
+import SignupLinkCard from "../components/SignupLinkCard.jsx";
 
 const { Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -402,56 +403,9 @@ export default function ShopDashboard() {
                 </Card>
               )}
 
-              <Card title="Your customer signup link" style={{ marginTop: 16 }}>
-                <Text type="secondary">
-                  Share this with your customers via WhatsApp or let them scan the QR code
-                  so they can sign up directly to your shop — they'll never see other shops on the platform.
-                </Text>
-                <Space wrap style={{ marginTop: 12, width: "100%" }}>
-                  <Input readOnly value={signupLink} style={{ width: 320 }} onFocus={(e) => e.target.select()} />
-                  <Button icon={<CopyOutlined />} onClick={() => {
-                    navigator.clipboard.writeText(signupLink);
-                    message.success("Copied!");
-                  }}>Copy</Button>
-                  <Button icon={<QrcodeOutlined />} onClick={() => setShowQr((v) => !v)}>
-                    {showQr ? "Hide QR" : "Show QR Code"}
-                  </Button>
-                </Space>
-
-                <div style={{ marginTop: 16 }}>
-                  <Text strong style={{ fontSize: 13 }}>Send directly to a customer's number</Text>
-                  <div><Text type="secondary" style={{ fontSize: 12 }}>No need to search/save their contact first — opens WhatsApp chat with them directly.</Text></div>
-                  <Space wrap style={{ marginTop: 8 }}>
-                    <Input
-                      placeholder="Customer's WhatsApp number"
-                      value={signupWaPhone}
-                      onChange={(e) => setSignupWaPhone(e.target.value.replace(/[^\d]/g, ""))}
-                      style={{ width: 200 }}
-                    />
-                    <Button
-                      type="primary"
-                      icon={<WhatsAppOutlined />}
-                      onClick={() => {
-                        const text = encodeURIComponent(`Join our shop on ShopCart to place orders directly: ${signupLink}`);
-                        const target = signupWaPhone.trim()
-                          ? `https://wa.me/${normalizeIndianPhone(signupWaPhone)}?text=${text}`
-                          : `https://wa.me/?text=${text}`;
-                        window.open(target, "_blank");
-                      }}
-                    >
-                      {signupWaPhone.trim() ? "Send to this number" : "Share on WhatsApp"}
-                    </Button>
-                  </Space>
-                </div>
-
-                {showQr && (
-                  <div style={{ marginTop: 16, textAlign: "center" }}>
-                    <div style={{ display: "inline-block", background: "#fff", padding: 12, borderRadius: 8, border: "1px solid #f0f0f0" }}>
-                      <QRCodeSVG value={signupLink} size={180} />
-                    </div>
-                  </div>
-                )}
-              </Card>
+              <div style={{ marginTop: 16 }}>
+                <SignupLinkCard businessId={businessId} />
+              </div>
 
               {activeOrders.length > 0 && (
                 <Card title="Recent Active Orders" style={{ marginTop: 16 }}>

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Tabs, Card, Tag, Typography, Empty, Input, Space, Button, message } from "antd";
-import { CopyOutlined, WhatsAppOutlined, QrcodeOutlined, ReloadOutlined } from "@ant-design/icons";
-import { QRCodeSVG } from "qrcode.react";
+import { Tabs, Card, Tag, Typography, Empty, Button } from "antd";
+import { ReloadOutlined } from "@ant-design/icons";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { formatDate } from "../utils.js";
 import NewSale from "./NewSale.jsx";
+import SignupLinkCard from "../components/SignupLinkCard.jsx";
 
 const { Text } = Typography;
 const STATUS_COLORS = {
@@ -62,40 +62,7 @@ function StaffOrders({ businessId }) {
 }
 
 function StaffSignupLink({ businessId }) {
-  const [showQr, setShowQr] = useState(false);
-  const signupLink = `${window.location.origin}/signup?shop=${businessId}`;
-
-  return (
-    <Card>
-      <Text type="secondary">
-        Share this with customers so they can sign up directly to this shop.
-      </Text>
-      <Space wrap style={{ marginTop: 12 }}>
-        <Input readOnly value={signupLink} style={{ width: 320 }} onFocus={(e) => e.target.select()} />
-        <Button icon={<CopyOutlined />} onClick={() => {
-          navigator.clipboard.writeText(signupLink);
-          message.success("Copied!");
-        }}>Copy</Button>
-        <Button
-          icon={<WhatsAppOutlined />}
-          href={`https://wa.me/?text=${encodeURIComponent(`Join our shop on ShopCart to place orders directly: ${signupLink}`)}`}
-          target="_blank"
-        >
-          Share on WhatsApp
-        </Button>
-        <Button icon={<QrcodeOutlined />} onClick={() => setShowQr((v) => !v)}>
-          {showQr ? "Hide QR" : "Show QR Code"}
-        </Button>
-      </Space>
-      {showQr && (
-        <div style={{ marginTop: 16, textAlign: "center" }}>
-          <div style={{ display: "inline-block", background: "#fff", padding: 12, borderRadius: 8, border: "1px solid #f0f0f0" }}>
-            <QRCodeSVG value={signupLink} size={180} />
-          </div>
-        </div>
-      )}
-    </Card>
-  );
+  return <SignupLinkCard businessId={businessId} title="Customer Signup Link" />;
 }
 
 export default function StaffPOS() {
