@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
-  Layout, Menu, Card, Row, Col, Statistic, Button, Input, Select, DatePicker,
+  Layout, Menu, Card, Row, Col, Button, Input, Select, DatePicker,
   Table, Tag, Space, Badge, Form, Upload, message, Popconfirm, Empty, Typography,
   notification, Modal, Collapse,
 } from "antd";
@@ -9,6 +9,7 @@ import {
   HomeOutlined, ShoppingCartOutlined, InboxOutlined, PlusCircleOutlined,
   UploadOutlined, TeamOutlined, TagsOutlined, BarChartOutlined, UserOutlined,
   CopyOutlined, WhatsAppOutlined, QrcodeOutlined, MenuOutlined, ReloadOutlined,
+  AppstoreOutlined, ThunderboltOutlined, ShoppingOutlined, WalletOutlined,
 } from "@ant-design/icons";
 import { QRCodeSVG } from "qrcode.react";
 import api from "../api";
@@ -20,6 +21,7 @@ import Analytics from "./Analytics.jsx";
 import StaffManagement from "./StaffManagement.jsx";
 import SignupLinkCard from "../components/SignupLinkCard.jsx";
 import ShopBanner from "../components/ShopBanner.jsx";
+import StatCard from "../components/StatCard.jsx";
 
 const { Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -433,11 +435,26 @@ export default function ShopDashboard() {
                 </div>
               </Card>
 
+              <div style={{ marginBottom: 16 }}>
+                <Title level={4} style={{ margin: 0 }}>
+                  Welcome back, {user?.name?.split(" ")[0] || "there"} 👋
+                </Title>
+                <Text type="secondary">Here's how {business?.name || "your shop"} is doing today.</Text>
+              </div>
+
               <Row gutter={16}>
-                <Col xs={12} md={6}><Card><Statistic title="Products" value={products.length} /></Card></Col>
-                <Col xs={12} md={6}><Card><Statistic title="Active Orders" value={activeOrders.length} /></Card></Col>
-                <Col xs={12} md={6}><Card><Statistic title="Total Orders" value={orders.length} /></Card></Col>
-                <Col xs={12} md={6}><Card><Statistic title="Revenue (Delivered)" value={totalRevenue} prefix="₹" /></Card></Col>
+                <Col xs={12} md={6}>
+                  <StatCard icon={<AppstoreOutlined />} color="blue" title="Products" value={products.length} />
+                </Col>
+                <Col xs={12} md={6}>
+                  <StatCard icon={<ThunderboltOutlined />} color="orange" title="Active Orders" value={activeOrders.length} />
+                </Col>
+                <Col xs={12} md={6}>
+                  <StatCard icon={<ShoppingOutlined />} color="purple" title="Total Orders" value={orders.length} />
+                </Col>
+                <Col xs={12} md={6}>
+                  <StatCard icon={<WalletOutlined />} color="green" title="Revenue (Delivered)" value={totalRevenue} prefix="₹" />
+                </Col>
               </Row>
 
               {!business?.contact_phone && (
@@ -462,19 +479,27 @@ export default function ShopDashboard() {
                 <SignupLinkCard businessId={businessId} />
               </div>
 
-              {activeOrders.length > 0 && (
-                <Card title="Recent Active Orders" style={{ marginTop: 16 }}>
-                  {activeOrders.slice(0, 5).map((o) => (
-                    <div key={o.id} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #f0f0f0" }}>
-                      <span>#{o.id.slice(0, 8)} — ₹{o.total_amount}</span>
-                      <Tag color={STATUS_COLORS[o.status]}>{o.status}</Tag>
-                    </div>
-                  ))}
-                  <Button type="link" onClick={() => selectTab("overview")} style={{ marginTop: 8, padding: 0 }}>
-                    View All Orders →
-                  </Button>
-                </Card>
-              )}
+              <Card title="Recent Active Orders" style={{ marginTop: 16 }}>
+                {activeOrders.length === 0 ? (
+                  <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description="No active orders right now — new orders will show up here."
+                    style={{ padding: "12px 0" }}
+                  />
+                ) : (
+                  <>
+                    {activeOrders.slice(0, 5).map((o) => (
+                      <div key={o.id} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #f0f0f0" }}>
+                        <span>#{o.id.slice(0, 8)} — ₹{o.total_amount}</span>
+                        <Tag color={STATUS_COLORS[o.status]}>{o.status}</Tag>
+                      </div>
+                    ))}
+                    <Button type="link" onClick={() => selectTab("overview")} style={{ marginTop: 8, padding: 0 }}>
+                      View All Orders →
+                    </Button>
+                  </>
+                )}
+              </Card>
             </>
           )}
 

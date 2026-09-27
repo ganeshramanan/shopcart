@@ -63,6 +63,47 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
   .total-bar.mobile-only { display: flex; }
 }
 
+/* Stat cards v2 — colored icon-badge cards with hover lift, used across
+   shop owner / staff / admin dashboards via the shared StatCard component. */
+.stat-card-v2 {
+  position: relative;
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.stat-card-v2::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--stat-accent);
+}
+.stat-card-v2:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+.stat-card-v2-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
+.stat-card-v2-label { font-size: 13px; display: block; }
+.stat-card-v2-value { margin: 2px 0 0 !important; font-size: 26px !important; }
+.stat-card-v2-trend {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 600; margin-top: 8px;
+}
+.stat-card-v2-trend.up { color: #15803d; }
+.stat-card-v2-trend.down { color: #b91c1c; }
+.stat-card-v2-trend-label { color: #6b7280; font-weight: 400; }
+
 /* Dashboard */
 .dashboard-header { margin-bottom: 16px; }
 .dashboard-subtitle { color: #6b7280; font-size: 13px; margin: 4px 0 0; }
