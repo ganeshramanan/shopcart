@@ -104,6 +104,44 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
 .stat-card-v2-trend.down { color: #b91c1c; }
 .stat-card-v2-trend-label { color: #6b7280; font-weight: 400; }
 
+/* Catalog product cards — hover lift + green accent glow for the
+   "attractive, trustworthy billing" look (green = money/action, blue stays
+   the structural/trust color elsewhere). */
+.catalog-product-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  border-color: #f0f0f0 !important;
+}
+.catalog-product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 22px rgba(22,163,74,0.14);
+  border-color: #86efac !important;
+}
+.catalog-price {
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 14px;
+}
+.catalog-add-btn {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+  color: #fff !important;
+  font-weight: 600;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+.catalog-add-btn:hover {
+  background: #15803d !important;
+  border-color: #15803d !important;
+  transform: scale(1.03);
+}
+.catalog-qty-stepper {
+  background: #16a34a !important;
+}
+.catalog-chip-active {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+  color: #fff !important;
+}
+
 /* Dashboard */
 .dashboard-header { margin-bottom: 16px; }
 .dashboard-subtitle { color: #6b7280; font-size: 13px; margin: 4px 0 0; }

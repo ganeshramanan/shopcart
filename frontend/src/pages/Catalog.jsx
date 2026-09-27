@@ -146,6 +146,7 @@ export default function Catalog() {
           {categories.map((c) => (
             <Button
               key={c}
+              className={c === activeCategory ? "catalog-chip-active" : ""}
               type={c === activeCategory ? "primary" : "default"}
               shape="round"
               size="small"
@@ -166,6 +167,7 @@ export default function Catalog() {
               {visibleProducts.map((p) => (
                 <Col key={p.id} xs={12} sm={8} md={6}>
                   <Card
+                    className="catalog-product-card"
                     size="small"
                     cover={
                       <Image
@@ -178,16 +180,16 @@ export default function Catalog() {
                     }
                   >
                     <Text strong style={{ fontSize: 13, display: "block", minHeight: 34 }}>{p.name}</Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>₹{p.price} / {p.unit_type}</Text>
+                    <Text className="catalog-price">₹{p.price} / {p.unit_type}</Text>
                     <div style={{ marginTop: 8 }}>
                       {(cart[p.id] || 0) > 0 ? (
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#2563eb", borderRadius: 8, padding: "2px 4px" }}>
+                        <div className="catalog-qty-stepper" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderRadius: 8, padding: "2px 4px" }}>
                           <Button size="small" type="text" style={{ color: "#fff" }} icon={<MinusOutlined />} onClick={() => setQty(p.id, (cart[p.id] || 0) - step(p.unit_type))} />
                           <Text style={{ color: "#fff", fontWeight: 600 }}>{cart[p.id]}</Text>
                           <Button size="small" type="text" style={{ color: "#fff" }} icon={<PlusOutlined />} onClick={() => setQty(p.id, (cart[p.id] || 0) + step(p.unit_type))} />
                         </div>
                       ) : (
-                        <Button size="small" block onClick={() => setQty(p.id, step(p.unit_type))}>+ Add</Button>
+                        <Button className="catalog-add-btn" size="small" block onClick={() => setQty(p.id, step(p.unit_type))}>+ Add</Button>
                       )}
                     </div>
                   </Card>
@@ -221,9 +223,9 @@ export default function Catalog() {
                   ))}
                   <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #f0f0f0", paddingTop: 10, marginBottom: 10 }}>
                     <Text>{itemCount} item(s)</Text>
-                    <Text strong>₹{total.toFixed(2)}</Text>
+                    <Text strong className="catalog-price" style={{ fontSize: 15 }}>₹{total.toFixed(2)}</Text>
                   </div>
-                  <Button type="primary" block loading={placing} onClick={placeOrder}>Place Order</Button>
+                  <Button className="catalog-add-btn" block loading={placing} onClick={placeOrder}>Place Order</Button>
                 </>
               )}
             </Card>
@@ -235,9 +237,9 @@ export default function Catalog() {
         <Affix offsetBottom={0} className="mobile-only-affix">
           <div style={{ background: "#111827", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: "12px 12px 0 0" }}>
             <Text style={{ color: "#fff" }}>
-              <Badge count={itemCount} style={{ marginRight: 8 }} /> ₹{total.toFixed(2)}
+              <Badge count={itemCount} style={{ marginRight: 8, backgroundColor: "#16a34a" }} /> ₹{total.toFixed(2)}
             </Text>
-            <Button type="primary" loading={placing} onClick={placeOrder} icon={<ShoppingCartOutlined />}>
+            <Button className="catalog-add-btn" loading={placing} onClick={placeOrder} icon={<ShoppingCartOutlined />}>
               Place Order
             </Button>
           </div>
