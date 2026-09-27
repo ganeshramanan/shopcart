@@ -46,6 +46,7 @@ class Business(Base):
     type = Column(String, nullable=False)  # provision, pharmacy, laundry, etc.
     contact_phone = Column(String, nullable=True)
     address = Column(Text, nullable=True)
+    logo_url = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     products = relationship("Product", back_populates="business", cascade="all, delete-orphan")

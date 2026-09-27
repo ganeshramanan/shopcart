@@ -75,6 +75,8 @@ export default function ShopDashboard() {
   const [business, setBusiness] = useState(null);
   const [contactPhoneInput, setContactPhoneInput] = useState("");
   const [savingContact, setSavingContact] = useState(false);
+  const [logoUrlInput, setLogoUrlInput] = useState("");
+  const [savingLogo, setSavingLogo] = useState(false);
   const [customerResetTarget, setCustomerResetTarget] = useState(null);
   const [customerNewPassword, setCustomerNewPassword] = useState("");
   const [resettingCustomer, setResettingCustomer] = useState(false);
@@ -141,6 +143,7 @@ export default function ShopDashboard() {
     api.get(`/businesses/${businessId}`).then((res) => {
       setBusiness(res.data);
       setContactPhoneInput(res.data.contact_phone || "");
+      setLogoUrlInput(res.data.logo_url || "");
     });
   };
 
@@ -249,6 +252,19 @@ export default function ShopDashboard() {
       message.error(err.response?.data?.detail || "Could not save contact number");
     } finally {
       setSavingContact(false);
+    }
+  };
+
+  const saveLogoUrl = async () => {
+    setSavingLogo(true);
+    try {
+      await api.patch(`/businesses/${businessId}`, { logo_url: logoUrlInput });
+      message.success("Banner updated");
+      loadBusiness();
+    } catch (err) {
+      message.error(err.response?.data?.detail || "Could not save banner image");
+    } finally {
+      setSavingLogo(false);
     }
   };
 
@@ -378,6 +394,54 @@ export default function ShopDashboard() {
         <div style={{ marginTop: 20 }}>
           {tab === "home" && (
             <>
+              <Card style={{ marginBottom: 16, overflow: "hidden", padding: 0 }} bodyStyle={{ padding: 0 }}>
+                <div
+                  style={{
+                    background: business?.logo_url
+                      ? `linear-gradient(135deg, rgba(37,99,235,0.85), rgba(30,27,75,0.85)), url(${business.logo_url})`
+                      : "linear-gradient(135deg, #2563eb, #1e1b4b)",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    padding: "28px 24px",
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 16,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 64, height: 64, borderRadius: 12, background: "#fff",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      overflow: "hidden", flexShrink: 0, boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                    }}
+                  >
+                    {business?.logo_url ? (
+                      <img src={business.logo_url} alt={business?.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      <Text strong style={{ fontSize: 22, color: "#2563eb" }}>
+                        {business?.name?.charAt(0)?.toUpperCase() || "S"}
+                      </Text>
+                    )}
+                  </div>
+                  <div>
+                    <Title level={3} style={{ color: "#fff", margin: 0 }}>{business?.name || "Your Shop"}</Title>
+                    <Text style={{ color: "rgba(255,255,255,0.85)" }}>{business?.type}</Text>
+                  </div>
+                </div>
+                <div style={{ padding: "12px 24px" }}>
+                  <Space wrap>
+                    <Input
+                      placeholder="Paste a logo/banner image URL"
+                      value={logoUrlInput}
+                      onChange={(e) => setLogoUrlInput(e.target.value)}
+                      style={{ width: 320 }}
+                    />
+                    <Button loading={savingLogo} onClick={saveLogoUrl}>Save Banner</Button>
+                  </Space>
+                </div>
+              </Card>
+
               <Row gutter={16}>
                 <Col xs={12} md={6}><Card><Statistic title="Products" value={products.length} /></Card></Col>
                 <Col xs={12} md={6}><Card><Statistic title="Active Orders" value={activeOrders.length} /></Card></Col>

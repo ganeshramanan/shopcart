@@ -43,6 +43,7 @@ class BusinessCreate(BaseModel):
     type: str
     contact_phone: Optional[str] = None
     address: Optional[str] = None
+    logo_url: Optional[str] = None
 
 
 class BusinessOut(BaseModel):
@@ -52,12 +53,14 @@ class BusinessOut(BaseModel):
     type: str
     contact_phone: Optional[str] = None
     address: Optional[str] = None
+    logo_url: Optional[str] = None
 
 
 class BusinessUpdate(BaseModel):
     name: Optional[str] = None
     contact_phone: Optional[str] = None
     address: Optional[str] = None
+    logo_url: Optional[str] = None
 
 
 # ---------- Product ----------
