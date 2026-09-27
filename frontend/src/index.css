@@ -153,6 +153,15 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
   border-color: #16a34a !important;
   color: #fff !important;
 }
+.catalog-chip-fav {
+  color: #ef4444;
+  border-color: #fecaca;
+}
+.catalog-chip-fav-active {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #fff !important;
+}
 
 .catalog-product-card {
   border-radius: 16px !important;

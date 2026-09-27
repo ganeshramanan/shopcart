@@ -30,6 +30,7 @@ export default function Catalog() {
   const [search, setSearch] = useState("");
   const [placedOrder, setPlacedOrder] = useState(null); // shows the post-order modal when set
   const [favoriteIds, setFavoriteIds] = useState(new Set());
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -116,7 +117,8 @@ export default function Catalog() {
   const visibleProducts = products.filter((p) => {
     const matchesCategory = activeCategory === "All" || p.category === activeCategory;
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
-    return matchesCategory && matchesSearch;
+    const matchesFavorites = !favoritesOnly || favoriteIds.has(p.id);
+    return matchesCategory && matchesSearch && matchesFavorites;
   });
 
   const cartLines = Object.entries(cart)
@@ -221,9 +223,9 @@ export default function Catalog() {
         allowClear
       />
 
-      {categories.length > 1 && (
+      {(categories.length > 1 || user?.role === "customer") && (
         <div className="catalog-chip-row">
-          {categories.map((c) => (
+          {categories.length > 1 && categories.map((c) => (
             <button
               key={c}
               className={`catalog-chip ${c === activeCategory ? "catalog-chip-active" : ""}`}
@@ -232,6 +234,14 @@ export default function Catalog() {
               <span className="catalog-chip-emoji">{emojiFor(c === "All" ? "all" : c)}</span> {c}
             </button>
           ))}
+          {user?.role === "customer" && (
+            <button
+              className={`catalog-chip catalog-chip-fav ${favoritesOnly ? "catalog-chip-fav-active" : ""}`}
+              onClick={() => setFavoritesOnly((v) => !v)}
+            >
+              {favoritesOnly ? <HeartFilled /> : <HeartOutlined />} Favorites
+            </button>
+          )}
         </div>
       )}
 
@@ -239,9 +249,22 @@ export default function Catalog() {
         <Col xs={24} lg={17}>
           {visibleProducts.length === 0 ? (
             <div className="catalog-empty-state">
-              <div style={{ fontSize: 40 }}>🔍</div>
-              <Title level={5} style={{ marginTop: 8 }}>No products match your search</Title>
-              <Text type="secondary">Try a different keyword or browse another category.</Text>
+              {favoritesOnly ? (
+                <>
+                  <div style={{ fontSize: 40 }}>🤍</div>
+                  <Title level={5} style={{ marginTop: 8 }}>No favorites in this category yet</Title>
+                  <Text type="secondary">Tap the heart on any product to save it here.</Text>
+                  <div style={{ marginTop: 12 }}>
+                    <Button onClick={() => setFavoritesOnly(false)}>Show All Products</Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: 40 }}>🔍</div>
+                  <Title level={5} style={{ marginTop: 8 }}>No products match your search</Title>
+                  <Text type="secondary">Try a different keyword or browse another category.</Text>
+                </>
+              )}
             </div>
           ) : (
             <Row gutter={[14, 14]}>
