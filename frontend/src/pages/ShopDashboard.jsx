@@ -10,6 +10,7 @@ import {
   UploadOutlined, TeamOutlined, TagsOutlined, BarChartOutlined, UserOutlined,
   CopyOutlined, WhatsAppOutlined, QrcodeOutlined, MenuOutlined, ReloadOutlined,
   AppstoreOutlined, ThunderboltOutlined, ShoppingOutlined, WalletOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import { QRCodeSVG } from "qrcode.react";
 import api from "../api";
@@ -335,6 +336,40 @@ export default function ShopDashboard() {
     return matchesSearch && matchesStatus && matchesRange;
   });
 
+  // CSV export — respects whatever search/status/date filters are
+  // currently applied, so a shop owner doing e.g. end-of-day reconciliation
+  // can filter to today's delivered orders first, then export just those.
+  // One row per order line item (not one row per order) so quantities/
+  // prices are visible per product, matching how a bookkeeper would want it.
+  const exportOrdersCsv = () => {
+    if (filteredOrders.length === 0) {
+      message.info("No orders to export with the current filters");
+      return;
+    }
+    const headers = ["Order ID", "Date", "Customer Name", "Customer Phone", "Status", "Product", "Quantity", "Unit", "Unit Price", "Line Total", "Order Total"];
+    const escapeCsv = (val) => {
+      const s = String(val ?? "");
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = [headers];
+    filteredOrders.forEach((o) => {
+      o.items.forEach((it) => {
+        rows.push([
+          o.id, formatDate(o.created_at), o.customer_name || "", o.customer_phone || "", o.status,
+          it.product_name_snapshot, it.quantity, it.unit_type_snapshot, it.unit_price_snapshot, it.line_total, o.total_amount,
+        ]);
+      });
+    });
+    const csv = rows.map((row) => row.map(escapeCsv).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const [pageTitle, pageSubtitle] = PAGE_TITLES[tab] || ["", ""];
 
   const selectTab = (key) => {
@@ -577,6 +612,7 @@ export default function ShopDashboard() {
                     </Button>
                   )}
                   <Button icon={<ReloadOutlined />} onClick={pollOrders}>Refresh</Button>
+                  <Button icon={<DownloadOutlined />} onClick={exportOrdersCsv}>Download CSV</Button>
                 </Space>
               </Card>
 

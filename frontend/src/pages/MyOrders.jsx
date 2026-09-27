@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Card, Tag, Typography, Empty, Button, Space, Input, Select, DatePicker } from "antd";
-import { ReloadOutlined, RedoOutlined, DownOutlined, UpOutlined } from "@ant-design/icons";
+import { Card, Tag, Typography, Empty, Button, Space, Input, Select, DatePicker, Popconfirm, message } from "antd";
+import { ReloadOutlined, RedoOutlined, DownOutlined, UpOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import api from "../api";
 import { formatDate } from "../utils.js";
 
@@ -18,9 +18,16 @@ const STATUS_COLORS = {
 // about (qty × price = line total) once expanded.
 const VISIBLE_ROWS_BEFORE_SCROLL = 6;
 
-function OrderCard({ order: o, onReorder }) {
+function OrderCard({ order: o, onReorder, onCancel }) {
   const [expanded, setExpanded] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const needsScroll = o.items.length > VISIBLE_ROWS_BEFORE_SCROLL;
+
+  const handleCancel = async () => {
+    setCancelling(true);
+    await onCancel(o.id);
+    setCancelling(false);
+  };
 
   return (
     <Card style={{ marginBottom: 12, marginTop: 16 }}>
@@ -66,6 +73,17 @@ function OrderCard({ order: o, onReorder }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
         <Text strong>Total: ₹{o.total_amount}</Text>
         <Space>
+          {o.status === "placed" && (
+            <Popconfirm
+              title="Cancel this order?"
+              description="This can't be undone. Contact the shop directly once it's past 'placed'."
+              onConfirm={handleCancel}
+              okText="Yes, cancel"
+              okButtonProps={{ danger: true }}
+            >
+              <Button size="small" danger icon={<CloseCircleOutlined />} loading={cancelling}>Cancel</Button>
+            </Popconfirm>
+          )}
           <Button size="small" icon={<RedoOutlined />} onClick={() => onReorder(o)}>Order Again</Button>
           <Link to={`/invoice/${o.id}`}><Button size="small">View Bill</Button></Link>
         </Space>
@@ -103,6 +121,16 @@ export default function MyOrders() {
         reorderItems: order.items.map((it) => ({ product_id: it.product_id, quantity: it.quantity })),
       },
     });
+  };
+
+  const cancelOrder = async (orderId) => {
+    try {
+      await api.post(`/orders/${orderId}/cancel`);
+      message.success("Order cancelled");
+      load();
+    } catch (err) {
+      message.error(err.response?.data?.detail || "Could not cancel this order");
+    }
   };
 
   const filteredOrders = orders.filter((o) => {
@@ -150,7 +178,7 @@ export default function MyOrders() {
         <Empty description={orders.length === 0 ? "No orders yet" : "No orders match your filters"} style={{ marginTop: 40 }} />
       )}
       {filteredOrders.map((o) => (
-        <OrderCard key={o.id} order={o} onReorder={reorder} />
+        <OrderCard key={o.id} order={o} onReorder={reorder} onCancel={cancelOrder} />
       ))}
     </div>
   );

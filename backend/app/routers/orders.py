@@ -117,6 +117,35 @@ def update_order_status(
     return order
 
 
+@router.post("/{order_id}/cancel", response_model=schemas.OrderOut)
+def cancel_order(
+    order_id: str,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+):
+    """Customer-initiated cancellation. Deliberately narrow: only the
+    order's own customer can cancel, and only while it's still in the
+    'placed' state — once a shop owner has started acting on it
+    (confirmed/packing/etc.), the customer can no longer self-cancel and
+    has to contact the shop directly. Keeps this safe without needing any
+    shop-owner approval flow."""
+    order = db.query(models.Order).options(joinedload(models.Order.items)).filter(models.Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if order.customer_id != user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    if order.status != models.OrderStatusEnum.placed:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Order can no longer be cancelled (current status: {order.status.value}). Contact the shop directly.",
+        )
+
+    order.status = models.OrderStatusEnum.cancelled
+    db.commit()
+    db.refresh(order)
+    return order
+
+
 @router.post("/walk-in", response_model=schemas.OrderOut)
 def create_walk_in_order(
     payload: schemas.WalkInOrderCreate,
