@@ -17,6 +17,41 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
 .topbar-links a { color: #cbd5e1; text-decoration: none; font-weight: 600; font-size: 14px; transition: color 0.15s; }
 .topbar-links a:hover { color: white; }
 .topbar a { color: white; text-decoration: none; margin-right: 12px; font-weight: 600; }
+
+/* Top nav links — plain flex row, NOT Ant <Menu>, so links never get
+   silently hidden behind an overflow "..." dropdown (see App.jsx comment).
+   Horizontally scrollable as a fallback on very narrow screens instead of
+   disappearing. */
+.topnav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  min-width: 0;
+  scrollbar-width: none;
+}
+.topnav-links::-webkit-scrollbar { display: none; }
+.topnav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.topnav-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.topnav-link-active { background: rgba(59,130,246,0.25); color: #fff; }
+
+@media (max-width: 900px) {
+  .topnav-link-label { display: none; }
+  .topnav-link { padding: 8px; }
+}
 .qty-control { display: flex; align-items: center; gap: 8px; }
 .qty-control button { width: 30px; height: 30px; padding: 0; }
 .qty-control.full-width { width: 100%; justify-content: space-between; background: #2563eb; border-radius: 8px; padding: 4px 8px; }

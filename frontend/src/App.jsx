@@ -1,6 +1,10 @@
-import { Routes, Route, Navigate, Link, useNavigate } from "react-router-dom";
-import { Layout, Menu, Button, Space, Typography } from "antd";
-import { ShoppingOutlined, SettingOutlined, LogoutOutlined } from "@ant-design/icons";
+import { Routes, Route, Navigate, Link, useNavigate, useLocation } from "react-router-dom";
+import { Layout, Button, Typography } from "antd";
+import {
+  ShoppingOutlined, SettingOutlined, LogoutOutlined, ShopOutlined,
+  UnorderedListOutlined, HeartOutlined, HomeOutlined as PinOutlined,
+  DashboardOutlined, EyeOutlined, ShoppingCartOutlined,
+} from "@ant-design/icons";
 import { AuthProvider, useAuth } from "./auth/AuthContext.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
@@ -17,33 +21,55 @@ import StaffPOS from "./pages/StaffPOS.jsx";
 const { Header, Content } = Layout;
 const { Text } = Typography;
 
+// Plain always-visible nav links, deliberately NOT using Ant Design's
+// horizontal <Menu> — Menu auto-collapses low-priority items into a
+// hidden "..." overflow dropdown once it runs out of horizontal space,
+// which silently buried Favorites/Addresses behind an easy-to-miss
+// affordance during testing. A flex row of icon+label buttons has no
+// such overflow behavior — every link stays visible (icon-only on very
+// narrow screens via CSS, but never hidden in a dropdown).
+function NavLink({ to, icon, label, active }) {
+  return (
+    <Link to={to} className={`topnav-link ${active ? "topnav-link-active" : ""}`}>
+      {icon}
+      <span className="topnav-link-label">{label}</span>
+    </Link>
+  );
+}
+
 function TopBar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const isBoundCustomer = user?.role === "customer" && user?.business_id;
   const isShopOwner = user?.role === "shop_owner";
   const isAdmin = user?.role === "admin";
   const isStaff = user?.role === "staff";
+  const isPlainCustomer = user && !isShopOwner && !isBoundCustomer && !isAdmin && !isStaff;
 
-  const navItems = [];
-  if (isAdmin) navItems.push({ key: "/admin", label: <Link to="/admin">Platform Overview</Link> });
+  const isActive = (path) => location.pathname === path;
+
+  const navLinks = [];
+  if (isAdmin) {
+    navLinks.push({ to: "/admin", icon: <SettingOutlined />, label: "Platform Overview" });
+  }
   if (isShopOwner) {
-    navItems.push({ key: "/dashboard", label: <Link to="/dashboard">Dashboard</Link> });
-    if (user.business_id) navItems.push({ key: `/shop/${user.business_id}`, label: <Link to={`/shop/${user.business_id}`}>Preview My Shop</Link> });
+    navLinks.push({ to: "/dashboard", icon: <DashboardOutlined />, label: "Dashboard" });
+    if (user.business_id) navLinks.push({ to: `/shop/${user.business_id}`, icon: <EyeOutlined />, label: "Preview My Shop" });
   }
-  if (isStaff) navItems.push({ key: "/pos", label: <Link to="/pos">New Sale</Link> });
+  if (isStaff) {
+    navLinks.push({ to: "/pos", icon: <ShoppingCartOutlined />, label: "New Sale" });
+  }
   if (isBoundCustomer) {
-    navItems.push({ key: `/shop/${user.business_id}`, label: <Link to={`/shop/${user.business_id}`}>Catalog</Link> });
-    navItems.push({ key: "/orders", label: <Link to="/orders">My Orders</Link> });
-    navItems.push({ key: "/favorites", label: <Link to="/favorites">Favorites</Link> });
-    navItems.push({ key: "/addresses", label: <Link to="/addresses">Addresses</Link> });
+    navLinks.push({ to: `/shop/${user.business_id}`, icon: <ShopOutlined />, label: "Catalog" });
   }
-  if (!user) navItems.push({ key: "/", label: <Link to="/">Shops</Link> });
-  if (user && !isShopOwner && !isBoundCustomer && !isAdmin && !isStaff) {
-    navItems.push({ key: "/", label: <Link to="/">Shops</Link> });
-    navItems.push({ key: "/orders", label: <Link to="/orders">My Orders</Link> });
-    navItems.push({ key: "/favorites", label: <Link to="/favorites">Favorites</Link> });
-    navItems.push({ key: "/addresses", label: <Link to="/addresses">Addresses</Link> });
+  if (!user || isPlainCustomer) {
+    navLinks.push({ to: "/", icon: <ShopOutlined />, label: "Shops" });
+  }
+  if (isBoundCustomer || isPlainCustomer) {
+    navLinks.push({ to: "/orders", icon: <UnorderedListOutlined />, label: "My Orders" });
+    navLinks.push({ to: "/favorites", icon: <HeartOutlined />, label: "Favorites" });
+    navLinks.push({ to: "/addresses", icon: <PinOutlined />, label: "Addresses" });
   }
 
   return (
@@ -56,20 +82,18 @@ function TopBar() {
         padding: "0 20px",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-        <Link to="/" style={{ display: "flex", alignItems: "center", gap: 8, color: "#fff" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 20, minWidth: 0, flex: 1 }}>
+        <Link to="/" style={{ display: "flex", alignItems: "center", gap: 8, color: "#fff", flexShrink: 0 }}>
           {isAdmin ? <SettingOutlined style={{ fontSize: 20 }} /> : <ShoppingOutlined style={{ fontSize: 20 }} />}
           <Text strong style={{ color: "#fff", fontSize: 17 }}>{isAdmin ? "Cartbi" : "ShopCart"}</Text>
         </Link>
-        <Menu
-          theme="dark"
-          mode="horizontal"
-          items={navItems}
-          style={{ background: "transparent", borderBottom: "none", minWidth: 300 }}
-          selectedKeys={[]}
-        />
+        <nav className="topnav-links">
+          {navLinks.map((link) => (
+            <NavLink key={link.to + link.label} to={link.to} icon={link.icon} label={link.label} active={isActive(link.to)} />
+          ))}
+        </nav>
       </div>
-      <div>
+      <div style={{ flexShrink: 0 }}>
         {user ? (
           <Button icon={<LogoutOutlined />} onClick={() => { logout(); navigate("/login"); }}>
             Logout ({user.name})
