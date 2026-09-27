@@ -176,9 +176,13 @@ function StaffSignupLink({ businessId }) {
 
 export default function StaffPOS() {
   const { user } = useAuth();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [business, setBusiness] = useState(null);
+  // Controlled tab state kept in sync with the URL (?tab=orders) so
+  // browser back/forward and Invoice.jsx's "Back" button return to the
+  // exact tab staff were on, not always the default "New Sale" tab.
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "newsale");
 
   useEffect(() => {
     if (user?.business_id) {
@@ -205,7 +209,14 @@ export default function StaffPOS() {
   return (
     <div>
       {business && <ShopBanner business={business} compact />}
-      <Tabs defaultActiveKey={searchParams.get("tab") || "newsale"} items={items} />
+      <Tabs
+        activeKey={activeTab}
+        onChange={(key) => {
+          setActiveTab(key);
+          setSearchParams(key === "newsale" ? {} : { tab: key });
+        }}
+        items={items}
+      />
     </div>
   );
 }
