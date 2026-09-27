@@ -415,3 +415,16 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
 @media (max-width: 991px) {
   .mobile-only-affix { display: block; position: fixed !important; bottom: 0; left: 0; width: 100%; z-index: 500; }
 }
+
+/* Staff Orders — compact item tags instead of a plain bullet list, so
+   busy staff can scan a big order (10+ items) quickly. Neutral blue-gray,
+   matching the deliberately plain/professional staff POS palette. */
+.staff-order-item-tag {
+  background: #f3f4f6;
+  color: #374151;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.staff-order-item-tag b { font-weight: 600; color: #1f2937; }

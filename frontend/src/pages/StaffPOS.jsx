@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, Card, Tag, Typography, Empty, Button, Input, Select, Space, DatePicker } from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
+import { ReloadOutlined, PhoneOutlined, EnvironmentOutlined, DownOutlined, UpOutlined } from "@ant-design/icons";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { formatDate } from "../utils.js";
@@ -15,6 +15,74 @@ const STATUS_COLORS = {
   placed: "gold", confirmed: "blue", packing: "purple", ready: "cyan",
   dispatched: "geekblue", delivered: "green", cancelled: "red",
 };
+// Hex equivalents of the Tag colors above, used for the card's left border
+// accent so staff can glance-scan status without reading the tag text.
+const STATUS_BORDER_COLORS = {
+  placed: "#eab308", confirmed: "#2563eb", packing: "#a855f7", ready: "#06b6d4",
+  dispatched: "#4338ca", delivered: "#16a34a", cancelled: "#dc2626",
+};
+const ITEMS_PREVIEW_COUNT = 4;
+
+function StaffOrderCard({ order: o }) {
+  const [expanded, setExpanded] = useState(false);
+  const hasMore = o.items.length > ITEMS_PREVIEW_COUNT;
+  const visibleItems = expanded ? o.items : o.items.slice(0, ITEMS_PREVIEW_COUNT);
+
+  return (
+    <Card
+      size="small"
+      style={{ marginBottom: 12, borderLeft: `4px solid ${STATUS_BORDER_COLORS[o.status] || "#d9d9d9"}` }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div>
+          <Text strong>#{o.id.slice(0, 8)} — ₹{o.total_amount}</Text>
+          <div><Text type="secondary" style={{ fontSize: 12 }}>{formatDate(o.created_at)}</Text></div>
+          {o.customer_name && (
+            <div>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                {o.customer_name}
+                {o.customer_phone && (
+                  <> · <PhoneOutlined style={{ fontSize: 11 }} /> <a href={`tel:${o.customer_phone}`}>{o.customer_phone}</a></>
+                )}
+              </Text>
+            </div>
+          )}
+          {o.customer_address && (
+            <div>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                <EnvironmentOutlined style={{ fontSize: 11 }} /> {o.customer_address.label}: {o.customer_address.line1}
+                {o.customer_address.line2 ? `, ${o.customer_address.line2}` : ""}
+                {o.customer_address.city ? `, ${o.customer_address.city}` : ""}
+                {o.customer_address.pincode ? ` - ${o.customer_address.pincode}` : ""}
+              </Text>
+            </div>
+          )}
+        </div>
+        <Tag color={STATUS_COLORS[o.status]} style={{ fontWeight: 600 }}>{o.status}</Tag>
+      </div>
+
+      <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
+        {visibleItems.map((it) => (
+          <span key={it.id} className="staff-order-item-tag">
+            {it.product_name_snapshot} <b>· {it.quantity} {it.unit_type_snapshot}</b>
+          </span>
+        ))}
+      </div>
+
+      {hasMore && (
+        <Button
+          type="link"
+          size="small"
+          style={{ padding: 0, marginTop: 6, fontSize: 12 }}
+          icon={expanded ? <UpOutlined /> : <DownOutlined />}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? "Show less" : `+${o.items.length - ITEMS_PREVIEW_COUNT} more item(s)`}
+        </Button>
+      )}
+    </Card>
+  );
+}
 
 function StaffOrders({ businessId }) {
   const [orders, setOrders] = useState([]);
@@ -82,31 +150,7 @@ function StaffOrders({ businessId }) {
 
       {filteredOrders.length === 0 && <Empty description={orders.length === 0 ? "No orders yet" : "No orders match your filters"} />}
       {filteredOrders.map((o) => (
-        <Card key={o.id} size="small" style={{ marginBottom: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <div>
-              <Text strong>#{o.id.slice(0, 8)} — ₹{o.total_amount}</Text>
-              <div><Text type="secondary" style={{ fontSize: 12 }}>{formatDate(o.created_at)}</Text></div>
-              {o.customer_name && <Text type="secondary" style={{ fontSize: 12 }}>{o.customer_name}</Text>}
-              {o.customer_address && (
-                <div>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    📍 {o.customer_address.label}: {o.customer_address.line1}
-                    {o.customer_address.line2 ? `, ${o.customer_address.line2}` : ""}
-                    {o.customer_address.city ? `, ${o.customer_address.city}` : ""}
-                    {o.customer_address.pincode ? ` - ${o.customer_address.pincode}` : ""}
-                  </Text>
-                </div>
-              )}
-            </div>
-            <Tag color={STATUS_COLORS[o.status]}>{o.status}</Tag>
-          </div>
-          <ul style={{ marginTop: 8, marginBottom: 0, paddingLeft: 18, fontSize: 13 }}>
-            {o.items.map((it) => (
-              <li key={it.id}>{it.product_name_snapshot} — {it.quantity} {it.unit_type_snapshot}</li>
-            ))}
-          </ul>
-        </Card>
+        <StaffOrderCard key={o.id} order={o} />
       ))}
     </div>
   );
