@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Row, Col, Card, Statistic, Table, Tag, Button, Popconfirm, Typography, message, Input } from "antd";
 import api from "../api";
+import { useAuth } from "../auth/AuthContext.jsx";
 
 const { Title, Text } = Typography;
 
 export default function AdminDashboard() {
+  const { user: currentAdmin } = useAuth();
   const [owners, setOwners] = useState([]);
   const [businesses, setBusinesses] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
@@ -144,13 +146,17 @@ export default function AdminDashboard() {
     {
       title: "", key: "actions", width: 100,
       render: (_, u) => (
-        <Popconfirm
-          title={`Permanently delete ${u.name}?`}
-          description="This cannot be undone."
-          onConfirm={() => deleteUser(u.id)}
-        >
-          <Button size="small" danger>Delete</Button>
-        </Popconfirm>
+        u.id === currentAdmin?.id ? (
+          <Tag>You</Tag>
+        ) : (
+          <Popconfirm
+            title={`Permanently delete ${u.name}?`}
+            description="This cannot be undone."
+            onConfirm={() => deleteUser(u.id)}
+          >
+            <Button size="small" danger>Delete</Button>
+          </Popconfirm>
+        )
       ),
     },
   ];
