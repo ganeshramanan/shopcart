@@ -5,6 +5,7 @@ import { PlusOutlined, MinusOutlined, SearchOutlined, ShoppingCartOutlined, What
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { normalizeIndianPhone } from "../utils.js";
+import ShopBanner from "../components/ShopBanner.jsx";
 
 const { Title, Text } = Typography;
 
@@ -96,8 +97,7 @@ export default function Catalog() {
 
   return (
     <div>
-      <Title level={3} style={{ marginBottom: 0 }}>{business ? business.name : "Catalog"}</Title>
-      {business?.type && <Text type="secondary">{business.type}</Text>}
+      {business ? <ShopBanner business={business} /> : <Title level={3}>Catalog</Title>}
       {error && <Alert type="error" message={error} showIcon style={{ margin: "12px 0" }} />}
 
       <Modal

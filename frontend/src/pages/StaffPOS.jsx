@@ -6,6 +6,7 @@ import { useAuth } from "../auth/AuthContext.jsx";
 import { formatDate } from "../utils.js";
 import NewSale from "./NewSale.jsx";
 import SignupLinkCard from "../components/SignupLinkCard.jsx";
+import ShopBanner from "../components/ShopBanner.jsx";
 
 const { Text } = Typography;
 const STATUS_COLORS = {
@@ -68,10 +69,12 @@ function StaffSignupLink({ businessId }) {
 export default function StaffPOS() {
   const { user } = useAuth();
   const [products, setProducts] = useState([]);
+  const [business, setBusiness] = useState(null);
 
   useEffect(() => {
     if (user?.business_id) {
       api.get(`/products?business_id=${user.business_id}`).then((res) => setProducts(res.data));
+      api.get(`/businesses/${user.business_id}`).then((res) => setBusiness(res.data)).catch(() => {});
     }
   }, [user?.business_id]);
 
@@ -92,6 +95,7 @@ export default function StaffPOS() {
 
   return (
     <div>
+      {business && <ShopBanner business={business} compact />}
       <Tabs defaultActiveKey="newsale" items={items} />
     </div>
   );
