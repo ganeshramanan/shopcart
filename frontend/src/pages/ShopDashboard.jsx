@@ -8,7 +8,7 @@ import {
 import {
   HomeOutlined, ShoppingCartOutlined, InboxOutlined, PlusCircleOutlined,
   UploadOutlined, TeamOutlined, TagsOutlined, BarChartOutlined, UserOutlined,
-  CopyOutlined, WhatsAppOutlined, QrcodeOutlined, MenuOutlined,
+  CopyOutlined, WhatsAppOutlined, QrcodeOutlined, MenuOutlined, ReloadOutlined,
 } from "@ant-design/icons";
 import { QRCodeSVG } from "qrcode.react";
 import api from "../api";
@@ -496,6 +496,7 @@ export default function ShopDashboard() {
                       Clear
                     </Button>
                   )}
+                  <Button icon={<ReloadOutlined />} onClick={pollOrders}>Refresh</Button>
                 </Space>
               </Card>
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Tabs, Card, Tag, Typography, Empty, Input, Space, Button, message } from "antd";
-import { CopyOutlined, WhatsAppOutlined, QrcodeOutlined } from "@ant-design/icons";
+import { CopyOutlined, WhatsAppOutlined, QrcodeOutlined, ReloadOutlined } from "@ant-design/icons";
 import { QRCodeSVG } from "qrcode.react";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
@@ -16,15 +16,29 @@ const STATUS_COLORS = {
 function StaffOrders({ businessId }) {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = () => {
+    setRefreshing(true);
+    api.get("/orders")
+      .then((res) => setOrders(res.data))
+      .catch((e) => setError(e.response?.data?.detail || "Could not load orders"))
+      .finally(() => setRefreshing(false));
+  };
 
   useEffect(() => {
-    api.get("/orders").then((res) => setOrders(res.data)).catch((e) => setError(e.response?.data?.detail || "Could not load orders"));
+    load();
+    const interval = setInterval(load, 30000); // auto-refresh every 30s so staff see new orders without reloading the page
+    return () => clearInterval(interval);
   }, [businessId]);
 
   if (error) return <Text type="danger">{error}</Text>;
 
   return (
     <div>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+        <Button icon={<ReloadOutlined />} onClick={load} loading={refreshing}>Refresh</Button>
+      </div>
       {orders.length === 0 && <Empty description="No orders yet" />}
       {orders.map((o) => (
         <Card key={o.id} size="small" style={{ marginBottom: 12 }}>
