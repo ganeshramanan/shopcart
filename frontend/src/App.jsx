@@ -7,6 +7,8 @@ import Signup from "./pages/Signup.jsx";
 import BusinessList from "./pages/BusinessList.jsx";
 import Catalog from "./pages/Catalog.jsx";
 import MyOrders from "./pages/MyOrders.jsx";
+import Favorites from "./pages/Favorites.jsx";
+import AddressBook from "./pages/AddressBook.jsx";
 import ShopDashboard from "./pages/ShopDashboard.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import Invoice from "./pages/Invoice.jsx";
@@ -33,11 +35,15 @@ function TopBar() {
   if (isBoundCustomer) {
     navItems.push({ key: `/shop/${user.business_id}`, label: <Link to={`/shop/${user.business_id}`}>Catalog</Link> });
     navItems.push({ key: "/orders", label: <Link to="/orders">My Orders</Link> });
+    navItems.push({ key: "/favorites", label: <Link to="/favorites">Favorites</Link> });
+    navItems.push({ key: "/addresses", label: <Link to="/addresses">Addresses</Link> });
   }
   if (!user) navItems.push({ key: "/", label: <Link to="/">Shops</Link> });
   if (user && !isShopOwner && !isBoundCustomer && !isAdmin && !isStaff) {
     navItems.push({ key: "/", label: <Link to="/">Shops</Link> });
     navItems.push({ key: "/orders", label: <Link to="/orders">My Orders</Link> });
+    navItems.push({ key: "/favorites", label: <Link to="/favorites">Favorites</Link> });
+    navItems.push({ key: "/addresses", label: <Link to="/addresses">Addresses</Link> });
   }
 
   return (
@@ -108,6 +114,8 @@ export default function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/shop/:businessId" element={<Catalog />} />
             <Route path="/orders" element={<Protected><MyOrders /></Protected>} />
+            <Route path="/favorites" element={<Protected><Favorites /></Protected>} />
+            <Route path="/addresses" element={<Protected><AddressBook /></Protected>} />
             <Route path="/dashboard" element={<Protected role="shop_owner"><ShopDashboard /></Protected>} />
             <Route path="/admin" element={<Protected role="admin"><AdminDashboard /></Protected>} />
             <Route path="/pos" element={<Protected role="staff"><StaffPOS /></Protected>} />

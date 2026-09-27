@@ -145,3 +145,45 @@ class WalkInOrderCreate(BaseModel):
     customer_name: Optional[str] = None
     customer_phone: Optional[str] = None
     notes: Optional[str] = None
+
+
+# ---------- Address ----------
+class AddressCreate(BaseModel):
+    label: str = "Home"
+    line1: str
+    line2: Optional[str] = None
+    city: Optional[str] = None
+    pincode: Optional[str] = None
+    is_default: bool = False
+
+
+class AddressUpdate(BaseModel):
+    label: Optional[str] = None
+    line1: Optional[str] = None
+    line2: Optional[str] = None
+    city: Optional[str] = None
+    pincode: Optional[str] = None
+    is_default: Optional[bool] = None
+
+
+class AddressOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    label: str
+    line1: str
+    line2: Optional[str] = None
+    city: Optional[str] = None
+    pincode: Optional[str] = None
+    is_default: bool = False
+
+
+# ---------- Favorite ----------
+class FavoriteCreate(BaseModel):
+    product_id: str
+
+
+class FavoriteOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    product_id: str
+    product: Optional[ProductOut] = None

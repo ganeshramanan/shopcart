@@ -72,6 +72,8 @@ class User(Base):
 
     business = relationship("Business", back_populates="users")
     orders = relationship("Order", back_populates="customer")
+    addresses = relationship("Address", back_populates="customer", cascade="all, delete-orphan")
+    favorites = relationship("Favorite", back_populates="customer", cascade="all, delete-orphan")
 
 
 class Product(Base):
@@ -144,4 +146,38 @@ class OrderItem(Base):
     line_total = Column(Float, nullable=False)
 
     order = relationship("Order", back_populates="items")
+    product = relationship("Product")
+
+
+class Address(Base):
+    """Customer's saved delivery addresses — a customer can have several
+    (home, work, etc.) and pick one at checkout. Brand new table, so it's
+    created automatically by Base.metadata.create_all() on next deploy —
+    no manual Neon migration needed."""
+    __tablename__ = "addresses"
+
+    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
+    customer_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, index=True)
+    label = Column(String, nullable=False, default="Home")  # Home, Work, Other...
+    line1 = Column(String, nullable=False)
+    line2 = Column(String, nullable=True)
+    city = Column(String, nullable=True)
+    pincode = Column(String, nullable=True)
+    is_default = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    customer = relationship("User", back_populates="addresses")
+
+
+class Favorite(Base):
+    """A customer starring a product for quick access later. Brand new
+    table — no manual Neon migration needed, create_all() handles it."""
+    __tablename__ = "favorites"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    customer_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, index=True)
+    product_id = Column(UUID(as_uuid=False), ForeignKey("products.id"), nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    customer = relationship("User", back_populates="favorites")
     product = relationship("Product")

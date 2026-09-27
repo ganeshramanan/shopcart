@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Input, Row, Col, Card, Button, Badge, Empty, Typography, Affix, Alert, Image, Modal, message } from "antd";
-import { PlusOutlined, MinusOutlined, SearchOutlined, ShoppingCartOutlined, WhatsAppOutlined, CheckCircleFilled } from "@ant-design/icons";
+import { PlusOutlined, MinusOutlined, SearchOutlined, ShoppingCartOutlined, WhatsAppOutlined, CheckCircleFilled, HeartOutlined, HeartFilled } from "@ant-design/icons";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { normalizeIndianPhone } from "../utils.js";
@@ -29,6 +29,7 @@ export default function Catalog() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
   const [placedOrder, setPlacedOrder] = useState(null); // shows the post-order modal when set
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,6 +38,35 @@ export default function Catalog() {
     api.get(`/products?business_id=${businessId}`).then((res) => setProducts(res.data));
     api.get(`/businesses/${businessId}`).then((res) => setBusiness(res.data)).catch(() => {});
   }, [businessId]);
+
+  // Load the customer's favorited product IDs (only when logged in as a
+  // customer) so the heart icon on each card can show filled/outline state.
+  useEffect(() => {
+    if (user?.role !== "customer") return;
+    api.get("/favorites").then((res) => {
+      setFavoriteIds(new Set(res.data.map((f) => f.product_id)));
+    }).catch(() => {});
+  }, [user]);
+
+  const toggleFavorite = async (productId) => {
+    if (!user) return navigate("/login");
+    const isFav = favoriteIds.has(productId);
+    try {
+      if (isFav) {
+        await api.delete(`/favorites/${productId}`);
+        setFavoriteIds((prev) => {
+          const next = new Set(prev);
+          next.delete(productId);
+          return next;
+        });
+      } else {
+        await api.post("/favorites", { product_id: productId });
+        setFavoriteIds((prev) => new Set(prev).add(productId));
+      }
+    } catch (err) {
+      message.error(err.response?.data?.detail || "Could not update favorite");
+    }
+  };
 
   // "Order Again" support — MyOrders.jsx navigates here with
   // location.state.reorderItems. Once products have loaded, pre-fill the
@@ -221,13 +251,26 @@ export default function Catalog() {
                     className="catalog-product-card"
                     size="small"
                     cover={
-                      <Image
-                        src={p.image_url || "https://placehold.co/300x300/CCCCCC/666666?text=No+Image"}
-                        alt={p.name}
-                        height={150}
-                        style={{ objectFit: "cover" }}
-                        preview={false}
-                      />
+                      <div style={{ position: "relative" }}>
+                        <Image
+                          src={p.image_url || "https://placehold.co/300x300/CCCCCC/666666?text=No+Image"}
+                          alt={p.name}
+                          height={150}
+                          style={{ objectFit: "cover" }}
+                          preview={false}
+                        />
+                        <button
+                          className="catalog-fav-btn"
+                          onClick={(e) => { e.stopPropagation(); toggleFavorite(p.id); }}
+                          aria-label="Toggle favorite"
+                        >
+                          {favoriteIds.has(p.id) ? (
+                            <HeartFilled style={{ color: "#ef4444" }} />
+                          ) : (
+                            <HeartOutlined style={{ color: "#6b7280" }} />
+                          )}
+                        </button>
+                      </div>
                     }
                   >
                     <Text strong className="catalog-product-name">{p.name}</Text>

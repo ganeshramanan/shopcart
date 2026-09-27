@@ -167,6 +167,23 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
   border-color: #86efac !important;
 }
 .catalog-product-card .ant-card-cover img { border-radius: 0 !important; }
+.catalog-fav-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+.catalog-fav-btn:hover { transform: scale(1.12); }
 .catalog-product-name {
   font-size: 14px;
   display: block;
