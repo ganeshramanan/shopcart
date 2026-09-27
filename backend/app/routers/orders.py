@@ -60,7 +60,10 @@ def list_orders(
     """Customers see their own orders; shop owners see all orders for their
     business; staff can only see orders if the shop owner has explicitly
     granted them the can_view_orders permission."""
-    q = db.query(models.Order).options(joinedload(models.Order.items), joinedload(models.Order.customer))
+    q = db.query(models.Order).options(
+        joinedload(models.Order.items),
+        joinedload(models.Order.customer).joinedload(models.User.addresses),
+    )
     if user.role == "customer":
         q = q.filter(models.Order.customer_id == user.id)
     elif user.role == "shop_owner":
@@ -78,7 +81,10 @@ def list_orders(
 def get_order(order_id: str, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     order = (
         db.query(models.Order)
-        .options(joinedload(models.Order.items))
+        .options(
+            joinedload(models.Order.items),
+            joinedload(models.Order.customer).joinedload(models.User.addresses),
+        )
         .filter(models.Order.id == order_id)
         .first()
     )

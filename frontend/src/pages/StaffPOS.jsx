@@ -49,6 +49,16 @@ function StaffOrders({ businessId }) {
               <Text strong>#{o.id.slice(0, 8)} — ₹{o.total_amount}</Text>
               <div><Text type="secondary" style={{ fontSize: 12 }}>{formatDate(o.created_at)}</Text></div>
               {o.customer_name && <Text type="secondary" style={{ fontSize: 12 }}>{o.customer_name}</Text>}
+              {o.customer_address && (
+                <div>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    📍 {o.customer_address.label}: {o.customer_address.line1}
+                    {o.customer_address.line2 ? `, ${o.customer_address.line2}` : ""}
+                    {o.customer_address.city ? `, ${o.customer_address.city}` : ""}
+                    {o.customer_address.pincode ? ` - ${o.customer_address.pincode}` : ""}
+                  </Text>
+                </div>
+              )}
             </div>
             <Tag color={STATUS_COLORS[o.status]}>{o.status}</Tag>
           </div>

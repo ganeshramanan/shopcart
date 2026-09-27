@@ -595,6 +595,16 @@ export default function ShopDashboard() {
                           </Text>
                         </div>
                       )}
+                      {o.customer_address && (
+                        <div style={{ marginTop: 2 }}>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            📍 {o.customer_address.label}: {o.customer_address.line1}
+                            {o.customer_address.line2 ? `, ${o.customer_address.line2}` : ""}
+                            {o.customer_address.city ? `, ${o.customer_address.city}` : ""}
+                            {o.customer_address.pincode ? ` - ${o.customer_address.pincode}` : ""}
+                          </Text>
+                        </div>
+                      )}
                     </div>
                     <Select
                       value={o.status}

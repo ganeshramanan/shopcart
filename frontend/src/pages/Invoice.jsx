@@ -223,6 +223,16 @@ export default function Invoice() {
           </p>
         )}
 
+        {order.customer_address && (
+          <p style={{ color: "#374151" }}>
+            <strong>Deliver to ({order.customer_address.label}):</strong>{" "}
+            {order.customer_address.line1}
+            {order.customer_address.line2 ? `, ${order.customer_address.line2}` : ""}
+            {order.customer_address.city ? `, ${order.customer_address.city}` : ""}
+            {order.customer_address.pincode ? ` - ${order.customer_address.pincode}` : ""}
+          </p>
+        )}
+
         <table className="invoice-table">
           <thead>
             <tr>

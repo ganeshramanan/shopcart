@@ -132,6 +132,20 @@ class Order(Base):
     def customer_phone(self):
         return self.customer.phone if self.customer else None
 
+    @property
+    def customer_address(self):
+        """Customer's currently-saved default delivery address, if any.
+        Not snapshotted at order time (unlike price) — shows their latest
+        saved address so shop owner/staff always see where to actually
+        deliver right now. If the customer never saved one, or has
+        several with none marked default, falls back to the most
+        recently added address."""
+        if not self.customer or not self.customer.addresses:
+            return None
+        addresses = self.customer.addresses
+        default = next((a for a in addresses if a.is_default), None)
+        return default or addresses[0]
+
 
 class OrderItem(Base):
     __tablename__ = "order_items"

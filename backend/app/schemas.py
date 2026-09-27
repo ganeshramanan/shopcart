@@ -122,6 +122,17 @@ class OrderItemOut(BaseModel):
     line_total: float
 
 
+class OrderAddressOut(BaseModel):
+    """Slimmed-down address shape embedded on OrderOut — just what shop
+    owner/staff need to see for delivery, not the full CRUD fields."""
+    model_config = ConfigDict(from_attributes=True)
+    label: str
+    line1: str
+    line2: Optional[str] = None
+    city: Optional[str] = None
+    pincode: Optional[str] = None
+
+
 class OrderOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: str
@@ -129,6 +140,7 @@ class OrderOut(BaseModel):
     customer_id: str
     customer_name: Optional[str] = None
     customer_phone: Optional[str] = None
+    customer_address: Optional[OrderAddressOut] = None
     status: str
     total_amount: float
     notes: Optional[str] = None
