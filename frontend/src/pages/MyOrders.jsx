@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, Tag, Typography, Empty, Button, Space, Input, Select, DatePicker } from "antd";
-import { ReloadOutlined, RedoOutlined } from "@ant-design/icons";
+import { ReloadOutlined, RedoOutlined, DownOutlined, UpOutlined } from "@ant-design/icons";
 import api from "../api";
 import { formatDate } from "../utils.js";
 
@@ -11,6 +11,55 @@ const STATUS_COLORS = {
   placed: "gold", confirmed: "blue", packing: "purple", ready: "cyan",
   dispatched: "geekblue", delivered: "green", cancelled: "red",
 };
+
+// Items collapsed by default behind a "N items — view" toggle, same
+// pattern as StaffPOS's order cards — a big order (10+ items) shouldn't
+// dominate the card. Kept the per-line price breakdown customers care
+// about (qty × price = line total) once expanded.
+function OrderCard({ order: o, onReorder }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <Card style={{ marginBottom: 12, marginTop: 16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div>
+          <Text strong>Order #{o.id.slice(0, 8)}</Text>
+          <div><Text type="secondary" style={{ fontSize: 12 }}>{formatDate(o.created_at)}</Text></div>
+        </div>
+        <Tag color={STATUS_COLORS[o.status]}>{o.status}</Tag>
+      </div>
+
+      <Button
+        type="link"
+        size="small"
+        style={{ padding: 0, marginTop: 10, fontSize: 13, fontWeight: 600 }}
+        icon={expanded ? <UpOutlined /> : <DownOutlined />}
+        onClick={() => setExpanded((v) => !v)}
+      >
+        {o.items.length} item{o.items.length !== 1 ? "s" : ""} {expanded ? "— hide" : "— view"}
+      </Button>
+
+      {expanded && (
+        <div className="myorders-items-list">
+          {o.items.map((it) => (
+            <div key={it.id} className="myorders-item-row">
+              <span className="myorders-item-name">{it.product_name_snapshot} — {it.quantity} {it.unit_type_snapshot}</span>
+              <span className="myorders-item-total">× ₹{it.unit_price_snapshot} = ₹{it.line_total}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
+        <Text strong>Total: ₹{o.total_amount}</Text>
+        <Space>
+          <Button size="small" icon={<RedoOutlined />} onClick={() => onReorder(o)}>Order Again</Button>
+          <Link to={`/invoice/${o.id}`}><Button size="small">View Bill</Button></Link>
+        </Space>
+      </div>
+    </Card>
+  );
+}
 
 export default function MyOrders() {
   const [orders, setOrders] = useState([]);
@@ -88,29 +137,7 @@ export default function MyOrders() {
         <Empty description={orders.length === 0 ? "No orders yet" : "No orders match your filters"} style={{ marginTop: 40 }} />
       )}
       {filteredOrders.map((o) => (
-        <Card key={o.id} style={{ marginBottom: 12, marginTop: 16 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div>
-              <Text strong>Order #{o.id.slice(0, 8)}</Text>
-              <div><Text type="secondary" style={{ fontSize: 12 }}>{formatDate(o.created_at)}</Text></div>
-            </div>
-            <Tag color={STATUS_COLORS[o.status]}>{o.status}</Tag>
-          </div>
-          <ul style={{ margin: "12px 0", paddingLeft: 18 }}>
-            {o.items.map((it) => (
-              <li key={it.id}>
-                {it.product_name_snapshot} — {it.quantity} {it.unit_type_snapshot} × ₹{it.unit_price_snapshot} = ₹{it.line_total}
-              </li>
-            ))}
-          </ul>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Text strong>Total: ₹{o.total_amount}</Text>
-            <Space>
-              <Button size="small" icon={<RedoOutlined />} onClick={() => reorder(o)}>Order Again</Button>
-              <Link to={`/invoice/${o.id}`}><Button size="small">View Bill</Button></Link>
-            </Space>
-          </div>
-        </Card>
+        <OrderCard key={o.id} order={o} onReorder={reorder} />
       ))}
     </div>
   );
