@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import { Button, Input, Space, Tag, Typography, Divider } from "antd";
 import { ArrowLeftOutlined, PrinterOutlined, DownloadOutlined, WhatsAppOutlined } from "@ant-design/icons";
 import api from "../api";
+import { useAuth } from "../auth/AuthContext.jsx";
 import { formatDate } from "../utils.js";
 
 const { Title, Text } = Typography;
@@ -14,6 +15,8 @@ const STATUS_COLORS = {
 
 export default function Invoice() {
   const { orderId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [order, setOrder] = useState(null);
   const [business, setBusiness] = useState(null);
   const [error, setError] = useState("");
@@ -33,6 +36,23 @@ export default function Invoice() {
 
   if (error) return <div className="error">{error}</div>;
   if (!order) return <p>Loading...</p>;
+
+  // "Back" should return to wherever the user actually came from — the
+  // shop owner's Orders tab, the customer's My Orders page, etc. — not a
+  // hardcoded route. Browser history covers that; if there's no history
+  // (e.g. invoice opened directly via a shared link), fall back to a
+  // sensible destination based on the viewer's role.
+  const goBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else if (user?.role === "shop_owner") {
+      navigate("/dashboard");
+    } else if (user?.role === "staff") {
+      navigate("/pos");
+    } else {
+      navigate("/orders");
+    }
+  };
 
   const buildWhatsAppText = () => {
     const lines = order.items.map(
@@ -163,7 +183,7 @@ export default function Invoice() {
     <div>
       <div className="no-print" style={{ marginBottom: 16 }}>
         <Space wrap>
-          <Link to="/orders"><Button icon={<ArrowLeftOutlined />}>Back</Button></Link>
+          <Button icon={<ArrowLeftOutlined />} onClick={goBack}>Back</Button>
           <Button icon={<PrinterOutlined />} onClick={() => window.print()}>Print</Button>
           <Button icon={<DownloadOutlined />} onClick={downloadPdf}>Download PDF</Button>
           <Input
