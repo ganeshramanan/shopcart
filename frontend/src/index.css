@@ -237,6 +237,48 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
 .dashboard-tabs { display: flex; gap: 6px; margin-bottom: 16px; border-bottom: 1px solid #e5e7eb; overflow-x: auto; }
 .tab { background: transparent; color: #6b7280; border: none; border-bottom: 3px solid transparent; border-radius: 0; padding: 10px 16px; font-weight: 600; white-space: nowrap; }
 .tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+
+/* Shop Dashboard v2 — gradient sidebar nav + gradient CTAs, extending the
+   blue/indigo brand gradient (already used on ShopBanner) beyond the
+   banner into interactive elements, per the visual polish pass. */
+.dash-sider { box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.dash-collapse-btn { border-radius: 8px; }
+.dash-collapse-btn:hover { background: #eff6ff !important; }
+
+.dash-nav-menu .ant-menu-item {
+  border-radius: 10px !important;
+  margin: 4px 8px !important;
+  font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease;
+}
+.dash-nav-menu .ant-menu-item:hover {
+  background: #eff6ff !important;
+  color: #2563eb !important;
+  transform: translateX(2px);
+}
+.dash-nav-menu .ant-menu-item-selected {
+  background: linear-gradient(135deg, #3b82f6, #1e1b4b) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(37,99,235,0.28);
+}
+.dash-nav-menu .ant-menu-item-selected .anticon,
+.dash-nav-menu .ant-menu-item-selected .ant-menu-title-content {
+  color: #fff !important;
+}
+.dash-nav-menu .ant-menu-item-selected::after { display: none !important; }
+
+.dash-gradient-btn {
+  background: linear-gradient(135deg, #3b82f6, #1e1b4b) !important;
+  border: none !important;
+  font-weight: 600;
+  box-shadow: 0 3px 10px rgba(37,99,235,0.28);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.dash-gradient-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37,99,235,0.36);
+  filter: brightness(1.05);
+}
 .tab-badge { background: #ef4444; color: white; border-radius: 999px; font-size: 11px; padding: 1px 7px; margin-left: 6px; }
 .empty-state { color: #6b7280; text-align: center; padding: 30px 0; }
 .order-card { border-left: 4px solid #e5e7eb; }

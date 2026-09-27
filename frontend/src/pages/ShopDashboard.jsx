@@ -362,7 +362,7 @@ export default function ShopDashboard() {
   ];
 
   return (
-    <Layout style={{ background: "transparent", minHeight: "calc(100vh - 64px)" }}>
+    <Layout className="shop-dashboard-root" style={{ background: "transparent", minHeight: "calc(100vh - 64px)" }}>
       <Sider
         collapsible
         collapsed={collapsed}
@@ -370,12 +370,14 @@ export default function ShopDashboard() {
         breakpoint="lg"
         collapsedWidth={80}
         trigger={null}
+        className="dash-sider"
         style={{ background: "#fff", borderRadius: 12, marginRight: 16, overflow: "hidden" }}
         width={220}
       >
         <div style={{ padding: 12, textAlign: collapsed ? "center" : "left" }}>
           <Button
             type="text"
+            className="dash-collapse-btn"
             icon={<MenuOutlined />}
             onClick={() => setCollapsed(!collapsed)}
             style={{ marginBottom: 8 }}
@@ -386,6 +388,7 @@ export default function ShopDashboard() {
           selectedKeys={[tab]}
           onClick={({ key }) => selectTab(key)}
           items={NAV_ITEMS}
+          className="dash-nav-menu"
           style={{ border: "none" }}
         />
       </Sider>
@@ -470,7 +473,7 @@ export default function ShopDashboard() {
                       onChange={(e) => setContactPhoneInput(e.target.value.replace(/[^\d]/g, ""))}
                       style={{ width: 200 }}
                     />
-                    <Button type="primary" loading={savingContact} onClick={saveContactPhone}>Save</Button>
+                    <Button type="primary" className="dash-gradient-btn" loading={savingContact} onClick={saveContactPhone}>Save</Button>
                   </Space>
                 </Card>
               )}
@@ -603,7 +606,7 @@ export default function ShopDashboard() {
                 <Form.Item name="image_url" label="Image URL (optional)">
                   <Input />
                 </Form.Item>
-                <Button type="primary" htmlType="submit">Add Product</Button>
+                <Button type="primary" className="dash-gradient-btn" htmlType="submit">Add Product</Button>
               </Form>
             </Card>
           )}
@@ -727,7 +730,7 @@ function NoBusinessYet({ onCreated, approvalStatus }) {
             { value: "other", label: "Other" },
           ]} />
         </Form.Item>
-        <Button type="primary" htmlType="submit">Create Business</Button>
+        <Button type="primary" className="dash-gradient-btn" htmlType="submit">Create Business</Button>
       </Form>
     </Card>
   );

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { Row, Col, Card, Statistic, Table, Tag, Button, Popconfirm, Typography, message, Input, Modal } from "antd";
+import { Row, Col, Card, Table, Tag, Button, Popconfirm, Typography, message, Input, Modal } from "antd";
+import { ShopOutlined, UserOutlined, ClockCircleOutlined, StopOutlined } from "@ant-design/icons";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
+import StatCard from "../components/StatCard.jsx";
 
 const { Title, Text } = Typography;
 
@@ -193,10 +195,18 @@ export default function AdminDashboard() {
       {error && <Text type="danger">{error}</Text>}
 
       <Row gutter={16} style={{ marginTop: 20 }}>
-        <Col xs={12} md={6}><Card><Statistic title="Businesses" value={businesses.length} /></Card></Col>
-        <Col xs={12} md={6}><Card><Statistic title="Shop Owners" value={owners.length} /></Card></Col>
-        <Col xs={12} md={6}><Card><Statistic title="Pending Approval" value={pendingOwners.length} /></Card></Col>
-        <Col xs={12} md={6}><Card><Statistic title="Disabled" value={owners.filter((o) => !o.is_active).length} /></Card></Col>
+        <Col xs={12} md={6}>
+          <StatCard icon={<ShopOutlined />} color="purple" title="Businesses" value={businesses.length} />
+        </Col>
+        <Col xs={12} md={6}>
+          <StatCard icon={<UserOutlined />} color="blue" title="Shop Owners" value={owners.length} />
+        </Col>
+        <Col xs={12} md={6}>
+          <StatCard icon={<ClockCircleOutlined />} color="orange" title="Pending Approval" value={pendingOwners.length} />
+        </Col>
+        <Col xs={12} md={6}>
+          <StatCard icon={<StopOutlined />} color="red" title="Disabled" value={owners.filter((o) => !o.is_active).length} />
+        </Col>
       </Row>
 
       {pendingOwners.length > 0 && (
