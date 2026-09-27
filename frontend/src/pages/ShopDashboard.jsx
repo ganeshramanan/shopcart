@@ -218,6 +218,40 @@ export default function ShopDashboard() {
     loadOrders();
   };
 
+  // Status update -> customer WhatsApp notification. Mirrors the existing
+  // customer -> shop WhatsApp notify (Catalog.jsx) but in the other
+  // direction, so customers know their order moved without having to poll
+  // MyOrders themselves. Opens wa.me with a pre-filled message; nothing is
+  // sent automatically (WhatsApp requires a user tap to actually send —
+  // this keeps it free, no WhatsApp Business API needed).
+  const STATUS_MESSAGES = {
+    confirmed: "Your order has been confirmed and we're getting it ready!",
+    packing: "Your order is being packed right now.",
+    ready: "Your order is ready for pickup!",
+    dispatched: "Your order is on its way to you!",
+    delivered: "Your order has been delivered. Thank you for shopping with us!",
+    cancelled: "Your order has been cancelled. Contact us if you have questions.",
+  };
+
+  const notifyCustomerOnWhatsApp = (order) => {
+    if (!order.customer_phone) {
+      message.warning("No phone number on file for this customer");
+      return;
+    }
+    const lines = order.items.map((it) => `${it.product_name_snapshot} — ${it.quantity} ${it.unit_type_snapshot}`);
+    const text = [
+      `Update on your order #${order.id.slice(0, 8)} from ${business?.name || "us"}:`,
+      "",
+      STATUS_MESSAGES[order.status] || `Status: ${order.status}`,
+      "",
+      ...lines,
+      "",
+      `Total: ₹${order.total_amount}`,
+    ].join("\n");
+    const target = `https://wa.me/${normalizeIndianPhone(order.customer_phone)}?text=${encodeURIComponent(text)}`;
+    window.open(target, "_blank");
+  };
+
   const removeCustomer = async (customerId) => {
     await api.delete(`/businesses/${businessId}/customers/${customerId}`);
     message.success("Customer removed");
@@ -565,7 +599,14 @@ export default function ShopDashboard() {
                       <li key={it.id}>{it.product_name_snapshot} — {it.quantity} {it.unit_type_snapshot}</li>
                     ))}
                   </ul>
-                  <Link to={`/invoice/${o.id}`}><Button size="small">View Bill</Button></Link>
+                  <Space>
+                    <Link to={`/invoice/${o.id}`}><Button size="small">View Bill</Button></Link>
+                    {o.customer_phone && (
+                      <Button size="small" icon={<WhatsAppOutlined />} onClick={() => notifyCustomerOnWhatsApp(o)}>
+                        Notify Customer
+                      </Button>
+                    )}
+                  </Space>
                 </Card>
               ))}
             </>

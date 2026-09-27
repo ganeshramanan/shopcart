@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Input, Row, Col, Card, Button, Badge, Empty, Typography, Affix, Alert, Image, Modal } from "antd";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { Input, Row, Col, Card, Button, Badge, Empty, Typography, Affix, Alert, Image, Modal, message } from "antd";
 import { PlusOutlined, MinusOutlined, SearchOutlined, ShoppingCartOutlined, WhatsAppOutlined, CheckCircleFilled } from "@ant-design/icons";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
@@ -31,11 +31,42 @@ export default function Catalog() {
   const [placedOrder, setPlacedOrder] = useState(null); // shows the post-order modal when set
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     api.get(`/products?business_id=${businessId}`).then((res) => setProducts(res.data));
     api.get(`/businesses/${businessId}`).then((res) => setBusiness(res.data)).catch(() => {});
   }, [businessId]);
+
+  // "Order Again" support — MyOrders.jsx navigates here with
+  // location.state.reorderItems. Once products have loaded, pre-fill the
+  // cart with whichever of those items are still active; anything
+  // discontinued/removed is silently skipped (no broken cart state).
+  useEffect(() => {
+    const reorderItems = location.state?.reorderItems;
+    if (!reorderItems || products.length === 0) return;
+
+    const next = {};
+    let skipped = 0;
+    reorderItems.forEach(({ product_id, quantity }) => {
+      const stillActive = products.find((p) => p.id === product_id && p.is_active !== false);
+      if (stillActive) next[product_id] = quantity;
+      else skipped += 1;
+    });
+
+    setCart(next);
+    if (Object.keys(next).length > 0) {
+      message.success(
+        skipped > 0
+          ? `Added ${Object.keys(next).length} item(s) from your last order — ${skipped} item(s) no longer available.`
+          : "Added items from your last order to the cart."
+      );
+    } else {
+      message.info("None of the items from that order are available anymore.");
+    }
+    // Clear the state so refreshing the page doesn't re-apply it
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [products]);
 
   const step = (unit) => (unit === "kg" || unit === "litre" ? 0.5 : 1);
 

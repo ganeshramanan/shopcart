@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, Tag, Typography, Empty, Button, Space } from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
+import { ReloadOutlined, RedoOutlined } from "@ant-design/icons";
 import api from "../api";
 import { formatDate } from "../utils.js";
 
@@ -14,6 +14,7 @@ const STATUS_COLORS = {
 export default function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const navigate = useNavigate();
 
   const load = () => {
     setRefreshing(true);
@@ -25,6 +26,18 @@ export default function MyOrders() {
     const interval = setInterval(load, 30000); // auto-refresh every 30s so status updates show up without a manual reload
     return () => clearInterval(interval);
   }, []);
+
+  // "Order Again" — jump to that shop's catalog with the same items
+  // pre-filled in the cart. Catalog.jsx picks this up via router state and
+  // re-validates each product still exists/is active before adding it, so
+  // a discontinued item just gets silently skipped rather than breaking.
+  const reorder = (order) => {
+    navigate(`/shop/${order.business_id}`, {
+      state: {
+        reorderItems: order.items.map((it) => ({ product_id: it.product_id, quantity: it.quantity })),
+      },
+    });
+  };
 
   return (
     <div>
@@ -51,7 +64,10 @@ export default function MyOrders() {
           </ul>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Text strong>Total: ₹{o.total_amount}</Text>
-            <Link to={`/invoice/${o.id}`}><Button size="small">View Bill</Button></Link>
+            <Space>
+              <Button size="small" icon={<RedoOutlined />} onClick={() => reorder(o)}>Order Again</Button>
+              <Link to={`/invoice/${o.id}`}><Button size="small">View Bill</Button></Link>
+            </Space>
           </div>
         </Card>
       ))}
