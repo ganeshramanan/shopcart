@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Tabs, Card, Tag, Typography, Empty, Button } from "antd";
+import { Tabs, Card, Tag, Typography, Empty, Button, Input, Select, Space } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
@@ -10,6 +10,7 @@ import SignupLinkCard from "../components/SignupLinkCard.jsx";
 import ShopBanner from "../components/ShopBanner.jsx";
 
 const { Text } = Typography;
+const ORDER_STATUSES = ["placed", "confirmed", "packing", "ready", "dispatched", "delivered", "cancelled"];
 const STATUS_COLORS = {
   placed: "gold", confirmed: "blue", packing: "purple", ready: "cyan",
   dispatched: "geekblue", delivered: "green", cancelled: "red",
@@ -19,6 +20,8 @@ function StaffOrders({ businessId }) {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const load = () => {
     setRefreshing(true);
@@ -36,13 +39,43 @@ function StaffOrders({ businessId }) {
 
   if (error) return <Text type="danger">{error}</Text>;
 
+  const filteredOrders = orders.filter((o) => {
+    const q = search.trim().toLowerCase();
+    const matchesSearch =
+      !q ||
+      (o.customer_name && o.customer_name.toLowerCase().includes(q)) ||
+      (o.customer_phone && o.customer_phone.includes(q)) ||
+      o.id.toLowerCase().includes(q);
+    const matchesStatus = statusFilter === "all" || o.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
-        <Button icon={<ReloadOutlined />} onClick={load} loading={refreshing}>Refresh</Button>
-      </div>
-      {orders.length === 0 && <Empty description="No orders yet" />}
-      {orders.map((o) => (
+      <Card style={{ marginBottom: 16 }}>
+        <Space wrap>
+          <Input
+            placeholder="Search by customer name, phone, or order ID..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ width: 260 }}
+            allowClear
+          />
+          <Select
+            value={statusFilter}
+            onChange={setStatusFilter}
+            style={{ width: 160 }}
+            options={[{ value: "all", label: "All statuses" }, ...ORDER_STATUSES.map((s) => ({ value: s, label: s }))]}
+          />
+          {(search || statusFilter !== "all") && (
+            <Button onClick={() => { setSearch(""); setStatusFilter("all"); }}>Clear</Button>
+          )}
+          <Button icon={<ReloadOutlined />} onClick={load} loading={refreshing}>Refresh</Button>
+        </Space>
+      </Card>
+
+      {filteredOrders.length === 0 && <Empty description={orders.length === 0 ? "No orders yet" : "No orders match your filters"} />}
+      {filteredOrders.map((o) => (
         <Card key={o.id} size="small" style={{ marginBottom: 12 }}>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <div>
