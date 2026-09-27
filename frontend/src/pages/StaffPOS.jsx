@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Tabs, Card, Tag, Typography, Empty, Button, Input, Select, Space, DatePicker } from "antd";
 import { ReloadOutlined, PhoneOutlined, EnvironmentOutlined, DownOutlined, UpOutlined } from "@ant-design/icons";
 import api from "../api";
@@ -80,6 +80,10 @@ function StaffOrderCard({ order: o }) {
           {expanded ? "Show less" : `+${o.items.length - ITEMS_PREVIEW_COUNT} more item(s)`}
         </Button>
       )}
+
+      <div style={{ marginTop: 10 }}>
+        <Link to={`/invoice/${o.id}`}><Button size="small">View Bill</Button></Link>
+      </div>
     </Card>
   );
 }
