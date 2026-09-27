@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Input, Row, Col, Card, Button, Badge, Empty, Typography, Affix, Alert, Image } from "antd";
-import { PlusOutlined, MinusOutlined, SearchOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { Input, Row, Col, Card, Button, Badge, Empty, Typography, Affix, Alert, Image, Modal } from "antd";
+import { PlusOutlined, MinusOutlined, SearchOutlined, ShoppingCartOutlined, WhatsAppOutlined, CheckCircleFilled } from "@ant-design/icons";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { normalizeIndianPhone } from "../utils.js";
 
 const { Title, Text } = Typography;
 
@@ -16,6 +17,7 @@ export default function Catalog() {
   const [error, setError] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
+  const [placedOrder, setPlacedOrder] = useState(null); // shows the post-order modal when set
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -62,9 +64,9 @@ export default function Catalog() {
     setPlacing(true);
     try {
       const items = cartLines.map((l) => ({ product_id: l.product.id, quantity: l.qty }));
-      await api.post("/orders", { business_id: businessId, items });
+      const { data } = await api.post("/orders", { business_id: businessId, items });
       setCart({});
-      navigate("/orders");
+      setPlacedOrder(data);
     } catch (err) {
       setError(err.response?.data?.detail || "Could not place order");
     } finally {
@@ -72,11 +74,63 @@ export default function Catalog() {
     }
   };
 
+  const notifyShopOnWhatsApp = () => {
+    if (!placedOrder) return;
+    const lines = placedOrder.items.map(
+      (it) => `${it.product_name_snapshot} — ${it.quantity} ${it.unit_type_snapshot}`
+    );
+    const text = [
+      `New order on ShopCart!`,
+      `Order #${placedOrder.id.slice(0, 8)} from ${user?.name || "a customer"}`,
+      "",
+      ...lines,
+      "",
+      `Total: ₹${placedOrder.total_amount}`,
+    ].join("\n");
+    const encoded = encodeURIComponent(text);
+    const target = business?.contact_phone
+      ? `https://wa.me/${normalizeIndianPhone(business.contact_phone)}?text=${encoded}`
+      : `https://wa.me/?text=${encoded}`;
+    window.open(target, "_blank");
+  };
+
   return (
     <div>
       <Title level={3} style={{ marginBottom: 0 }}>{business ? business.name : "Catalog"}</Title>
       {business?.type && <Text type="secondary">{business.type}</Text>}
       {error && <Alert type="error" message={error} showIcon style={{ margin: "12px 0" }} />}
+
+      <Modal
+        open={!!placedOrder}
+        onCancel={() => { setPlacedOrder(null); navigate("/orders"); }}
+        footer={null}
+        centered
+      >
+        {placedOrder && (
+          <div style={{ textAlign: "center", padding: "12px 0" }}>
+            <CheckCircleFilled style={{ fontSize: 48, color: "#10b981" }} />
+            <Title level={4} style={{ marginTop: 12 }}>Order Placed!</Title>
+            <Text type="secondary">Order #{placedOrder.id.slice(0, 8)} · ₹{placedOrder.total_amount}</Text>
+
+            <div style={{ marginTop: 20 }}>
+              <Button type="primary" icon={<WhatsAppOutlined />} block onClick={notifyShopOnWhatsApp}>
+                Notify Shop on WhatsApp
+              </Button>
+              <Text type="secondary" style={{ fontSize: 12, display: "block", marginTop: 8 }}>
+                Let the shop know right away so they can start preparing your order.
+              </Text>
+            </div>
+
+            <Button
+              type="link"
+              style={{ marginTop: 12 }}
+              onClick={() => { setPlacedOrder(null); navigate("/orders"); }}
+            >
+              View My Orders →
+            </Button>
+          </div>
+        )}
+      </Modal>
 
       <Input
         prefix={<SearchOutlined />}

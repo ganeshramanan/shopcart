@@ -50,6 +50,30 @@ def get_business(business_id: str, db: Session = Depends(get_db)):
     return biz
 
 
+@router.patch("/{business_id}", response_model=schemas.BusinessOut)
+def update_business(
+    business_id: str,
+    payload: schemas.BusinessUpdate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(require_role("admin", "shop_owner")),
+):
+    """Shop owner updates their own business info — mainly used to set the
+    contact_phone customers/staff notify on new orders."""
+    from fastapi import HTTPException
+    biz = db.query(models.Business).filter(models.Business.id == business_id).first()
+    if not biz:
+        raise HTTPException(status_code=404, detail="Business not found")
+    if user.role == "shop_owner" and str(user.business_id) != str(business_id):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(biz, field, value)
+
+    db.commit()
+    db.refresh(biz)
+    return biz
+
+
 @router.delete("/{business_id}")
 def delete_business(    business_id: str,
     db: Session = Depends(get_db),

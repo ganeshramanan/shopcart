@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   Layout, Menu, Card, Row, Col, Statistic, Button, Input, Select, DatePicker,
   Table, Tag, Space, Badge, Form, Upload, message, Popconfirm, Empty, Typography,
+  notification,
 } from "antd";
 import {
   HomeOutlined, ShoppingCartOutlined, InboxOutlined, PlusCircleOutlined,
@@ -70,6 +71,9 @@ export default function ShopDashboard() {
   const [orderDateRange, setOrderDateRange] = useState(null);
   const [customerSearch, setCustomerSearch] = useState("");
   const [signupWaPhone, setSignupWaPhone] = useState("");
+  const [business, setBusiness] = useState(null);
+  const [contactPhoneInput, setContactPhoneInput] = useState("");
+  const [savingContact, setSavingContact] = useState(false);
   const [addForm] = Form.useForm();
 
   const businessId = user?.business_id;
@@ -85,10 +89,65 @@ export default function ShopDashboard() {
     api.get(`/businesses/${businessId}/customers`).then((res) => setCustomers(res.data));
   };
 
+  // Poll for new orders every 30s so the shop owner doesn't have to manually
+  // refresh the page to notice a customer just placed an order. Plays a short
+  // beep + shows a toast for each newly-seen order. Free — no push
+  // infrastructure needed, just periodic polling of our existing endpoint.
+  const knownOrderIds = useRef(new Set());
+  const firstLoadDone = useRef(false);
+
+  const playNotifySound = () => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.2);
+    } catch (e) {
+      // Audio not available/allowed — silently skip, toast still shows
+    }
+  };
+
+  const pollOrders = () => {
+    api.get("/orders").then((res) => {
+      const incoming = res.data;
+      if (firstLoadDone.current) {
+        const newOnes = incoming.filter((o) => !knownOrderIds.current.has(o.id));
+        newOnes.forEach((o) => {
+          notification.success({
+            message: "New Order!",
+            description: `#${o.id.slice(0, 8)} — ₹${o.total_amount} from ${o.customer_name || "a customer"}`,
+            placement: "topRight",
+          });
+        });
+        if (newOnes.length > 0) playNotifySound();
+      }
+      knownOrderIds.current = new Set(incoming.map((o) => o.id));
+      firstLoadDone.current = true;
+      setOrders(incoming);
+    });
+  };
+
+  const loadBusiness = () => {
+    if (!businessId) return;
+    api.get(`/businesses/${businessId}`).then((res) => {
+      setBusiness(res.data);
+      setContactPhoneInput(res.data.contact_phone || "");
+    });
+  };
+
   useEffect(() => {
     loadProducts();
-    loadOrders();
+    pollOrders();
     loadCustomers();
+    loadBusiness();
+
+    const interval = setInterval(pollOrders, 30000);
+    return () => clearInterval(interval);
   }, [businessId]);
 
   if (!businessId) return <NoBusinessYet onCreated={refreshUser} approvalStatus={user?.approval_status} />;
@@ -153,6 +212,19 @@ export default function ShopDashboard() {
     await api.delete(`/businesses/${businessId}/customers/${customerId}`);
     message.success("Customer removed");
     loadCustomers();
+  };
+
+  const saveContactPhone = async () => {
+    setSavingContact(true);
+    try {
+      await api.patch(`/businesses/${businessId}`, { contact_phone: contactPhoneInput });
+      message.success("Contact number saved");
+      loadBusiness();
+    } catch (err) {
+      message.error(err.response?.data?.detail || "Could not save contact number");
+    } finally {
+      setSavingContact(false);
+    }
   };
 
   const filteredProducts = products.filter((p) =>
@@ -284,6 +356,24 @@ export default function ShopDashboard() {
                 <Col xs={12} md={6}><Card><Statistic title="Total Orders" value={orders.length} /></Card></Col>
                 <Col xs={12} md={6}><Card><Statistic title="Revenue (Delivered)" value={totalRevenue} prefix="₹" /></Card></Col>
               </Row>
+
+              {!business?.contact_phone && (
+                <Card title="⚠️ Set your WhatsApp contact number" style={{ marginTop: 16, borderColor: "#f59e0b" }}>
+                  <Text type="secondary">
+                    Customers will use this number to notify you instantly on WhatsApp when they place an order.
+                    Without it set, they'll have to pick your contact manually.
+                  </Text>
+                  <Space style={{ marginTop: 12 }}>
+                    <Input
+                      placeholder="Your WhatsApp number"
+                      value={contactPhoneInput}
+                      onChange={(e) => setContactPhoneInput(e.target.value.replace(/[^\d]/g, ""))}
+                      style={{ width: 200 }}
+                    />
+                    <Button type="primary" loading={savingContact} onClick={saveContactPhone}>Save</Button>
+                  </Space>
+                </Card>
+              )}
 
               <Card title="Your customer signup link" style={{ marginTop: 16 }}>
                 <Text type="secondary">

@@ -52,6 +52,12 @@ class BusinessOut(BaseModel):
     address: Optional[str] = None
 
 
+class BusinessUpdate(BaseModel):
+    name: Optional[str] = None
+    contact_phone: Optional[str] = None
+    address: Optional[str] = None
+
+
 # ---------- Product ----------
 class ProductCreate(BaseModel):
     name: str
