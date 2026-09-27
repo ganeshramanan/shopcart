@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import { Card, Form, Input, Button, Checkbox, Typography, Tag, Popconfirm, message, Space } from "antd";
 import api from "../api";
+
+const { Text } = Typography;
 
 export default function StaffManagement() {
   const [staff, setStaff] = useState([]);
-  const [form, setForm] = useState({ name: "", phone: "", password: "" });
   const [error, setError] = useState("");
+  const [form] = Form.useForm();
 
   const load = () => {
     api.get("/staff").then((res) => setStaff(res.data)).catch((e) => setError(e.response?.data?.detail || "Failed to load"));
@@ -12,12 +15,12 @@ export default function StaffManagement() {
 
   useEffect(() => { load(); }, []);
 
-  const addStaff = async (e) => {
-    e.preventDefault();
+  const addStaff = async (values) => {
     setError("");
     try {
-      await api.post("/staff", form);
-      setForm({ name: "", phone: "", password: "" });
+      await api.post("/staff", values);
+      form.resetFields();
+      message.success("Staff member added");
       load();
     } catch (err) {
       setError(err.response?.data?.detail || "Could not add staff member");
@@ -29,50 +32,79 @@ export default function StaffManagement() {
     load();
   };
 
-  const removeStaff = async (id, name) => {
-    if (!window.confirm(`Remove ${name}? They will no longer be able to log in.`)) return;
+  const updatePermission = async (id, field, value) => {
+    await api.patch(`/staff/${id}/permissions`, { [field]: value });
+    load();
+  };
+
+  const removeStaff = async (id) => {
     await api.delete(`/staff/${id}`);
+    message.success("Staff member removed");
     load();
   };
 
   return (
     <div>
-      <div className="card" style={{ maxWidth: 480, marginBottom: 20 }}>
-        <h3>Add Staff (Sales/POS access only)</h3>
-        <p className="dashboard-subtitle">
-          Staff accounts can only use the "New Sale" billing screen — they
-          cannot see customer details, pricing controls, analytics, or other
+      <Card title="Add Staff (Sales/POS access only)" style={{ maxWidth: 480, marginBottom: 20 }}>
+        <Text type="secondary">
+          Staff accounts can only use the "New Sale" billing screen by default —
+          they cannot see customer details, pricing controls, analytics, or other
           shop data. No approval needed from Cartbi, this is fully controlled by you.
-        </p>
-        {error && <div className="error">{error}</div>}
-        <form onSubmit={addStaff}>
-          <input placeholder="Staff name" value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-          <input placeholder="Phone number" value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/[^\d]/g, "") })} required />
-          <input type="password" placeholder="Password" value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })} required />
-          <button type="submit">Add Staff</button>
-        </form>
-      </div>
+          You can optionally grant extra permissions below after creating them.
+        </Text>
+        {error && <Text type="danger" style={{ display: "block", marginTop: 8 }}>{error}</Text>}
+        <Form form={form} layout="vertical" onFinish={addStaff} style={{ marginTop: 16 }}>
+          <Form.Item name="name" label="Staff name" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="phone" label="Phone number" rules={[{ required: true }]}>
+            <Input inputMode="numeric" onChange={(e) => e.target.value = e.target.value.replace(/[^\d]/g, "")} />
+          </Form.Item>
+          <Form.Item name="password" label="Password" rules={[{ required: true }]}>
+            <Input.Password />
+          </Form.Item>
+          <Button type="primary" htmlType="submit">Add Staff</Button>
+        </Form>
+      </Card>
 
-      <h3>Your Staff</h3>
-      {staff.length === 0 && <p className="empty-state">No staff added yet.</p>}
-      {staff.map((s) => (
-        <div key={s.id} className="card row">
-          <div>
-            <strong>{s.name}</strong>
-            {!s.is_active && <span className="badge" style={{ background: "#fee2e2", color: "#dc2626", marginLeft: 8 }}>Disabled</span>}
-            <div className="inventory-meta">{s.phone}</div>
+      <Card title="Your Staff">
+        {staff.length === 0 && <Text type="secondary">No staff added yet.</Text>}
+        {staff.map((s) => (
+          <div key={s.id} style={{ padding: "14px 0", borderBottom: "1px solid #f0f0f0" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <Text strong>{s.name}</Text>{" "}
+                {!s.is_active && <Tag color="red">Disabled</Tag>}
+                <div><Text type="secondary" style={{ fontSize: 12 }}>{s.phone}</Text></div>
+              </div>
+              <Space>
+                <Button size="small" onClick={() => toggleActive(s.id)}>
+                  {s.is_active ? "Disable" : "Enable"}
+                </Button>
+                <Popconfirm title={`Remove ${s.name}?`} onConfirm={() => removeStaff(s.id)}>
+                  <Button size="small" danger>Remove</Button>
+                </Popconfirm>
+              </Space>
+            </div>
+            <div style={{ marginTop: 8 }}>
+              <Space direction="vertical" size={4}>
+                <Checkbox
+                  checked={s.can_view_orders}
+                  onChange={(e) => updatePermission(s.id, "can_view_orders", e.target.checked)}
+                >
+                  Can view orders
+                </Checkbox>
+                <Checkbox
+                  checked={s.can_share_signup_link}
+                  onChange={(e) => updatePermission(s.id, "can_share_signup_link", e.target.checked)}
+                >
+                  Can share customer signup link
+                </Checkbox>
+              </Space>
+            </div>
           </div>
-          <div className="row" style={{ gap: 8, width: "auto" }}>
-            <button className={s.is_active ? "secondary" : ""} onClick={() => toggleActive(s.id)}>
-              {s.is_active ? "Disable" : "Enable"}
-            </button>
-            <button className="secondary" onClick={() => removeStaff(s.id, s.name)}>Remove</button>
-          </div>
-        </div>
-      ))}
+        ))}
+      </Card>
     </div>
   );
 }

@@ -27,6 +27,8 @@ class UserOut(BaseModel):
     business_id: Optional[str] = None
     is_active: bool = True
     approval_status: str = "approved"
+    can_view_orders: bool = False
+    can_share_signup_link: bool = False
 
 
 class Token(BaseModel):

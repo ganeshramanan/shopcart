@@ -33,6 +33,8 @@ statements = [
     "ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;",
     "ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode VARCHAR;",
     "CREATE UNIQUE INDEX IF NOT EXISTS ix_products_barcode ON products (barcode) WHERE barcode IS NOT NULL;",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS can_view_orders BOOLEAN NOT NULL DEFAULT false;",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS can_share_signup_link BOOLEAN NOT NULL DEFAULT false;",
 ]
 
 # Adding an enum value must run outside a transaction block in Postgres <12,

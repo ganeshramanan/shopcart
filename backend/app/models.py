@@ -65,6 +65,8 @@ class User(Base):
     business_id = Column(UUID(as_uuid=False), ForeignKey("businesses.id"), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     approval_status = Column(Enum(ApprovalStatusEnum), nullable=False, default=ApprovalStatusEnum.approved)
+    can_view_orders = Column(Boolean, default=False, nullable=False)      # staff-only permission
+    can_share_signup_link = Column(Boolean, default=False, nullable=False)  # staff-only permission
     created_at = Column(DateTime, default=datetime.utcnow)
 
     business = relationship("Business", back_populates="users")

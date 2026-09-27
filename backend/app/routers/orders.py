@@ -57,11 +57,17 @@ def list_orders(
     user: models.User = Depends(get_current_user),
     business_id: str | None = None,
 ):
-    """Customers see their own orders; shop owners see all orders for their business."""
+    """Customers see their own orders; shop owners see all orders for their
+    business; staff can only see orders if the shop owner has explicitly
+    granted them the can_view_orders permission."""
     q = db.query(models.Order).options(joinedload(models.Order.items), joinedload(models.Order.customer))
     if user.role == "customer":
         q = q.filter(models.Order.customer_id == user.id)
     elif user.role == "shop_owner":
+        q = q.filter(models.Order.business_id == user.business_id)
+    elif user.role == "staff":
+        if not user.can_view_orders:
+            raise HTTPException(status_code=403, detail="You don't have permission to view orders")
         q = q.filter(models.Order.business_id == user.business_id)
     elif business_id:
         q = q.filter(models.Order.business_id == business_id)

@@ -30,6 +30,8 @@ def list_staff(
             "name": s.name,
             "phone": s.phone,
             "is_active": s.is_active,
+            "can_view_orders": s.can_view_orders,
+            "can_share_signup_link": s.can_share_signup_link,
             "created_at": s.created_at,
         }
         for s in staff
@@ -64,11 +66,51 @@ def create_staff(
         role=models.RoleEnum.staff,
         business_id=user.business_id,
         is_active=True,
+        can_view_orders=bool(payload.get("can_view_orders", False)),
+        can_share_signup_link=bool(payload.get("can_share_signup_link", False)),
     )
     db.add(staff)
     db.commit()
     db.refresh(staff)
-    return {"id": staff.id, "name": staff.name, "phone": staff.phone, "is_active": staff.is_active}
+    return {
+        "id": staff.id, "name": staff.name, "phone": staff.phone, "is_active": staff.is_active,
+        "can_view_orders": staff.can_view_orders, "can_share_signup_link": staff.can_share_signup_link,
+    }
+
+
+@router.patch("/{staff_id}/permissions")
+def update_staff_permissions(
+    staff_id: str,
+    payload: dict,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(require_role("shop_owner")),
+):
+    """Shop owner grants/revokes a staff member's extra permissions:
+    viewing orders and/or sharing the customer signup link. Both default to
+    off — staff stays POS-only unless explicitly granted more."""
+    staff = (
+        db.query(models.User)
+        .filter(
+            models.User.id == staff_id,
+            models.User.business_id == user.business_id,
+            models.User.role == models.RoleEnum.staff,
+        )
+        .first()
+    )
+    if not staff:
+        raise HTTPException(status_code=404, detail="Staff member not found")
+
+    if "can_view_orders" in payload:
+        staff.can_view_orders = bool(payload["can_view_orders"])
+    if "can_share_signup_link" in payload:
+        staff.can_share_signup_link = bool(payload["can_share_signup_link"])
+
+    db.commit()
+    return {
+        "detail": "Updated",
+        "can_view_orders": staff.can_view_orders,
+        "can_share_signup_link": staff.can_share_signup_link,
+    }
 
 
 @router.patch("/{staff_id}/toggle-active")
