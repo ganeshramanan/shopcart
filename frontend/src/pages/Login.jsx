@@ -65,6 +65,12 @@ export default function Login() {
         <div style={{ textAlign: "center", marginTop: 16 }}>
           <Text>No account? <Link to="/signup">Sign up</Link></Text>
         </div>
+        <div style={{ textAlign: "center", marginTop: 8 }}>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            Forgot your password? Ask your shop owner to reset it for you
+            (or, if you're a shop owner, contact Cartbi support).
+          </Text>
+        </div>
       </Card>
     </div>
   );

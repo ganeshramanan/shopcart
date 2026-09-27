@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Row, Col, Card, Statistic, Table, Tag, Button, Popconfirm, Typography, message, Input } from "antd";
+import { Row, Col, Card, Statistic, Table, Tag, Button, Popconfirm, Typography, message, Input, Modal } from "antd";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
 
@@ -12,6 +12,9 @@ export default function AdminDashboard() {
   const [allUsers, setAllUsers] = useState([]);
   const [userSearch, setUserSearch] = useState("");
   const [error, setError] = useState("");
+  const [resetTarget, setResetTarget] = useState(null); // user object being reset
+  const [newPassword, setNewPassword] = useState("");
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     document.title = "Cartbi — Platform Admin";
@@ -66,6 +69,24 @@ export default function AdminDashboard() {
       load();
     } catch (err) {
       message.error(err.response?.data?.detail || "Could not delete this user");
+    }
+  };
+
+  const submitPasswordReset = async () => {
+    if (!newPassword || newPassword.length < 4) {
+      message.error("Password must be at least 4 characters");
+      return;
+    }
+    setResetting(true);
+    try {
+      await api.post(`/admin/users/${resetTarget.id}/reset-password`, { new_password: newPassword });
+      message.success(`Password reset for ${resetTarget.name}. Let them know their new password directly.`);
+      setResetTarget(null);
+      setNewPassword("");
+    } catch (err) {
+      message.error(err.response?.data?.detail || "Could not reset password");
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -144,18 +165,21 @@ export default function AdminDashboard() {
     },
     { title: "Orders", dataIndex: "order_count", key: "order_count", width: 80 },
     {
-      title: "", key: "actions", width: 100,
+      title: "", key: "actions", width: 180,
       render: (_, u) => (
         u.id === currentAdmin?.id ? (
           <Tag>You</Tag>
         ) : (
-          <Popconfirm
-            title={`Permanently delete ${u.name}?`}
-            description="This cannot be undone."
-            onConfirm={() => deleteUser(u.id)}
-          >
-            <Button size="small" danger>Delete</Button>
-          </Popconfirm>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button size="small" onClick={() => { setResetTarget(u); setNewPassword(""); }}>Reset PW</Button>
+            <Popconfirm
+              title={`Permanently delete ${u.name}?`}
+              description="This cannot be undone."
+              onConfirm={() => deleteUser(u.id)}
+            >
+              <Button size="small" danger>Delete</Button>
+            </Popconfirm>
+          </div>
         )
       ),
     },
@@ -214,6 +238,26 @@ export default function AdminDashboard() {
         />
         <Table dataSource={filteredUsers} columns={userColumns} rowKey="id" pagination={{ pageSize: 10 }} />
       </Card>
+
+      <Modal
+        title={`Reset password for ${resetTarget?.name || ""}`}
+        open={!!resetTarget}
+        onCancel={() => setResetTarget(null)}
+        onOk={submitPasswordReset}
+        okText="Reset Password"
+        confirmLoading={resetting}
+      >
+        <Text type="secondary">
+          Set a new password for this account. Communicate it to them directly (phone call, WhatsApp, etc.) —
+          there's no automatic notification.
+        </Text>
+        <Input.Password
+          placeholder="New password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          style={{ marginTop: 12 }}
+        />
+      </Modal>
     </div>
   );
 }

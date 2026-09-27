@@ -140,8 +140,7 @@ def list_customers(
 
 
 @router.delete("/{business_id}/customers/{customer_id}")
-def remove_customer(
-    business_id: str,
+def remove_customer(    business_id: str,
     customer_id: str,
     db: Session = Depends(get_db),
     user: models.User = Depends(require_role("admin", "shop_owner")),
@@ -164,3 +163,37 @@ def remove_customer(
     customer.business_id = None
     db.commit()
     return {"detail": "Customer removed from shop"}
+
+
+@router.post("/{business_id}/customers/{customer_id}/reset-password")
+def reset_customer_password(
+    business_id: str,
+    customer_id: str,
+    payload: dict,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(require_role("admin", "shop_owner")),
+):
+    """Shop owner resets a password for one of their own customers (free,
+    no email/SMS gateway needed — shop owner communicates the new password
+    to the customer directly, e.g. by phone or in person)."""
+    from fastapi import HTTPException
+    from app.core.security import hash_password
+
+    if user.role == "shop_owner" and str(user.business_id) != str(business_id):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    new_password = payload.get("new_password")
+    if not new_password or len(new_password) < 4:
+        raise HTTPException(status_code=400, detail="new_password must be at least 4 characters")
+
+    customer = (
+        db.query(models.User)
+        .filter(models.User.id == customer_id, models.User.business_id == business_id)
+        .first()
+    )
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found for this shop")
+
+    customer.password_hash = hash_password(new_password)
+    db.commit()
+    return {"detail": "Password reset"}

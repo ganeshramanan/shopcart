@@ -172,3 +172,29 @@ def delete_user(
     db.delete(user)
     db.commit()
     return {"detail": "User deleted"}
+
+
+@router.post("/users/{user_id}/reset-password")
+def admin_reset_password(
+    user_id: str,
+    payload: dict,
+    db: Session = Depends(get_db),
+    _admin: models.User = Depends(require_role("admin")),
+):
+    """Super-admin only: reset any user's password (e.g. a shop owner who's
+    locked out). No email/SMS infrastructure needed — Cartbi sets a new
+    password directly and communicates it to the account holder off-platform
+    (phone call, WhatsApp, etc.)."""
+    from app.core.security import hash_password
+
+    new_password = payload.get("new_password")
+    if not new_password or len(new_password) < 4:
+        raise HTTPException(status_code=400, detail="new_password must be at least 4 characters")
+
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.password_hash = hash_password(new_password)
+    db.commit()
+    return {"detail": "Password reset"}

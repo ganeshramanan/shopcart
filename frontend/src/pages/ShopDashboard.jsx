@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   Layout, Menu, Card, Row, Col, Statistic, Button, Input, Select, DatePicker,
   Table, Tag, Space, Badge, Form, Upload, message, Popconfirm, Empty, Typography,
-  notification,
+  notification, Modal,
 } from "antd";
 import {
   HomeOutlined, ShoppingCartOutlined, InboxOutlined, PlusCircleOutlined,
@@ -74,6 +74,9 @@ export default function ShopDashboard() {
   const [business, setBusiness] = useState(null);
   const [contactPhoneInput, setContactPhoneInput] = useState("");
   const [savingContact, setSavingContact] = useState(false);
+  const [customerResetTarget, setCustomerResetTarget] = useState(null);
+  const [customerNewPassword, setCustomerNewPassword] = useState("");
+  const [resettingCustomer, setResettingCustomer] = useState(false);
   const [addForm] = Form.useForm();
 
   const businessId = user?.business_id;
@@ -214,6 +217,27 @@ export default function ShopDashboard() {
     loadCustomers();
   };
 
+  const submitCustomerPasswordReset = async () => {
+    if (!customerNewPassword || customerNewPassword.length < 4) {
+      message.error("Password must be at least 4 characters");
+      return;
+    }
+    setResettingCustomer(true);
+    try {
+      await api.post(
+        `/businesses/${businessId}/customers/${customerResetTarget.id}/reset-password`,
+        { new_password: customerNewPassword }
+      );
+      message.success(`Password reset for ${customerResetTarget.name}. Let them know their new password directly.`);
+      setCustomerResetTarget(null);
+      setCustomerNewPassword("");
+    } catch (err) {
+      message.error(err.response?.data?.detail || "Could not reset password");
+    } finally {
+      setResettingCustomer(false);
+    }
+  };
+
   const saveContactPhone = async () => {
     setSavingContact(true);
     try {
@@ -303,12 +327,15 @@ export default function ShopDashboard() {
     { title: "Orders", dataIndex: "order_count", key: "order_count", width: 90 },
     { title: "Total Spent", dataIndex: "total_spent", key: "total_spent", width: 120, render: (v) => `₹${v}` },
     {
-      title: "", key: "actions", width: 100,
+      title: "", key: "actions", width: 180,
       render: (_, c) => (
         !c.is_guest && (
-          <Popconfirm title={`Remove ${c.name}?`} onConfirm={() => removeCustomer(c.id)}>
-            <Button size="small" danger>Remove</Button>
-          </Popconfirm>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button size="small" onClick={() => { setCustomerResetTarget(c); setCustomerNewPassword(""); }}>Reset PW</Button>
+            <Popconfirm title={`Remove ${c.name}?`} onConfirm={() => removeCustomer(c.id)}>
+              <Button size="small" danger>Remove</Button>
+            </Popconfirm>
+          </div>
         )
       ),
     },
@@ -590,6 +617,25 @@ export default function ShopDashboard() {
           )}
         </div>
       </Content>
+
+      <Modal
+        title={`Reset password for ${customerResetTarget?.name || ""}`}
+        open={!!customerResetTarget}
+        onCancel={() => setCustomerResetTarget(null)}
+        onOk={submitCustomerPasswordReset}
+        okText="Reset Password"
+        confirmLoading={resettingCustomer}
+      >
+        <Text type="secondary">
+          Set a new password for this customer. Let them know it directly — there's no automatic notification.
+        </Text>
+        <Input.Password
+          placeholder="New password"
+          value={customerNewPassword}
+          onChange={(e) => setCustomerNewPassword(e.target.value)}
+          style={{ marginTop: 12 }}
+        />
+      </Modal>
     </Layout>
   );
 }
