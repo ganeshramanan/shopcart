@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   Layout, Menu, Card, Row, Col, Statistic, Button, Input, Select, DatePicker,
   Table, Tag, Space, Badge, Form, Upload, message, Popconfirm, Empty, Typography,
-  notification, Modal,
+  notification, Modal, Collapse,
 } from "antd";
 import {
   HomeOutlined, ShoppingCartOutlined, InboxOutlined, PlusCircleOutlined,
@@ -432,19 +432,35 @@ export default function ShopDashboard() {
                 <div style={{ padding: "12px 24px" }}>
                   <Space wrap>
                     <Input
-                      placeholder="Paste a logo/banner image URL"
+                      placeholder="Paste a direct image URL"
                       value={logoUrlInput}
                       onChange={(e) => setLogoUrlInput(e.target.value)}
                       style={{ width: 320 }}
                     />
                     <Button loading={savingLogo} onClick={saveLogoUrl}>Save Banner</Button>
                   </Space>
-                  <div style={{ marginTop: 6 }}>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                      No file to upload yet — just paste a link. Tip: upload your photo to Google
-                      Drive/Photos, set it to "Anyone with the link", then paste that share link here.
-                    </Text>
-                  </div>
+                  <Collapse
+                    ghost
+                    size="small"
+                    style={{ marginTop: 8 }}
+                    items={[{
+                      key: "howto",
+                      label: <Text type="secondary" style={{ fontSize: 12 }}>How to get an image link from Google Drive (one-time setup) →</Text>,
+                      children: (
+                        <div style={{ fontSize: 12, color: "#6b7280" }}>
+                          <ol style={{ paddingLeft: 18, margin: 0 }}>
+                            <li>Upload your shop's photo/logo to <a href="https://drive.google.com" target="_blank" rel="noreferrer">Google Drive</a></li>
+                            <li>Right-click the file → <strong>Share</strong> → set access to <strong>"Anyone with the link"</strong></li>
+                            <li>Copy the share link — it looks like <code>https://drive.google.com/file/d/FILE_ID/view</code></li>
+                            <li>Copy just the <strong>FILE_ID</strong> part (the long code between <code>/d/</code> and <code>/view</code>)</li>
+                            <li>Paste this into the field above, replacing FILE_ID with your code:<br />
+                              <code>https://drive.google.com/uc?export=view&id=FILE_ID</code>
+                            </li>
+                          </ol>
+                        </div>
+                      ),
+                    }]}
+                  />
                 </div>
               </Card>
 
