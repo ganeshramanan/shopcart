@@ -21,12 +21,9 @@ const STATUS_BORDER_COLORS = {
   placed: "#eab308", confirmed: "#2563eb", packing: "#a855f7", ready: "#06b6d4",
   dispatched: "#4338ca", delivered: "#16a34a", cancelled: "#dc2626",
 };
-const ITEMS_PREVIEW_COUNT = 4;
 
 function StaffOrderCard({ order: o }) {
   const [expanded, setExpanded] = useState(false);
-  const hasMore = o.items.length > ITEMS_PREVIEW_COUNT;
-  const visibleItems = expanded ? o.items : o.items.slice(0, ITEMS_PREVIEW_COUNT);
 
   return (
     <Card
@@ -61,24 +58,25 @@ function StaffOrderCard({ order: o }) {
         <Tag color={STATUS_COLORS[o.status]} style={{ fontWeight: 600 }}>{o.status}</Tag>
       </div>
 
-      <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {visibleItems.map((it) => (
-          <span key={it.id} className="staff-order-item-tag">
-            {it.product_name_snapshot} <b>· {it.quantity} {it.unit_type_snapshot}</b>
-          </span>
-        ))}
-      </div>
+      <Button
+        type="link"
+        size="small"
+        style={{ padding: 0, marginTop: 10, fontSize: 13, fontWeight: 600 }}
+        icon={expanded ? <UpOutlined /> : <DownOutlined />}
+        onClick={() => setExpanded((v) => !v)}
+      >
+        {o.items.length} item{o.items.length !== 1 ? "s" : ""} {expanded ? "— hide" : "— view"}
+      </Button>
 
-      {hasMore && (
-        <Button
-          type="link"
-          size="small"
-          style={{ padding: 0, marginTop: 6, fontSize: 12 }}
-          icon={expanded ? <UpOutlined /> : <DownOutlined />}
-          onClick={() => setExpanded((v) => !v)}
-        >
-          {expanded ? "Show less" : `+${o.items.length - ITEMS_PREVIEW_COUNT} more item(s)`}
-        </Button>
+      {expanded && (
+        <div className="staff-order-items-list">
+          {o.items.map((it) => (
+            <div key={it.id} className="staff-order-item-row">
+              <span className="staff-order-item-name">{it.product_name_snapshot}</span>
+              <span className="staff-order-item-qty">{it.quantity} {it.unit_type_snapshot}</span>
+            </div>
+          ))}
+        </div>
       )}
 
       <div style={{ marginTop: 10 }}>

@@ -416,15 +416,25 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
   .mobile-only-affix { display: block; position: fixed !important; bottom: 0; left: 0; width: 100%; z-index: 500; }
 }
 
-/* Staff Orders — compact item tags instead of a plain bullet list, so
-   busy staff can scan a big order (10+ items) quickly. Neutral blue-gray,
-   matching the deliberately plain/professional staff POS palette. */
-.staff-order-item-tag {
-  background: #f3f4f6;
-  color: #374151;
-  border-radius: 6px;
-  padding: 3px 8px;
-  font-size: 12px;
-  white-space: nowrap;
+/* Staff Orders — items collapsed behind a "N items — view" toggle by
+   default (so a 20+ item order doesn't dominate the screen), expanding
+   into a clean scrollable vertical list — name left, qty right — instead
+   of a wrapped tag cloud that got dense/unreadable on big orders. */
+.staff-order-items-list {
+  margin-top: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
 }
-.staff-order-item-tag b { font-weight: 600; color: #1f2937; }
+.staff-order-item-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 10px;
+  font-size: 13px;
+  border-bottom: 1px solid #f5f5f5;
+}
+.staff-order-item-row:last-child { border-bottom: none; }
+.staff-order-item-name { color: #1f2937; }
+.staff-order-item-qty { color: #6b7280; font-weight: 600; white-space: nowrap; }
