@@ -12,7 +12,30 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.post("/signup", response_model=schemas.Token)
 def signup(payload: schemas.UserSignup, db: Session = Depends(get_db)):
     existing = db.query(models.User).filter(models.User.phone == payload.phone).first()
+
     if existing:
+        # A walk-in/guest customer (captured by a shop owner at POS billing,
+        # no password ever set) is allowed to "claim" their account by
+        # signing up with the same phone number — this upgrades them to a
+        # real customer who can log in and order remotely, while keeping
+        # their name and order history intact. Any account that already
+        # has a password is a real registered user — still blocked as a
+        # duplicate in that case.
+        if existing.is_guest and not existing.password_hash:
+            existing.password_hash = hash_password(payload.password)
+            existing.is_guest = False
+            # Keep their original name if they already had one from the
+            # walk-in sale; only overwrite if it was left as the default.
+            if payload.name and existing.name in (None, "", "Walk-in Customer"):
+                existing.name = payload.name
+            if payload.business_id and not existing.business_id:
+                existing.business_id = payload.business_id
+            db.commit()
+            db.refresh(existing)
+
+            token = create_access_token({"sub": existing.id, "role": existing.role})
+            return schemas.Token(access_token=token, user=existing)
+
         raise HTTPException(status_code=400, detail="Phone number already registered")
 
     if payload.business_id:
