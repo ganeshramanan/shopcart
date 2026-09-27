@@ -9,6 +9,16 @@ import ShopBanner from "../components/ShopBanner.jsx";
 
 const { Title, Text } = Typography;
 
+// Light-touch emoji lookup so category chips feel tappable/friendly instead
+// of plain text pills — falls back to a generic tag for anything unmapped.
+const CATEGORY_EMOJI = {
+  all: "🛒",
+  vegetables: "🥦", fruits: "🍎", dairy: "🥛", grains: "🌾", rice: "🍚",
+  pulses: "🫘", spices: "🌶️", snacks: "🍪", beverages: "🥤", bakery: "🍞",
+  household: "🧴", personal: "🧼", medicines: "💊", laundry: "🧺",
+};
+const emojiFor = (category) => CATEGORY_EMOJI[category?.toLowerCase()] || "🏷️";
+
 export default function Catalog() {
   const { businessId } = useParams();
   const [products, setProducts] = useState([]);
@@ -98,6 +108,13 @@ export default function Catalog() {
   return (
     <div>
       {business ? <ShopBanner business={business} /> : <Title level={3}>Catalog</Title>}
+
+      {business && (
+        <div className="catalog-tagline">
+          <Text>🛍️ Fresh picks, fair prices — order now, we'll have it ready for you.</Text>
+        </div>
+      )}
+
       {error && <Alert type="error" message={error} showIcon style={{ margin: "12px 0" }} />}
 
       <Modal
@@ -108,7 +125,7 @@ export default function Catalog() {
       >
         {placedOrder && (
           <div style={{ textAlign: "center", padding: "12px 0" }}>
-            <CheckCircleFilled style={{ fontSize: 48, color: "#10b981" }} />
+            <CheckCircleFilled style={{ fontSize: 48, color: "#16a34a" }} />
             <Title level={4} style={{ marginTop: 12 }}>Order Placed!</Title>
             <Text type="secondary">Order #{placedOrder.id.slice(0, 8)} · ₹{placedOrder.total_amount}</Text>
 
@@ -133,27 +150,26 @@ export default function Catalog() {
       </Modal>
 
       <Input
-        prefix={<SearchOutlined />}
-        placeholder="Search products..."
+        className="catalog-search-input"
+        prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
+        placeholder="Search for atta, rice, milk..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        style={{ maxWidth: 400, margin: "16px 0 12px" }}
+        size="large"
+        style={{ maxWidth: 440, margin: "20px 0 14px" }}
         allowClear
       />
 
       {categories.length > 1 && (
-        <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 12 }}>
+        <div className="catalog-chip-row">
           {categories.map((c) => (
-            <Button
+            <button
               key={c}
-              className={c === activeCategory ? "catalog-chip-active" : ""}
-              type={c === activeCategory ? "primary" : "default"}
-              shape="round"
-              size="small"
+              className={`catalog-chip ${c === activeCategory ? "catalog-chip-active" : ""}`}
               onClick={() => setActiveCategory(c)}
             >
-              {c}
-            </Button>
+              <span className="catalog-chip-emoji">{emojiFor(c === "All" ? "all" : c)}</span> {c}
+            </button>
           ))}
         </div>
       )}
@@ -161,9 +177,13 @@ export default function Catalog() {
       <Row gutter={16}>
         <Col xs={24} lg={17}>
           {visibleProducts.length === 0 ? (
-            <Empty description="No products match your search" style={{ marginTop: 40 }} />
+            <div className="catalog-empty-state">
+              <div style={{ fontSize: 40 }}>🔍</div>
+              <Title level={5} style={{ marginTop: 8 }}>No products match your search</Title>
+              <Text type="secondary">Try a different keyword or browse another category.</Text>
+            </div>
           ) : (
-            <Row gutter={[12, 12]}>
+            <Row gutter={[14, 14]}>
               {visibleProducts.map((p) => (
                 <Col key={p.id} xs={12} sm={8} md={6}>
                   <Card
@@ -173,19 +193,19 @@ export default function Catalog() {
                       <Image
                         src={p.image_url || "https://placehold.co/300x300/CCCCCC/666666?text=No+Image"}
                         alt={p.name}
-                        height={120}
+                        height={150}
                         style={{ objectFit: "cover" }}
                         preview={false}
                       />
                     }
                   >
-                    <Text strong style={{ fontSize: 13, display: "block", minHeight: 34 }}>{p.name}</Text>
-                    <Text className="catalog-price">₹{p.price} / {p.unit_type}</Text>
-                    <div style={{ marginTop: 8 }}>
+                    <Text strong className="catalog-product-name">{p.name}</Text>
+                    <div className="catalog-price-pill">₹{p.price} <span>/ {p.unit_type}</span></div>
+                    <div style={{ marginTop: 10 }}>
                       {(cart[p.id] || 0) > 0 ? (
-                        <div className="catalog-qty-stepper" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderRadius: 8, padding: "2px 4px" }}>
+                        <div className="catalog-qty-stepper">
                           <Button size="small" type="text" style={{ color: "#fff" }} icon={<MinusOutlined />} onClick={() => setQty(p.id, (cart[p.id] || 0) - step(p.unit_type))} />
-                          <Text style={{ color: "#fff", fontWeight: 600 }}>{cart[p.id]}</Text>
+                          <Text style={{ color: "#fff", fontWeight: 700 }}>{cart[p.id]}</Text>
                           <Button size="small" type="text" style={{ color: "#fff" }} icon={<PlusOutlined />} onClick={() => setQty(p.id, (cart[p.id] || 0) + step(p.unit_type))} />
                         </div>
                       ) : (
@@ -201,9 +221,14 @@ export default function Catalog() {
 
         <Col xs={0} lg={7}>
           <Affix offsetTop={16}>
-            <Card title="Your Cart">
+            <Card className="catalog-cart-card" title="🛒 Your Cart">
               {itemCount === 0 ? (
-                <Text type="secondary">No items added yet. Tap "+ Add" on a product to start.</Text>
+                <div style={{ textAlign: "center", padding: "16px 0" }}>
+                  <div style={{ fontSize: 32 }}>🧺</div>
+                  <Text type="secondary" style={{ display: "block", marginTop: 8 }}>
+                    No items added yet. Tap "+ Add" on a product to start.
+                  </Text>
+                </div>
               ) : (
                 <>
                   {cartLines.map(({ product, qty, lineTotal }) => (
@@ -223,7 +248,7 @@ export default function Catalog() {
                   ))}
                   <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #f0f0f0", paddingTop: 10, marginBottom: 10 }}>
                     <Text>{itemCount} item(s)</Text>
-                    <Text strong className="catalog-price" style={{ fontSize: 15 }}>₹{total.toFixed(2)}</Text>
+                    <Text strong className="catalog-price" style={{ fontSize: 16 }}>₹{total.toFixed(2)}</Text>
                   </div>
                   <Button className="catalog-add-btn" block loading={placing} onClick={placeOrder}>Place Order</Button>
                 </>

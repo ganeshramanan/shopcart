@@ -104,17 +104,90 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
 .stat-card-v2-trend.down { color: #b91c1c; }
 .stat-card-v2-trend-label { color: #6b7280; font-weight: 400; }
 
-/* Catalog product cards — hover lift + green accent glow for the
-   "attractive, trustworthy billing" look (green = money/action, blue stays
-   the structural/trust color elsewhere). */
+/* Catalog — customer-facing storefront. Bigger imagery, default shadows
+   (not just on hover), pill-style price/chips, and more breathing room so
+   it reads as a real storefront rather than a generic admin grid. Blue
+   stays the trust/structural color; green is money/action. */
+.catalog-tagline {
+  background: linear-gradient(135deg, #ecfdf5, #eff6ff);
+  border: 1px solid #d1fae5;
+  border-radius: 12px;
+  padding: 10px 16px;
+  margin: 12px 0 4px;
+  color: #166534;
+  font-weight: 500;
+}
+.catalog-search-input {
+  border-radius: 999px !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+.catalog-search-input .ant-input {
+  border-radius: 999px !important;
+}
+
+.catalog-chip-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 14px;
+  margin-top: 4px;
+}
+.catalog-chip {
+  flex-shrink: 0;
+  background: #fff;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.catalog-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+.catalog-chip-emoji { margin-right: 2px; }
+.catalog-chip-active {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+  color: #fff !important;
+}
+
 .catalog-product-card {
+  border-radius: 16px !important;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   border-color: #f0f0f0 !important;
 }
 .catalog-product-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 22px rgba(22,163,74,0.14);
+  box-shadow: 0 12px 26px rgba(22,163,74,0.16);
   border-color: #86efac !important;
+}
+.catalog-product-card .ant-card-cover img { border-radius: 0 !important; }
+.catalog-product-name {
+  font-size: 14px;
+  display: block;
+  min-height: 38px;
+  line-height: 1.35;
+  margin-bottom: 6px;
+  color: #111827;
+}
+.catalog-price-pill {
+  display: inline-block;
+  background: #f0fdf4;
+  color: #15803d;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.catalog-price-pill span {
+  font-weight: 500;
+  font-size: 11px;
+  color: #4b7c5b;
 }
 .catalog-price {
   color: #16a34a;
@@ -125,7 +198,8 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
   background: #16a34a !important;
   border-color: #16a34a !important;
   color: #fff !important;
-  font-weight: 600;
+  font-weight: 700;
+  border-radius: 8px !important;
   transition: transform 0.12s ease, background 0.12s ease;
 }
 .catalog-add-btn:hover {
@@ -134,12 +208,23 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
   transform: scale(1.03);
 }
 .catalog-qty-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: #16a34a !important;
+  border-radius: 8px;
+  padding: 2px 4px;
 }
-.catalog-chip-active {
-  background: #16a34a !important;
-  border-color: #16a34a !important;
-  color: #fff !important;
+.catalog-cart-card {
+  border-radius: 16px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.catalog-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
 /* Dashboard */
