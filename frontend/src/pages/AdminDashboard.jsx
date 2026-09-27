@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Row, Col, Card, Statistic, Table, Tag, Button, Popconfirm, Typography, message } from "antd";
+import { Row, Col, Card, Statistic, Table, Tag, Button, Popconfirm, Typography, message, Input } from "antd";
 import api from "../api";
 
 const { Title, Text } = Typography;
@@ -7,6 +7,8 @@ const { Title, Text } = Typography;
 export default function AdminDashboard() {
   const [owners, setOwners] = useState([]);
   const [businesses, setBusinesses] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [userSearch, setUserSearch] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -17,6 +19,7 @@ export default function AdminDashboard() {
   const load = () => {
     api.get("/admin/shop-owners").then((res) => setOwners(res.data)).catch((e) => setError(e.response?.data?.detail || "Failed to load"));
     api.get("/admin/businesses").then((res) => setBusinesses(res.data)).catch(() => {});
+    api.get("/admin/users").then((res) => setAllUsers(res.data)).catch(() => {});
   };
 
   useEffect(() => { load(); }, []);
@@ -54,8 +57,23 @@ export default function AdminDashboard() {
     }
   };
 
+  const deleteUser = async (userId) => {
+    try {
+      await api.delete(`/admin/users/${userId}`);
+      message.success("User deleted");
+      load();
+    } catch (err) {
+      message.error(err.response?.data?.detail || "Could not delete this user");
+    }
+  };
+
   const pendingOwners = owners.filter((o) => o.approval_status === "pending");
   const decidedOwners = owners.filter((o) => o.approval_status !== "pending");
+
+  const filteredUsers = allUsers.filter((u) => {
+    const q = userSearch.trim().toLowerCase();
+    return !q || u.name.toLowerCase().includes(q) || (u.phone && u.phone.includes(q));
+  });
 
   const ownerColumns = [
     {
@@ -105,6 +123,38 @@ export default function AdminDashboard() {
     },
   ];
 
+  const userColumns = [
+    {
+      title: "Name", dataIndex: "name", key: "name",
+      render: (name, u) => (
+        <div>
+          <Text strong>{name}</Text>{" "}
+          <Tag>{u.role}</Tag>
+          {!u.is_active && <Tag color="red">Disabled</Tag>}
+          {u.is_guest && <Tag color="default">Guest</Tag>}
+        </div>
+      ),
+    },
+    { title: "Phone", dataIndex: "phone", key: "phone", render: (p) => p || <Text type="secondary">—</Text> },
+    {
+      title: "Business", key: "business",
+      render: (_, u) => u.business_name || <Text type="secondary">—</Text>,
+    },
+    { title: "Orders", dataIndex: "order_count", key: "order_count", width: 80 },
+    {
+      title: "", key: "actions", width: 100,
+      render: (_, u) => (
+        <Popconfirm
+          title={`Permanently delete ${u.name}?`}
+          description="This cannot be undone."
+          onConfirm={() => deleteUser(u.id)}
+        >
+          <Button size="small" danger>Delete</Button>
+        </Popconfirm>
+      ),
+    },
+  ];
+
   return (
     <div>
       <Title level={3} style={{ marginBottom: 0 }}>Cartbi Platform Overview</Title>
@@ -142,6 +192,21 @@ export default function AdminDashboard() {
 
       <Card title="All Businesses" style={{ marginTop: 20 }}>
         <Table dataSource={businesses} columns={businessColumns} rowKey="id" pagination={{ pageSize: 10 }} />
+      </Card>
+
+      <Card title="All Users (any role)" style={{ marginTop: 20 }}>
+        <Text type="secondary">
+          Full account list across every role — useful for finding orphaned/misconfigured accounts
+          not shown in the Shop Owners list above (e.g. a stuck phone number blocking a new signup).
+        </Text>
+        <Input
+          placeholder="Search by name or phone..."
+          value={userSearch}
+          onChange={(e) => setUserSearch(e.target.value)}
+          style={{ margin: "12px 0", maxWidth: 320 }}
+          allowClear
+        />
+        <Table dataSource={filteredUsers} columns={userColumns} rowKey="id" pagination={{ pageSize: 10 }} />
       </Card>
     </div>
   );

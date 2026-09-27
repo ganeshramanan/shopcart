@@ -115,3 +115,60 @@ def list_all_businesses(db: Session = Depends(get_db), _admin: models.User = Dep
             "order_count": order_count,
         })
     return result
+
+
+@router.get("/users")
+def list_all_users(db: Session = Depends(get_db), _admin: models.User = Depends(require_role("admin"))):
+    """Super-admin only: every user account on the platform, regardless of
+    role — useful for finding/cleaning up orphaned or misconfigured accounts
+    that don't show up in the role-specific lists (e.g. shop-owners list)."""
+    users = db.query(models.User).order_by(models.User.created_at.desc()).all()
+    result = []
+    for u in users:
+        biz = db.query(models.Business).filter(models.Business.id == u.business_id).first() if u.business_id else None
+        order_count = db.query(models.Order).filter(models.Order.customer_id == u.id).count()
+        result.append({
+            "id": u.id,
+            "name": u.name,
+            "phone": u.phone,
+            "role": u.role,
+            "is_active": u.is_active,
+            "is_guest": u.is_guest,
+            "approval_status": u.approval_status,
+            "business_id": u.business_id,
+            "business_name": biz.name if biz else None,
+            "order_count": order_count,
+            "created_at": u.created_at,
+        })
+    return result
+
+
+@router.delete("/users/{user_id}")
+def delete_user(
+    user_id: str,
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(require_role("admin")),
+):
+    """Super-admin only: permanently delete ANY user account, regardless of
+    role. Blocked if the account still has a business attached (delete the
+    business first) or has order history (deleting would break past bills'
+    customer references) — use toggle-active/disable instead for those cases."""
+    if user_id == admin.id:
+        raise HTTPException(status_code=400, detail="You cannot delete your own account")
+
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.business_id:
+        raise HTTPException(status_code=400, detail="This user still has a business attached. Delete their business first.")
+
+    order_count = db.query(models.Order).filter(models.Order.customer_id == user.id).count()
+    if order_count > 0:
+        raise HTTPException(
+            status_code=400,
+            detail=f"This user has {order_count} order(s) on record. Deleting would break that order history — disable the account instead.",
+        )
+
+    db.delete(user)
+    db.commit()
+    return {"detail": "User deleted"}
