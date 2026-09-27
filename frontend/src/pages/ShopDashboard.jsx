@@ -439,6 +439,12 @@ export default function ShopDashboard() {
                     />
                     <Button loading={savingLogo} onClick={saveLogoUrl}>Save Banner</Button>
                   </Space>
+                  <div style={{ marginTop: 6 }}>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      No file to upload yet — just paste a link. Tip: upload your photo to Google
+                      Drive/Photos, set it to "Anyone with the link", then paste that share link here.
+                    </Text>
+                  </div>
                 </div>
               </Card>
 
