@@ -44,6 +44,7 @@ class BusinessCreate(BaseModel):
     contact_phone: Optional[str] = None
     address: Optional[str] = None
     logo_url: Optional[str] = None
+    min_order_value: float = 0
 
 
 class BusinessOut(BaseModel):
@@ -54,6 +55,7 @@ class BusinessOut(BaseModel):
     contact_phone: Optional[str] = None
     address: Optional[str] = None
     logo_url: Optional[str] = None
+    min_order_value: float = 0
 
 
 class BusinessUpdate(BaseModel):
@@ -61,6 +63,7 @@ class BusinessUpdate(BaseModel):
     contact_phone: Optional[str] = None
     address: Optional[str] = None
     logo_url: Optional[str] = None
+    min_order_value: Optional[float] = None
 
 
 # ---------- Product ----------

@@ -47,6 +47,7 @@ class Business(Base):
     contact_phone = Column(String, nullable=True)
     address = Column(Text, nullable=True)
     logo_url = Column(String, nullable=True)
+    min_order_value = Column(Float, nullable=False, default=0)  # 0 = no minimum
     created_at = Column(DateTime, default=datetime.utcnow)
 
     products = relationship("Product", back_populates="business", cascade="all, delete-orphan")

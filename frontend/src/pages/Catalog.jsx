@@ -131,9 +131,13 @@ export default function Catalog() {
 
   const total = cartLines.reduce((sum, l) => sum + l.lineTotal, 0);
   const itemCount = cartLines.length;
+  const minOrderValue = business?.min_order_value || 0;
+  const belowMinimum = minOrderValue > 0 && itemCount > 0 && total < minOrderValue;
+  const amountShortOfMinimum = belowMinimum ? Math.round((minOrderValue - total) * 100) / 100 : 0;
 
   const placeOrder = async () => {
     if (!user) return navigate("/login");
+    if (belowMinimum) return; // guarded by disabled button too, but double-check
     setError("");
     setPlacing(true);
     try {
@@ -175,6 +179,11 @@ export default function Catalog() {
       {business && (
         <div className="catalog-tagline">
           <Text>🛍️ Fresh picks, fair prices — order now, we'll have it ready for you.</Text>
+          {minOrderValue > 0 && (
+            <Text style={{ display: "block", marginTop: 4, fontSize: 12 }}>
+              Minimum order value: <b>₹{minOrderValue}</b>
+            </Text>
+          )}
         </div>
       )}
 
@@ -349,7 +358,14 @@ export default function Catalog() {
                     <Text>{itemCount} item(s)</Text>
                     <Text strong className="catalog-price" style={{ fontSize: 16 }}>₹{total.toFixed(2)}</Text>
                   </div>
-                  <Button className="catalog-add-btn" block loading={placing} onClick={placeOrder}>Place Order</Button>
+                  {belowMinimum && (
+                    <Text type="warning" style={{ display: "block", fontSize: 12, marginBottom: 8 }}>
+                      Add ₹{amountShortOfMinimum} more to reach the ₹{minOrderValue} minimum order value.
+                    </Text>
+                  )}
+                  <Button className="catalog-add-btn" block loading={placing} disabled={belowMinimum} onClick={placeOrder}>
+                    {belowMinimum ? `Add ₹${amountShortOfMinimum} More` : "Place Order"}
+                  </Button>
                 </>
               )}
             </Card>
@@ -359,13 +375,20 @@ export default function Catalog() {
 
       {itemCount > 0 && (
         <Affix offsetBottom={0} className="mobile-only-affix">
-          <div style={{ background: "#111827", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: "12px 12px 0 0" }}>
-            <Text style={{ color: "#fff" }}>
-              <Badge count={itemCount} style={{ marginRight: 8, backgroundColor: "#16a34a" }} /> ₹{total.toFixed(2)}
-            </Text>
-            <Button className="catalog-add-btn" loading={placing} onClick={placeOrder} icon={<ShoppingCartOutlined />}>
-              Place Order
-            </Button>
+          <div style={{ background: "#111827", padding: "12px 16px", borderRadius: "12px 12px 0 0" }}>
+            {belowMinimum && (
+              <Text type="warning" style={{ display: "block", fontSize: 11, marginBottom: 6 }}>
+                Add ₹{amountShortOfMinimum} more to reach the ₹{minOrderValue} minimum
+              </Text>
+            )}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <Text style={{ color: "#fff" }}>
+                <Badge count={itemCount} style={{ marginRight: 8, backgroundColor: "#16a34a" }} /> ₹{total.toFixed(2)}
+              </Text>
+              <Button className="catalog-add-btn" loading={placing} disabled={belowMinimum} onClick={placeOrder} icon={<ShoppingCartOutlined />}>
+                {belowMinimum ? `Add ₹${amountShortOfMinimum} More` : "Place Order"}
+              </Button>
+            </div>
           </div>
         </Affix>
       )}

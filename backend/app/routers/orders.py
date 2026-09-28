@@ -20,10 +20,15 @@ def create_order(
     if not payload.items:
         raise HTTPException(status_code=400, detail="Order must have at least one item")
 
-    order = models.Order(business_id=payload.business_id, customer_id=user.id, notes=payload.notes)
-    db.add(order)
-    db.flush()  # get order.id
+    business = db.query(models.Business).filter(models.Business.id == payload.business_id).first()
+    if not business:
+        raise HTTPException(status_code=404, detail="Shop not found")
 
+    # Look up products and compute the total BEFORE creating any DB rows, so
+    # a minimum-order-value rejection doesn't leave a half-created order
+    # behind. Enforced server-side (not just in the UI) since this is
+    # billing-adjacent — the UI check is just a head start for the customer.
+    line_items = []
     total = 0.0
     for item in payload.items:
         product = db.query(models.Product).filter(models.Product.id == item.product_id).first()
@@ -34,18 +39,31 @@ def create_order(
 
         line_total = round(product.price * item.quantity, 2)
         total += line_total
+        line_items.append((product, item.quantity, line_total))
 
+    total = round(total, 2)
+    if business.min_order_value and total < business.min_order_value:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Minimum order value for this shop is ₹{business.min_order_value}. Add ₹{round(business.min_order_value - total, 2)} more to place this order.",
+        )
+
+    order = models.Order(business_id=payload.business_id, customer_id=user.id, notes=payload.notes)
+    db.add(order)
+    db.flush()  # get order.id
+
+    for product, quantity, line_total in line_items:
         db.add(models.OrderItem(
             order_id=order.id,
             product_id=product.id,
             product_name_snapshot=product.name,
             unit_type_snapshot=product.unit_type,
-            quantity=item.quantity,
+            quantity=quantity,
             unit_price_snapshot=product.price,
             line_total=line_total,
         ))
 
-    order.total_amount = round(total, 2)
+    order.total_amount = total
     db.commit()
     db.refresh(order)
     return order

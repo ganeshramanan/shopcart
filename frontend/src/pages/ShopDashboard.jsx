@@ -87,6 +87,8 @@ export default function ShopDashboard() {
   const [savingContact, setSavingContact] = useState(false);
   const [logoUrlInput, setLogoUrlInput] = useState("");
   const [savingLogo, setSavingLogo] = useState(false);
+  const [minOrderValueInput, setMinOrderValueInput] = useState("");
+  const [savingMinOrderValue, setSavingMinOrderValue] = useState(false);
   const [customerResetTarget, setCustomerResetTarget] = useState(null);
   const [customerNewPassword, setCustomerNewPassword] = useState("");
   const [resettingCustomer, setResettingCustomer] = useState(false);
@@ -154,6 +156,7 @@ export default function ShopDashboard() {
       setBusiness(res.data);
       setContactPhoneInput(res.data.contact_phone || "");
       setLogoUrlInput(res.data.logo_url || "");
+      setMinOrderValueInput(res.data.min_order_value ? String(res.data.min_order_value) : "");
     });
   };
 
@@ -309,6 +312,24 @@ export default function ShopDashboard() {
       message.error(err.response?.data?.detail || "Could not save banner image");
     } finally {
       setSavingLogo(false);
+    }
+  };
+
+  const saveMinOrderValue = async () => {
+    const value = parseFloat(minOrderValueInput);
+    if (minOrderValueInput !== "" && (isNaN(value) || value < 0)) {
+      message.error("Enter a valid amount (0 or more)");
+      return;
+    }
+    setSavingMinOrderValue(true);
+    try {
+      await api.patch(`/businesses/${businessId}`, { min_order_value: minOrderValueInput === "" ? 0 : value });
+      message.success("Minimum order value updated");
+      loadBusiness();
+    } catch (err) {
+      message.error(err.response?.data?.detail || "Could not save minimum order value");
+    } finally {
+      setSavingMinOrderValue(false);
     }
   };
 
@@ -555,6 +576,24 @@ export default function ShopDashboard() {
                   </Space>
                 </Card>
               )}
+
+              <Card title="🛒 Minimum Order Value" style={{ marginTop: 16 }}>
+                <Text type="secondary">
+                  Customers must reach this amount before they can place an order. Leave at 0 (or empty) for no minimum.
+                </Text>
+                <Space style={{ marginTop: 12 }}>
+                  <Input
+                    placeholder="e.g. 100"
+                    prefix="₹"
+                    type="number"
+                    min={0}
+                    value={minOrderValueInput}
+                    onChange={(e) => setMinOrderValueInput(e.target.value)}
+                    style={{ width: 160 }}
+                  />
+                  <Button type="primary" className="dash-gradient-btn" loading={savingMinOrderValue} onClick={saveMinOrderValue}>Save</Button>
+                </Space>
+              </Card>
 
               <div style={{ marginTop: 16 }}>
                 <SignupLinkCard businessId={businessId} />

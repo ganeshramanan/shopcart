@@ -36,6 +36,7 @@ statements = [
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS can_view_orders BOOLEAN NOT NULL DEFAULT false;",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS can_share_signup_link BOOLEAN NOT NULL DEFAULT false;",
     "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS logo_url VARCHAR;",
+    "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS min_order_value DOUBLE PRECISION NOT NULL DEFAULT 0;",
 ]
 
 # Adding an enum value must run outside a transaction block in Postgres <12,
