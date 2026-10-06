@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from "./auth/AuthContext.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import BusinessList from "./pages/BusinessList.jsx";
+import Landing from "./pages/Landing.jsx";
 import Catalog from "./pages/Catalog.jsx";
 import MyOrders from "./pages/MyOrders.jsx";
 import Favorites from "./pages/Favorites.jsx";
@@ -123,7 +124,11 @@ function HomeRoute() {
   if (user?.role === "shop_owner") {
     return <Navigate to="/dashboard" replace />;
   }
-  return <BusinessList />;
+  // Logged-in customer with no shop yet (e.g. registered but hasn't picked
+  // one) — skip the marketing landing page, go straight to the shop
+  // directory so they can pick one.
+  if (user) return <BusinessList />;
+  return <Landing />;
 }
 
 export default function App() {
