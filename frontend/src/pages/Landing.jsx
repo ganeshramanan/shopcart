@@ -4,7 +4,6 @@ import {
   ShoppingOutlined, BarcodeOutlined, WhatsAppOutlined, MobileOutlined,
   BarChartOutlined, TeamOutlined, CheckCircleFilled, RocketOutlined,
 } from "@ant-design/icons";
-import BusinessList from "./BusinessList.jsx";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -137,15 +136,6 @@ export default function Landing() {
           </Button>
         </Link>
       </Card>
-
-      {/* Existing shops directory — secondary, for customers who already know their shop */}
-      <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 32 }}>
-        <Title level={4} style={{ marginBottom: 4 }}>Already shopping with us?</Title>
-        <Text type="secondary" style={{ display: "block", marginBottom: 16 }}>
-          If your shop already uses ShopCart, find it below to browse their catalog and order.
-        </Text>
-        <BusinessList />
-      </div>
     </div>
   );
 }
