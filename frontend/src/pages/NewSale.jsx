@@ -14,7 +14,7 @@ export default function NewSale({ products, businessId }) {
   const [scanMessage, setScanMessage] = useState("");
   const navigate = useNavigate();
 
-  const step = (unit) => (unit === "kg" || unit === "litre" ? 0.5 : 1);
+  const step = (unit) => (unit === "kg" || unit === "litre" || unit === "g" || unit === "ml" ? 0.5 : 1);
 
   const setQty = (productId, qty) => {
     setCart((prev) => {

@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import {
   Layout, Menu, Card, Row, Col, Button, Input, Select, DatePicker,
   Table, Tag, Space, Badge, Form, Upload, message, Popconfirm, Empty, Typography,
-  notification, Modal, Collapse,
+  notification, Modal, Collapse, AutoComplete,
 } from "antd";
 import {
   HomeOutlined, ShoppingCartOutlined, InboxOutlined, PlusCircleOutlined,
@@ -15,7 +15,7 @@ import {
 import { QRCodeSVG } from "qrcode.react";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
-import { formatDate, normalizeIndianPhone } from "../utils.js";
+import { formatDate, normalizeIndianPhone, COMMON_UNITS } from "../utils.js";
 import NewSale from "./NewSale.jsx";
 import PrintLabels from "./PrintLabels.jsx";
 import Analytics from "./Analytics.jsx";
@@ -827,7 +827,12 @@ export default function ShopDashboard() {
                   <Input placeholder="e.g. Basmati Rice" />
                 </Form.Item>
                 <Form.Item name="unit_type" label="Unit" rules={[{ required: true }]} initialValue="kg">
-                  <Input placeholder="kg, piece, litre..." />
+                  <AutoComplete
+                    options={COMMON_UNITS.map((u) => ({ value: u }))}
+                    filterOption={(input, option) => option.value.toLowerCase().includes(input.toLowerCase())}
+                  >
+                    <Input placeholder="kg, piece, litre..." />
+                  </AutoComplete>
                 </Form.Item>
                 <Form.Item name="price" label="Price" rules={[{ required: true }]}>
                   <Input type="number" step="0.01" prefix="₹" />
@@ -923,7 +928,12 @@ export default function ShopDashboard() {
             <Input placeholder="e.g. Basmati Rice" />
           </Form.Item>
           <Form.Item name="unit_type" label="Unit" rules={[{ required: true }]}>
-            <Input placeholder="kg, piece, litre..." />
+            <AutoComplete
+              options={COMMON_UNITS.map((u) => ({ value: u }))}
+              filterOption={(input, option) => option.value.toLowerCase().includes(input.toLowerCase())}
+            >
+              <Input placeholder="kg, piece, litre..." />
+            </AutoComplete>
           </Form.Item>
           <Form.Item name="price" label="Price" rules={[{ required: true }]}>
             <Input type="number" step="0.01" prefix="₹" />

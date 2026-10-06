@@ -29,3 +29,10 @@ export function normalizeIndianPhone(raw) {
   if (digits.length === 10) return `91${digits}`;
   return digits;
 }
+
+// Common unit options for the Add/Edit Product unit dropdown. Kept as a
+// plain string list (not an enum) — the dropdown allows free typing too
+// (Ant Select mode="tags"), so existing products with a custom unit like
+// "pack" or "bottle" keep working exactly as before; this list is just a
+// convenience shortlist, not a restriction.
+export const COMMON_UNITS = ["kg", "g", "litre", "ml", "piece", "pack", "bottle", "box", "dozen"];

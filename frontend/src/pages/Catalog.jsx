@@ -99,7 +99,7 @@ export default function Catalog() {
     navigate(location.pathname, { replace: true, state: {} });
   }, [products]);
 
-  const step = (unit) => (unit === "kg" || unit === "litre" ? 0.5 : 1);
+  const step = (unit) => (unit === "kg" || unit === "litre" || unit === "g" || unit === "ml" ? 0.5 : 1);
 
   const setQty = (productId, qty) => {
     setCart((prev) => {
