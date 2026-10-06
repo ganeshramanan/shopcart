@@ -95,10 +95,12 @@ export default function AdminDashboard() {
   const pendingOwners = owners.filter((o) => o.approval_status === "pending");
   const decidedOwners = owners.filter((o) => o.approval_status !== "pending");
 
-  const filteredUsers = allUsers.filter((u) => {
-    const q = userSearch.trim().toLowerCase();
-    return !q || u.name.toLowerCase().includes(q) || (u.phone && u.phone.includes(q));
-  });
+  const filteredUsers = allUsers
+    .filter((u) => !u.is_guest) // walk-in guests never have a phone/password — nothing to manage or reset here
+    .filter((u) => {
+      const q = userSearch.trim().toLowerCase();
+      return !q || u.name.toLowerCase().includes(q) || (u.phone && u.phone.includes(q));
+    });
 
   const ownerColumns = [
     {
@@ -173,7 +175,9 @@ export default function AdminDashboard() {
           <Tag>You</Tag>
         ) : (
           <div style={{ display: "flex", gap: 8 }}>
-            <Button size="small" onClick={() => { setResetTarget(u); setNewPassword(""); }}>Reset PW</Button>
+            {u.phone && (
+              <Button size="small" onClick={() => { setResetTarget(u); setNewPassword(""); }}>Reset PW</Button>
+            )}
             <Popconfirm
               title={`Permanently delete ${u.name}?`}
               description="This cannot be undone."
@@ -249,10 +253,12 @@ export default function AdminDashboard() {
           children: (
             <>
               <Text type="secondary">
-                Full account list across every role — includes walk-in/guest customers and staff.
-                Staff password resets are now self-service for shop owners (Staff tab on their
-                dashboard); use this only to find orphaned/misconfigured accounts not shown in the
-                Shop Owners list above (e.g. a stuck phone number blocking a new signup).
+                Every registered account with login credentials — customers, staff, shop owners —
+                excluding walk-in/guest customers (they're created at POS with no phone or password,
+                so there's nothing here to manage for them). Staff password resets are now
+                self-service for shop owners (Staff tab on their dashboard); use this mainly to help
+                a shop owner reset their own login, or to find an orphaned/misconfigured account not
+                shown in the Shop Owners list above (e.g. a stuck phone number blocking a new signup).
               </Text>
               <Input
                 placeholder="Search by name or phone..."
