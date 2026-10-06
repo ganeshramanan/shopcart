@@ -829,7 +829,7 @@ export default function ShopDashboard() {
                 <Form.Item name="unit_type" label="Unit" rules={[{ required: true }]} initialValue="kg">
                   <AutoComplete
                     options={COMMON_UNITS.map((u) => ({ value: u }))}
-                    filterOption={(input, option) => option.value.toLowerCase().includes(input.toLowerCase())}
+                    filterOption={false}
                   >
                     <Input placeholder="kg, piece, litre..." />
                   </AutoComplete>
@@ -930,7 +930,7 @@ export default function ShopDashboard() {
           <Form.Item name="unit_type" label="Unit" rules={[{ required: true }]}>
             <AutoComplete
               options={COMMON_UNITS.map((u) => ({ value: u }))}
-              filterOption={(input, option) => option.value.toLowerCase().includes(input.toLowerCase())}
+              filterOption={false}
             >
               <Input placeholder="kg, piece, litre..." />
             </AutoComplete>
