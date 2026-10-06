@@ -381,6 +381,8 @@ input, select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; fon
   .label-sheet { display: grid !important; }
   .pos-sidebar { display: none !important; }
   .pos-layout { display: block !important; }
+  .dash-sider, .ant-layout-header { display: none !important; }
+  .shop-dashboard-root { display: block !important; }
 }
 
 /* Barcode labels */

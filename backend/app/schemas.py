@@ -100,6 +100,8 @@ class ProductOut(BaseModel):
     category: Optional[str] = None
     barcode: Optional[str] = None
     attributes: Optional[dict[str, Any]] = {}
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 
 # ---------- Order ----------

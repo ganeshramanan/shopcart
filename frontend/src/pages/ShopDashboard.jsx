@@ -10,9 +10,10 @@ import {
   UploadOutlined, TeamOutlined, TagsOutlined, BarChartOutlined, UserOutlined,
   CopyOutlined, WhatsAppOutlined, QrcodeOutlined, MenuOutlined, ReloadOutlined,
   AppstoreOutlined, ThunderboltOutlined, ShoppingOutlined, WalletOutlined,
-  DownloadOutlined, ScanOutlined, EditOutlined,
+  DownloadOutlined, ScanOutlined, EditOutlined, CalendarOutlined, PrinterOutlined,
 } from "@ant-design/icons";
 import { QRCodeSVG } from "qrcode.react";
+import dayjs from "dayjs";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { formatDate, normalizeIndianPhone, COMMON_UNITS } from "../utils.js";
@@ -38,6 +39,7 @@ const NAV_ITEMS = [
   { key: "home", icon: <HomeOutlined />, label: "Home" },
   { key: "newsale", icon: <ShoppingCartOutlined />, label: "New Sale" },
   { key: "overview", icon: <InboxOutlined />, label: "Orders" },
+  { key: "summary", icon: <CalendarOutlined />, label: "Daily Summary" },
   { key: "inventory", icon: <InboxOutlined />, label: "Inventory" },
   { key: "add", icon: <PlusCircleOutlined />, label: "Add Product" },
   { key: "import", icon: <UploadOutlined />, label: "Bulk Import" },
@@ -51,6 +53,7 @@ const PAGE_TITLES = {
   home: ["Home", "Quick overview of your shop"],
   newsale: ["New Sale", "Billing counter — search or scan a product to add it"],
   overview: ["Orders", "Track and update order status"],
+  summary: ["Daily Summary", "Printable end-of-day sales report"],
   inventory: ["Inventory", "Manage your catalog and prices"],
   add: ["Add Product", "Add a single item to your catalog"],
   import: ["Bulk Import", "Upload an Excel/CSV rate list"],
@@ -99,6 +102,7 @@ export default function ShopDashboard() {
   const [editProductTarget, setEditProductTarget] = useState(null); // product object being edited, or null
   const [editForm] = Form.useForm();
   const [savingEditProduct, setSavingEditProduct] = useState(false);
+  const [summaryDate, setSummaryDate] = useState(dayjs());
 
   const businessId = user?.business_id;
   const signupLink = businessId ? `${window.location.origin}/signup?shop=${businessId}` : "";
@@ -412,6 +416,20 @@ export default function ShopDashboard() {
     p.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  // "Low-stock" without any real inventory/quantity tracking: a product
+  // that hasn't had its price/details touched in a long time is a decent
+  // proxy for "might be running low or discontinued and the shop owner
+  // forgot to update it" — cheap, no schema change, no new backend
+  // endpoint needed, just a heuristic over data we already have
+  // (Product.updated_at already exists and bumps on any edit).
+  const STALE_DAYS_THRESHOLD = 14;
+  const staleProducts = products.filter((p) => {
+    if (!p.is_active) return false;
+    const updated = new Date(p.updated_at || p.created_at);
+    const daysSince = (Date.now() - updated.getTime()) / (1000 * 60 * 60 * 24);
+    return daysSince >= STALE_DAYS_THRESHOLD;
+  });
+
   const activeOrders = orders.filter((o) => !["delivered", "cancelled"].includes(o.status));
   const totalRevenue = orders
     .filter((o) => o.status === "delivered")
@@ -432,22 +450,60 @@ export default function ShopDashboard() {
     return matchesSearch && matchesStatus && matchesRange;
   });
 
+  // Daily Sales Summary — a printable end-of-day report: total revenue,
+  // order count, status breakdown, and a per-product sales breakdown for
+  // whichever single day the shop owner picks (defaults to today). Pure
+  // frontend computation over orders already loaded — no new backend
+  // endpoint, no schema change.
+  const summaryDayStr = summaryDate.format("YYYY-MM-DD");
+  const summaryOrders = orders.filter((o) => o.created_at.slice(0, 10) === summaryDayStr);
+  const summaryDelivered = summaryOrders.filter((o) => o.status === "delivered");
+  const summaryRevenue = summaryDelivered.reduce((sum, o) => sum + o.total_amount, 0);
+  const summaryStatusCounts = ORDER_STATUSES.reduce((acc, s) => {
+    acc[s] = summaryOrders.filter((o) => o.status === s).length;
+    return acc;
+  }, {});
+  const summaryProductTotals = {};
+  summaryOrders.forEach((o) => {
+    o.items.forEach((it) => {
+      const key = it.product_name_snapshot;
+      if (!summaryProductTotals[key]) {
+        summaryProductTotals[key] = { name: key, quantity: 0, unit: it.unit_type_snapshot, revenue: 0 };
+      }
+      summaryProductTotals[key].quantity += it.quantity;
+      summaryProductTotals[key].revenue += it.line_total;
+    });
+  });
+  const summaryTopProducts = Object.values(summaryProductTotals).sort((a, b) => b.revenue - a.revenue);
+
   // CSV export — respects whatever search/status/date filters are
   // currently applied, so a shop owner doing e.g. end-of-day reconciliation
   // can filter to today's delivered orders first, then export just those.
   // One row per order line item (not one row per order) so quantities/
   // prices are visible per product, matching how a bookkeeper would want it.
+  const escapeCsv = (val) => {
+    const s = String(val ?? "");
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+
+  const downloadCsv = (filename, headers, rows) => {
+    const csv = [headers, ...rows].map((row) => row.map(escapeCsv).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const exportOrdersCsv = () => {
     if (filteredOrders.length === 0) {
       message.info("No orders to export with the current filters");
       return;
     }
     const headers = ["Order ID", "Date", "Customer Name", "Customer Phone", "Status", "Product", "Quantity", "Unit", "Unit Price", "Line Total", "Order Total"];
-    const escapeCsv = (val) => {
-      const s = String(val ?? "");
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    };
-    const rows = [headers];
+    const rows = [];
     filteredOrders.forEach((o) => {
       o.items.forEach((it) => {
         rows.push([
@@ -456,14 +512,38 @@ export default function ShopDashboard() {
         ]);
       });
     });
-    const csv = rows.map((row) => row.map(escapeCsv).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadCsv(`orders-${new Date().toISOString().slice(0, 10)}.csv`, headers, rows);
+  };
+
+  // Full backup/export of a shop owner's own customer list — mainly so
+  // there's never a sense of lock-in or data loss: a shop owner can always
+  // pull their customer contacts (for a WhatsApp broadcast list, a
+  // spreadsheet backup, migrating elsewhere, whatever) without needing to
+  // ask Cartbi for anything.
+  const exportCustomersCsv = () => {
+    if (customers.length === 0) {
+      message.info("No customers to export yet");
+      return;
+    }
+    const headers = ["Name", "Phone", "Type", "Orders", "Total Spent"];
+    const rows = customers.map((c) => [
+      c.name, c.phone || "", c.is_guest ? "Walk-in" : "Registered", c.order_count, c.total_spent,
+    ]);
+    downloadCsv(`customers-${new Date().toISOString().slice(0, 10)}.csv`, headers, rows);
+  };
+
+  // Full catalog export — same "no data loss / no lock-in" reasoning as
+  // customers. Also doubles as a quick backup before a risky bulk edit.
+  const exportInventoryCsv = () => {
+    if (products.length === 0) {
+      message.info("No products to export yet");
+      return;
+    }
+    const headers = ["Name", "Category", "Unit", "Price", "Barcode", "Active", "Image URL"];
+    const rows = products.map((p) => [
+      p.name, p.category || "", p.unit_type, p.price, p.barcode || "", p.is_active ? "Yes" : "No", p.image_url || "",
+    ]);
+    downloadCsv(`inventory-${new Date().toISOString().slice(0, 10)}.csv`, headers, rows);
   };
 
   const [pageTitle, pageSubtitle] = PAGE_TITLES[tab] || ["", ""];
@@ -635,6 +715,35 @@ export default function ShopDashboard() {
                 </Col>
               </Row>
 
+              {staleProducts.length > 0 && (
+                <Card
+                  title={`📦 ${staleProducts.length} product${staleProducts.length !== 1 ? "s" : ""} may need attention`}
+                  style={{ marginTop: 16, borderColor: "#f59e0b" }}
+                >
+                  <Text type="secondary">
+                    These haven't had their price or details updated in {STALE_DAYS_THRESHOLD}+ days —
+                    worth checking if they're still in stock, still the right price, or should be
+                    marked inactive. (This is a simple reminder, not real stock tracking — restocking
+                    or just re-saving the price clears a product from this list.)
+                  </Text>
+                  <div style={{ marginTop: 12, display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {staleProducts.slice(0, 12).map((p) => (
+                      <Tag key={p.id} color="orange" style={{ cursor: "pointer" }} onClick={() => selectTab("inventory")}>
+                        {p.name}
+                      </Tag>
+                    ))}
+                    {staleProducts.length > 12 && (
+                      <Tag onClick={() => selectTab("inventory")} style={{ cursor: "pointer" }}>
+                        +{staleProducts.length - 12} more
+                      </Tag>
+                    )}
+                  </div>
+                  <Button type="link" onClick={() => selectTab("inventory")} style={{ marginTop: 8, padding: 0 }}>
+                    Review in Inventory →
+                  </Button>
+                </Card>
+              )}
+
               {!business?.contact_phone && (
                 <Card title="⚠️ Set your WhatsApp contact number" style={{ marginTop: 16, borderColor: "#f59e0b" }}>
                   <Text type="secondary">
@@ -782,14 +891,100 @@ export default function ShopDashboard() {
             </>
           )}
 
+          {tab === "summary" && (
+            <>
+              <Card style={{ marginBottom: 16 }} className="no-print">
+                <Space wrap>
+                  <DatePicker value={summaryDate} onChange={(d) => setSummaryDate(d || dayjs())} allowClear={false} />
+                  <Button onClick={() => setSummaryDate(dayjs())}>Today</Button>
+                  <Button onClick={() => setSummaryDate(dayjs().subtract(1, "day"))}>Yesterday</Button>
+                  <Button icon={<PrinterOutlined />} type="primary" className="dash-gradient-btn" onClick={() => window.print()}>
+                    Print
+                  </Button>
+                </Space>
+              </Card>
+
+              <div className="invoice-sheet" style={{ maxWidth: 700 }}>
+                <div className="invoice-header">
+                  <div>
+                    <Title level={4} style={{ margin: 0 }}>{business?.name || "Your Shop"}</Title>
+                    <Text type="secondary">Daily Sales Summary</Text>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <Text strong>{summaryDate.format("DD MMM YYYY")}</Text>
+                    <div><Text type="secondary" style={{ fontSize: 12 }}>{summaryOrders.length} order(s)</Text></div>
+                  </div>
+                </div>
+
+                <Row gutter={16} style={{ marginTop: 16, marginBottom: 20 }}>
+                  <Col xs={12} md={6}>
+                    <StatCard icon={<ShoppingOutlined />} color="purple" title="Orders" value={summaryOrders.length} />
+                  </Col>
+                  <Col xs={12} md={6}>
+                    <StatCard icon={<ThunderboltOutlined />} color="orange" title="Delivered" value={summaryDelivered.length} />
+                  </Col>
+                  <Col xs={12} md={6}>
+                    <StatCard icon={<WalletOutlined />} color="green" title="Revenue (Delivered)" value={summaryRevenue} prefix="₹" />
+                  </Col>
+                  <Col xs={12} md={6}>
+                    <StatCard icon={<AppstoreOutlined />} color="blue" title="Products Sold" value={summaryTopProducts.length} />
+                  </Col>
+                </Row>
+
+                <Title level={5}>Orders by Status</Title>
+                <Space wrap style={{ marginBottom: 20 }}>
+                  {ORDER_STATUSES.map((s) => (
+                    <Tag key={s} color={STATUS_COLORS[s]}>{s}: {summaryStatusCounts[s]}</Tag>
+                  ))}
+                </Space>
+
+                <Title level={5}>Product-wise Sales</Title>
+                {summaryTopProducts.length === 0 ? (
+                  <Empty description="No orders on this day" style={{ margin: "20px 0" }} />
+                ) : (
+                  <table className="invoice-table">
+                    <thead>
+                      <tr>
+                        <th>Product</th>
+                        <th>Quantity Sold</th>
+                        <th>Revenue</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {summaryTopProducts.map((p) => (
+                        <tr key={p.name}>
+                          <td>{p.name}</td>
+                          <td>{p.quantity} {p.unit}</td>
+                          <td>₹{p.revenue.toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+
+                <div className="invoice-total-row">
+                  <span>Total Revenue (Delivered)</span>
+                  <strong>₹{summaryRevenue.toFixed(2)}</strong>
+                </div>
+
+                <p style={{ textAlign: "center", color: "#9ca3af", fontSize: 12, marginTop: 30 }}>
+                  Generated by Cartbi — Order Simple, Bill Right
+                </p>
+              </div>
+            </>
+          )}
+
           {tab === "inventory" && (
             <>
-              <Input
-                placeholder="Search products..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                style={{ marginBottom: 12, maxWidth: 320 }}
-              />
+              <Space wrap style={{ marginBottom: 12 }}>
+                <Input
+                  placeholder="Search products..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  style={{ maxWidth: 320 }}
+                />
+                <Button icon={<DownloadOutlined />} onClick={exportInventoryCsv}>Download CSV</Button>
+              </Space>
               <Table
                 dataSource={filteredProducts}
                 columns={inventoryColumns}
@@ -874,13 +1069,16 @@ export default function ShopDashboard() {
 
           {tab === "customers" && (
             <>
-              <Input
-                placeholder="Search by name or phone..."
-                value={customerSearch}
-                onChange={(e) => setCustomerSearch(e.target.value)}
-                style={{ marginBottom: 12, maxWidth: 320 }}
-                allowClear
-              />
+              <Space wrap style={{ marginBottom: 12 }}>
+                <Input
+                  placeholder="Search by name or phone..."
+                  value={customerSearch}
+                  onChange={(e) => setCustomerSearch(e.target.value)}
+                  style={{ maxWidth: 320 }}
+                  allowClear
+                />
+                <Button icon={<DownloadOutlined />} onClick={exportCustomersCsv}>Download CSV</Button>
+              </Space>
               <Table
                 dataSource={customers.filter((c) => {
                   const q = customerSearch.trim().toLowerCase();
