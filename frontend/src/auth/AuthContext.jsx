@@ -25,6 +25,16 @@ export function AuthProvider({ children }) {
     return data.user;
   };
 
+  // Shared by anything that gets a {access_token, user} shape back directly
+  // (currently just the "Try Demo" flow) without going through the normal
+  // login/signup forms.
+  const applyAuthResponse = (data) => {
+    localStorage.setItem("token", data.access_token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    setUser(data.user);
+    return data.user;
+  };
+
   const refreshUser = async () => {
     const { data } = await api.get("/auth/me");
     localStorage.setItem("user", JSON.stringify(data));
@@ -39,7 +49,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, refreshUser, applyAuthResponse }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Input, Row, Col, Card, Button, Badge, Empty, Typography, Affix, Alert, Image, Modal, message } from "antd";
-import { PlusOutlined, MinusOutlined, SearchOutlined, ShoppingCartOutlined, WhatsAppOutlined, CheckCircleFilled, HeartOutlined, HeartFilled } from "@ant-design/icons";
+import { PlusOutlined, MinusOutlined, SearchOutlined, ShoppingCartOutlined, WhatsAppOutlined, CheckCircleFilled, HeartOutlined, HeartFilled, PlayCircleOutlined } from "@ant-design/icons";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { normalizeIndianPhone } from "../utils.js";
@@ -174,6 +174,17 @@ export default function Catalog() {
 
   return (
     <div>
+      {business?.name === "Cartbi Demo Store" && (
+        <Alert
+          type="info"
+          showIcon
+          icon={<PlayCircleOutlined />}
+          message="You're in Demo Mode"
+          description="This is a sample shop with fake products — nothing here is real. Feel free to click around, add items, and place a demo order to see how it works."
+          style={{ marginBottom: 16 }}
+        />
+      )}
+
       {business ? <ShopBanner business={business} /> : <Title level={3}>Catalog</Title>}
 
       {business && (

@@ -1,9 +1,12 @@
-import { Link } from "react-router-dom";
-import { Button, Row, Col, Typography, Card, Space } from "antd";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button, Row, Col, Typography, Card, Space, message } from "antd";
 import {
   ShoppingOutlined, BarcodeOutlined, WhatsAppOutlined, MobileOutlined,
-  BarChartOutlined, TeamOutlined, CheckCircleFilled, RocketOutlined,
+  BarChartOutlined, TeamOutlined, CheckCircleFilled, RocketOutlined, PlayCircleOutlined,
 } from "@ant-design/icons";
+import api from "../api";
+import { useAuth } from "../auth/AuthContext.jsx";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -41,6 +44,28 @@ const FEATURES = [
 ];
 
 export default function Landing() {
+  const { applyAuthResponse } = useAuth();
+  const navigate = useNavigate();
+  const [startingDemo, setStartingDemo] = useState(false);
+
+  // One-click "Try Demo" — logs straight into a fixed demo customer
+  // account bound to a seeded sample shop/catalog. No signup form, no
+  // real phone number needed. Lets a prospective shop owner (or anyone
+  // curious) see the actual customer ordering experience in seconds,
+  // mirroring the dummy-user demo pattern used in another billing app.
+  const tryDemo = async () => {
+    setStartingDemo(true);
+    try {
+      const { data } = await api.post("/demo/start");
+      const user = applyAuthResponse(data);
+      navigate(`/shop/${user.business_id}`);
+    } catch (err) {
+      message.error("Could not start the demo right now — please try again.");
+    } finally {
+      setStartingDemo(false);
+    }
+  };
+
   return (
     <div>
       {/* Hero */}
@@ -62,6 +87,15 @@ export default function Landing() {
           take orders online, and stay organized — without juggling five different apps.
         </Paragraph>
         <Space size="middle" wrap style={{ justifyContent: "center" }}>
+          <Button
+            size="large"
+            ghost
+            icon={<PlayCircleOutlined />}
+            loading={startingDemo}
+            onClick={tryDemo}
+          >
+            Try the Demo (no signup)
+          </Button>
           <Link to="/signup">
             <Button type="primary" size="large" icon={<RocketOutlined />} style={{ background: "#16a34a", borderColor: "#16a34a", fontWeight: 600 }}>
               Try it with your shop

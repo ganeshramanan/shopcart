@@ -64,14 +64,12 @@ function TopBar() {
   if (isBoundCustomer) {
     navLinks.push({ to: `/shop/${user.business_id}`, icon: <ShopOutlined />, label: "Catalog" });
   }
-  // "Shops" only matters for a logged-in customer who hasn't picked a shop
-  // yet — for them "/" shows the actual shop directory (BusinessList). For
-  // anonymous visitors, "/" shows the Landing page instead (not a shop
-  // list), and clicking the Cartbi logo already goes there — showing a
-  // second, now-mislabeled "Shops" link to the same place is redundant.
-  if (isPlainCustomer) {
-    navLinks.push({ to: "/", icon: <ShopOutlined />, label: "Shops" });
-  }
+  // No "Shops" directory link — a customer belongs to exactly one shop
+  // (reached via that shop's own signup link), so a general shop
+  // directory isn't a real feature they need. If a logged-in customer
+  // somehow has no business_id yet (a rare edge case), HomeRoute still
+  // falls back to BusinessList when they land on "/" — just not
+  // surfaced as a persistent nav item.
   if (isBoundCustomer || isPlainCustomer) {
     navLinks.push({ to: "/orders", icon: <UnorderedListOutlined />, label: "My Orders" });
     navLinks.push({ to: "/favorites", icon: <HeartOutlined />, label: "Favorites" });
