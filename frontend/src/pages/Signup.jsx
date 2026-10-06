@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Card, Form, Input, Button, Typography, Alert, Space } from "antd";
-import { UserOutlined, PhoneOutlined, LockOutlined, ShoppingOutlined } from "@ant-design/icons";
+import { UserOutlined, PhoneOutlined, LockOutlined, ShoppingOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { useAuth } from "../auth/AuthContext.jsx";
 
 const { Title, Text } = Typography;
@@ -56,7 +56,11 @@ export default function Signup() {
   if (!shopId) {
     return (
       <div style={{ display: "flex", justifyContent: "center", paddingTop: 40 }}>
-        <Card style={{ maxWidth: 460, width: "100%" }}>
+        <div style={{ maxWidth: 460, width: "100%" }}>
+          <Link to="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 12, color: "#6b7280" }}>
+            <ArrowLeftOutlined /> Back to home
+          </Link>
+          <Card>
           <Space direction="vertical" align="center" style={{ width: "100%", marginBottom: 16 }}>
             <ShoppingOutlined style={{ fontSize: 32, color: "#2563eb" }} />
             <Title level={3} style={{ margin: 0 }}>Sign up</Title>
@@ -73,14 +77,19 @@ export default function Signup() {
           <div style={{ textAlign: "center", marginTop: 16 }}>
             <Text>Already have an account? <Link to="/login">Login</Link></Text>
           </div>
-        </Card>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
     <div style={{ display: "flex", justifyContent: "center", paddingTop: 40 }}>
-      <Card style={{ maxWidth: 420, width: "100%" }}>
+      <div style={{ maxWidth: 420, width: "100%" }}>
+        <Link to="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 12, color: "#6b7280" }}>
+          <ArrowLeftOutlined /> Back to home
+        </Link>
+        <Card>
         <Space direction="vertical" align="center" style={{ width: "100%", marginBottom: 16 }}>
           <ShoppingOutlined style={{ fontSize: 32, color: "#2563eb" }} />
           <Title level={3} style={{ margin: 0 }}>Sign up</Title>
@@ -91,7 +100,8 @@ export default function Signup() {
         <div style={{ textAlign: "center", marginTop: 16 }}>
           <Text>Already have an account? <Link to="/login">Login</Link></Text>
         </div>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

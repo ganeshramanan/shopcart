@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, Form, Input, Button, Typography, Alert, Space } from "antd";
-import { PhoneOutlined, LockOutlined, ShoppingOutlined } from "@ant-design/icons";
+import { PhoneOutlined, LockOutlined, ShoppingOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { useAuth } from "../auth/AuthContext.jsx";
 
 const { Title, Text } = Typography;
@@ -35,7 +35,11 @@ export default function Login() {
 
   return (
     <div style={{ display: "flex", justifyContent: "center", paddingTop: 40 }}>
-      <Card style={{ maxWidth: 420, width: "100%" }}>
+      <div style={{ maxWidth: 420, width: "100%" }}>
+        <Link to="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 12, color: "#6b7280" }}>
+          <ArrowLeftOutlined /> Back to home
+        </Link>
+        <Card>
         <Space direction="vertical" align="center" style={{ width: "100%", marginBottom: 16 }}>
           <ShoppingOutlined style={{ fontSize: 32, color: "#2563eb" }} />
           <Title level={3} style={{ margin: 0 }}>Login</Title>
@@ -71,7 +75,8 @@ export default function Login() {
             (or, if you're a shop owner, contact Cartbi support).
           </Text>
         </div>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }
