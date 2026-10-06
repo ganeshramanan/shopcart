@@ -16,14 +16,21 @@ def _ensure_owns_business(user: models.User, business_id: str):
         raise HTTPException(status_code=403, detail="Not authorized for this business")
 
 
-def _generate_unique_barcode(db: Session) -> str:
-    """Generates a unique internal-use barcode. GS1 reserves the 20-29 EAN-13
-    prefix range for in-store/internal use (never assigned to real retail
-    products), so codes here will never collide with a manufacturer's actual
-    barcode. Format: 2 + 11 random digits = 12 digits, Code128-scannable."""
+def _generate_unique_barcode(db: Session, business_id: str) -> str:
+    """Generates a unique internal-use barcode (unique within this shop
+    only, since barcode uniqueness is now scoped per business — see
+    Product's UniqueConstraint). GS1 reserves the 20-29 EAN-13 prefix
+    range for in-store/internal use (never assigned to real retail
+    products), so codes here will never collide with a manufacturer's
+    actual barcode. Format: 2 + 11 random digits = 12 digits,
+    Code128-scannable."""
     for _ in range(10):
         candidate = "2" + "".join(str(random.randint(0, 9)) for _ in range(11))
-        exists = db.query(models.Product).filter(models.Product.barcode == candidate).first()
+        exists = (
+            db.query(models.Product)
+            .filter(models.Product.barcode == candidate, models.Product.business_id == business_id)
+            .first()
+        )
         if not exists:
             return candidate
     raise RuntimeError("Could not generate a unique barcode after 10 attempts")
@@ -50,7 +57,18 @@ def create_product(
     _ensure_owns_business(user, business_id)
     data = payload.model_dump()
     if not data.get("barcode"):
-        data["barcode"] = _generate_unique_barcode(db)
+        data["barcode"] = _generate_unique_barcode(db, business_id)
+    else:
+        existing = (
+            db.query(models.Product)
+            .filter(models.Product.barcode == data["barcode"], models.Product.business_id == business_id)
+            .first()
+        )
+        if existing:
+            raise HTTPException(
+                status_code=400,
+                detail=f"You already have a product with this barcode: {existing.name}. Edit that product instead, or scan the correct item.",
+            )
     product = models.Product(business_id=business_id, **data)
     db.add(product)
     db.commit()

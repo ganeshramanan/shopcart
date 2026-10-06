@@ -37,6 +37,14 @@ statements = [
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS can_share_signup_link BOOLEAN NOT NULL DEFAULT false;",
     "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS logo_url VARCHAR;",
     "ALTER TABLE businesses ADD COLUMN IF NOT EXISTS min_order_value DOUBLE PRECISION NOT NULL DEFAULT 0;",
+    # Barcode uniqueness is now scoped PER SHOP, not global — a real
+    # manufacturer barcode (e.g. a Britannia biscuit's EAN) is identical
+    # across every shop that stocks it, so a global unique index would make
+    # it impossible for a second shop to ever add that same branded
+    # product. Drop the old global unique index, replace with a composite
+    # one on (business_id, barcode).
+    "DROP INDEX IF EXISTS ix_products_barcode;",
+    "CREATE UNIQUE INDEX IF NOT EXISTS uq_product_business_barcode ON products (business_id, barcode) WHERE barcode IS NOT NULL;",
 ]
 
 # Adding an enum value must run outside a transaction block in Postgres <12,

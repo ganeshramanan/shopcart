@@ -31,12 +31,19 @@ def _map_columns(columns: list[str]) -> dict:
     return mapping
 
 
-def _generate_unique_barcode(db: Session) -> str:
+def _generate_unique_barcode(db: Session, business_id: str) -> str:
     """Same internal-use barcode scheme as products.py (2xx prefix, GS1's
-    reserved in-store range — never collides with real manufacturer codes)."""
+    reserved in-store range — never collides with real manufacturer codes).
+    Uniqueness is scoped per shop (business_id), matching Product's
+    UniqueConstraint — see products.py for why."""
     for _ in range(10):
         candidate = "2" + "".join(str(random.randint(0, 9)) for _ in range(11))
-        if not db.query(models.Product).filter(models.Product.barcode == candidate).first():
+        exists = (
+            db.query(models.Product)
+            .filter(models.Product.barcode == candidate, models.Product.business_id == business_id)
+            .first()
+        )
+        if not exists:
             return candidate
     raise RuntimeError("Could not generate a unique barcode after 10 attempts")
 
@@ -58,7 +65,7 @@ def backfill_barcodes(
         .all()
     )
     for p in products:
-        p.barcode = _generate_unique_barcode(db)
+        p.barcode = _generate_unique_barcode(db, business_id)
     db.commit()
     return {"updated": len(products)}
 
@@ -136,13 +143,13 @@ async def import_products(
                 if category:
                     existing.category = category
                 if not existing.barcode:
-                    existing.barcode = _generate_unique_barcode(db)
+                    existing.barcode = _generate_unique_barcode(db, business_id)
                 updated += 1
             else:
                 db.add(models.Product(
                     business_id=business_id, name=name, unit_type=unit_type,
                     price=price, attributes=extra, image_url=image_url, category=category,
-                    barcode=_generate_unique_barcode(db),
+                    barcode=_generate_unique_barcode(db, business_id),
                 ))
                 created += 1
         except Exception as e:

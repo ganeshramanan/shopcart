@@ -3,7 +3,8 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import (
-    Column, String, Float, Boolean, ForeignKey, DateTime, Enum, Integer, Text
+    Column, String, Float, Boolean, ForeignKey, DateTime, Enum, Integer, Text,
+    UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
@@ -88,13 +89,24 @@ class Product(Base):
     is_active = Column(Boolean, default=True)
     image_url = Column(String, nullable=True)
     category = Column(String, nullable=True, index=True)
-    barcode = Column(String, unique=True, nullable=True, index=True)
+    barcode = Column(String, nullable=True, index=True)  # unique per shop, not globally — see UniqueConstraint below
     attributes = Column(JSONB, nullable=True, default=dict)  # flexible per-vertical fields
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     business = relationship("Business", back_populates="products")
     price_history = relationship("PriceHistory", back_populates="product", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        # Barcode only needs to be unique WITHIN a shop, not globally.
+        # Real manufacturer barcodes (e.g. a Britannia biscuit's EAN) are
+        # identical across every shop that stocks that product — a global
+        # unique constraint would make it impossible for a second shop to
+        # ever add the same branded product. Internal auto-generated
+        # barcodes remain effectively unique in practice since they're
+        # randomly generated per shop anyway.
+        UniqueConstraint("business_id", "barcode", name="uq_product_business_barcode"),
+    )
 
 
 class PriceHistory(Base):

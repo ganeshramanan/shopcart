@@ -10,7 +10,7 @@ import {
   UploadOutlined, TeamOutlined, TagsOutlined, BarChartOutlined, UserOutlined,
   CopyOutlined, WhatsAppOutlined, QrcodeOutlined, MenuOutlined, ReloadOutlined,
   AppstoreOutlined, ThunderboltOutlined, ShoppingOutlined, WalletOutlined,
-  DownloadOutlined,
+  DownloadOutlined, ScanOutlined,
 } from "@ant-design/icons";
 import { QRCodeSVG } from "qrcode.react";
 import api from "../api";
@@ -23,6 +23,7 @@ import StaffManagement from "./StaffManagement.jsx";
 import SignupLinkCard from "../components/SignupLinkCard.jsx";
 import ShopBanner from "../components/ShopBanner.jsx";
 import StatCard from "../components/StatCard.jsx";
+import BarcodeScanner from "../components/BarcodeScanner.jsx";
 
 const { Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -93,6 +94,8 @@ export default function ShopDashboard() {
   const [customerNewPassword, setCustomerNewPassword] = useState("");
   const [resettingCustomer, setResettingCustomer] = useState(false);
   const [addForm] = Form.useForm();
+  const [addScannerOpen, setAddScannerOpen] = useState(false);
+  const [lookingUpBarcode, setLookingUpBarcode] = useState(false);
 
   const businessId = user?.business_id;
   const signupLink = businessId ? `${window.location.origin}/signup?shop=${businessId}` : "";
@@ -183,6 +186,41 @@ export default function ShopDashboard() {
       loadProducts();
     } catch (err) {
       message.error(err.response?.data?.detail || "Could not add product");
+    }
+  };
+
+  // "Scan to Add" — shop owner scans a branded product's real factory
+  // barcode (same barcode on every unit of that SKU, e.g. every Britannia
+  // Good Day 100g packet) once when it first arrives. We save that real
+  // barcode on the product so every future unit scans straight to it at
+  // POS — no sticker needed for branded goods, only for loose/unbranded
+  // items that still go through the existing auto-generate+print flow.
+  //
+  // As a free bonus, we look up the scanned barcode against Open Food
+  // Facts (no API key, no cost) to auto-fill the product name — shop
+  // owner just confirms/edits it and sets their own price, since price is
+  // always a business decision, never pulled from the barcode itself.
+  const handleAddScan = async (decodedText) => {
+    setAddScannerOpen(false);
+    addForm.setFieldsValue({ barcode: decodedText });
+    message.success(`Barcode scanned: ${decodedText}`);
+
+    setLookingUpBarcode(true);
+    try {
+      const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${decodedText}.json`);
+      const data = await res.json();
+      if (data?.status === 1 && data.product?.product_name) {
+        addForm.setFieldsValue({ name: data.product.product_name });
+        message.info("Product name auto-filled from barcode — review before saving.");
+      } else {
+        message.info("Barcode saved, but no product name found online — please enter it manually.");
+      }
+    } catch (err) {
+      // Lookup is a nice-to-have only — never block the shop owner from
+      // continuing just because the free lookup service is unreachable.
+      message.info("Barcode saved. Couldn't reach the product lookup service — enter the name manually.");
+    } finally {
+      setLookingUpBarcode(false);
     }
   };
 
@@ -725,6 +763,27 @@ export default function ShopDashboard() {
 
           {tab === "add" && (
             <Card style={{ maxWidth: 480 }}>
+              <div style={{ marginBottom: 16 }}>
+                <Button
+                  icon={<ScanOutlined />}
+                  loading={lookingUpBarcode}
+                  onClick={() => setAddScannerOpen(true)}
+                  block
+                >
+                  📷 Scan to Add (branded product)
+                </Button>
+                <Text type="secondary" style={{ fontSize: 12, display: "block", marginTop: 6 }}>
+                  Scan the barcode already printed on a packaged product (e.g. a biscuit packet) —
+                  every unit of that same product shares the same barcode, so you only scan once per
+                  item ever. We'll try to auto-fill the name; you set the price. For loose/unbranded
+                  items without a barcode, just fill the form below and use Print Labels afterwards.
+                </Text>
+              </div>
+
+              {addScannerOpen && (
+                <BarcodeScanner onScan={handleAddScan} onClose={() => setAddScannerOpen(false)} />
+              )}
+
               <Form form={addForm} layout="vertical" onFinish={addProduct}>
                 <Form.Item name="name" label="Name" rules={[{ required: true }]}>
                   <Input placeholder="e.g. Basmati Rice" />
@@ -740,6 +799,9 @@ export default function ShopDashboard() {
                 </Form.Item>
                 <Form.Item name="image_url" label="Image URL (optional)">
                   <Input />
+                </Form.Item>
+                <Form.Item name="barcode" label="Barcode (optional)">
+                  <Input placeholder="Scanned automatically, or leave blank to auto-generate one for printing" />
                 </Form.Item>
                 <Button type="primary" className="dash-gradient-btn" htmlType="submit">Add Product</Button>
               </Form>
