@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Row, Col, Card, Table, Tag, Button, Popconfirm, Typography, message, Input, Modal } from "antd";
+import { Row, Col, Card, Table, Tag, Button, Popconfirm, Typography, message, Input, Modal, Collapse } from "antd";
 import { ShopOutlined, UserOutlined, ClockCircleOutlined, StopOutlined } from "@ant-design/icons";
 import api from "../api";
 import { useAuth } from "../auth/AuthContext.jsx";
@@ -234,20 +234,38 @@ export default function AdminDashboard() {
         <Table dataSource={businesses} columns={businessColumns} rowKey="id" pagination={{ pageSize: 10 }} />
       </Card>
 
-      <Card title="All Users (any role)" style={{ marginTop: 20 }}>
-        <Text type="secondary">
-          Full account list across every role — useful for finding orphaned/misconfigured accounts
-          not shown in the Shop Owners list above (e.g. a stuck phone number blocking a new signup).
-        </Text>
-        <Input
-          placeholder="Search by name or phone..."
-          value={userSearch}
-          onChange={(e) => setUserSearch(e.target.value)}
-          style={{ margin: "12px 0", maxWidth: 320 }}
-          allowClear
-        />
-        <Table dataSource={filteredUsers} columns={userColumns} rowKey="id" pagination={{ pageSize: 10 }} />
-      </Card>
+      <Collapse
+        style={{ marginTop: 20 }}
+        items={[{
+          key: "all-users",
+          label: (
+            <div>
+              <Text strong>All Users (any role)</Text>{" "}
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                — mostly for debugging; day-to-day you likely only need Shop Owners above
+              </Text>
+            </div>
+          ),
+          children: (
+            <>
+              <Text type="secondary">
+                Full account list across every role — includes walk-in/guest customers and staff.
+                Staff password resets are now self-service for shop owners (Staff tab on their
+                dashboard); use this only to find orphaned/misconfigured accounts not shown in the
+                Shop Owners list above (e.g. a stuck phone number blocking a new signup).
+              </Text>
+              <Input
+                placeholder="Search by name or phone..."
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                style={{ margin: "12px 0", maxWidth: 320 }}
+                allowClear
+              />
+              <Table dataSource={filteredUsers} columns={userColumns} rowKey="id" pagination={{ pageSize: 10 }} />
+            </>
+          ),
+        }]}
+      />
 
       <Modal
         title={`Reset password for ${resetTarget?.name || ""}`}

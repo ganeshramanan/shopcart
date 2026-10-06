@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card, Form, Input, Button, Checkbox, Typography, Tag, Popconfirm, message, Space } from "antd";
+import { Card, Form, Input, Button, Checkbox, Typography, Tag, Popconfirm, message, Space, Modal } from "antd";
 import api from "../api";
 
 const { Text } = Typography;
@@ -8,6 +8,9 @@ export default function StaffManagement() {
   const [staff, setStaff] = useState([]);
   const [error, setError] = useState("");
   const [form] = Form.useForm();
+  const [resetTarget, setResetTarget] = useState(null); // staff object being reset, or null
+  const [newPassword, setNewPassword] = useState("");
+  const [resetting, setResetting] = useState(false);
 
   const load = () => {
     api.get("/staff").then((res) => setStaff(res.data)).catch((e) => setError(e.response?.data?.detail || "Failed to load"));
@@ -41,6 +44,27 @@ export default function StaffManagement() {
     await api.delete(`/staff/${id}`);
     message.success("Staff member removed");
     load();
+  };
+
+  // Shop owner resets their own staff's password directly — previously
+  // this needed Cartbi admin involvement via the platform-wide "All Users"
+  // table, even though staff are otherwise entirely self-service here.
+  const submitPasswordReset = async () => {
+    if (!newPassword || newPassword.length < 4) {
+      message.error("Password must be at least 4 characters");
+      return;
+    }
+    setResetting(true);
+    try {
+      await api.post(`/staff/${resetTarget.id}/reset-password`, { new_password: newPassword });
+      message.success(`Password reset for ${resetTarget.name}. Let them know their new password directly.`);
+      setResetTarget(null);
+      setNewPassword("");
+    } catch (err) {
+      message.error(err.response?.data?.detail || "Could not reset password");
+    } finally {
+      setResetting(false);
+    }
   };
 
   return (
@@ -78,6 +102,7 @@ export default function StaffManagement() {
                 <div><Text type="secondary" style={{ fontSize: 12 }}>{s.phone}</Text></div>
               </div>
               <Space>
+                <Button size="small" onClick={() => { setResetTarget(s); setNewPassword(""); }}>Reset PW</Button>
                 <Button size="small" onClick={() => toggleActive(s.id)}>
                   {s.is_active ? "Disable" : "Enable"}
                 </Button>
@@ -105,6 +130,25 @@ export default function StaffManagement() {
           </div>
         ))}
       </Card>
+
+      <Modal
+        title={`Reset password for ${resetTarget?.name || ""}`}
+        open={!!resetTarget}
+        onCancel={() => setResetTarget(null)}
+        onOk={submitPasswordReset}
+        okText="Reset Password"
+        confirmLoading={resetting}
+      >
+        <Text type="secondary">
+          Set a new password for this staff member. Let them know it directly — there's no automatic notification.
+        </Text>
+        <Input.Password
+          placeholder="New password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          style={{ marginTop: 12 }}
+        />
+      </Modal>
     </div>
   );
 }

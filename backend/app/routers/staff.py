@@ -138,6 +138,41 @@ def toggle_staff_active(
     return {"detail": "Updated", "is_active": staff.is_active}
 
 
+@router.post("/{staff_id}/reset-password")
+def reset_staff_password(
+    staff_id: str,
+    payload: dict,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(require_role("shop_owner")),
+):
+    """Shop owner resets a password for one of their own staff accounts —
+    mirrors businesses.py's reset_customer_password. Previously this could
+    only be done by Cartbi admin via the platform-wide 'All Users' table,
+    even though staff are otherwise entirely self-service for the shop
+    owner (create/permissions/enable-disable/delete all already were).
+    Free — no email/SMS gateway, shop owner communicates the new password
+    to the staff member directly."""
+    staff = (
+        db.query(models.User)
+        .filter(
+            models.User.id == staff_id,
+            models.User.business_id == user.business_id,
+            models.User.role == models.RoleEnum.staff,
+        )
+        .first()
+    )
+    if not staff:
+        raise HTTPException(status_code=404, detail="Staff member not found")
+
+    new_password = payload.get("new_password")
+    if not new_password or len(new_password) < 4:
+        raise HTTPException(status_code=400, detail="new_password must be at least 4 characters")
+
+    staff.password_hash = hash_password(new_password)
+    db.commit()
+    return {"detail": "Password reset"}
+
+
 @router.delete("/{staff_id}")
 def delete_staff(
     staff_id: str,
