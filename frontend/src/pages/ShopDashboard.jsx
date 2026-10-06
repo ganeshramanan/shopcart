@@ -781,7 +781,7 @@ export default function ShopDashboard() {
               </div>
 
               {addScannerOpen && (
-                <BarcodeScanner onScan={handleAddScan} onClose={() => setAddScannerOpen(false)} />
+                <BarcodeScanner onScan={handleAddScan} onClose={() => setAddScannerOpen(false)} requireConfirmation />
               )}
 
               <Form form={addForm} layout="vertical" onFinish={addProduct}>
