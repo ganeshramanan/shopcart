@@ -90,6 +90,22 @@ def update_product(
 
     data = payload.model_dump(exclude_unset=True)
 
+    if data.get("barcode"):
+        conflict = (
+            db.query(models.Product)
+            .filter(
+                models.Product.barcode == data["barcode"],
+                models.Product.business_id == product.business_id,
+                models.Product.id != product.id,
+            )
+            .first()
+        )
+        if conflict:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Another product already uses this barcode: {conflict.name}.",
+            )
+
     # Track price change history automatically
     if "price" in data and data["price"] != product.price:
         db.add(models.PriceHistory(

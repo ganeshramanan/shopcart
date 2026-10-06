@@ -10,7 +10,7 @@ import {
   UploadOutlined, TeamOutlined, TagsOutlined, BarChartOutlined, UserOutlined,
   CopyOutlined, WhatsAppOutlined, QrcodeOutlined, MenuOutlined, ReloadOutlined,
   AppstoreOutlined, ThunderboltOutlined, ShoppingOutlined, WalletOutlined,
-  DownloadOutlined, ScanOutlined,
+  DownloadOutlined, ScanOutlined, EditOutlined,
 } from "@ant-design/icons";
 import { QRCodeSVG } from "qrcode.react";
 import api from "../api";
@@ -96,6 +96,9 @@ export default function ShopDashboard() {
   const [addForm] = Form.useForm();
   const [addScannerOpen, setAddScannerOpen] = useState(false);
   const [lookingUpBarcode, setLookingUpBarcode] = useState(false);
+  const [editProductTarget, setEditProductTarget] = useState(null); // product object being edited, or null
+  const [editForm] = Form.useForm();
+  const [savingEditProduct, setSavingEditProduct] = useState(false);
 
   const businessId = user?.business_id;
   const signupLink = businessId ? `${window.location.origin}/signup?shop=${businessId}` : "";
@@ -237,6 +240,40 @@ export default function ShopDashboard() {
     await api.delete(`/products/${productId}`);
     message.success("Product removed");
     loadProducts();
+  };
+
+  // Full Edit Product modal — the inline Inventory row only ever let a
+  // shop owner tweak price. Name/unit/category/image/barcode had no edit
+  // path at all other than delete + recreate (which also loses barcode
+  // continuity). This reuses the same PUT /products/{id} endpoint, which
+  // already supports partial updates — no backend change needed.
+  const openEditProduct = (product) => {
+    setEditProductTarget(product);
+    editForm.setFieldsValue({
+      name: product.name,
+      unit_type: product.unit_type,
+      price: product.price,
+      category: product.category,
+      image_url: product.image_url,
+      barcode: product.barcode,
+    });
+  };
+
+  const saveEditProduct = async (values) => {
+    setSavingEditProduct(true);
+    try {
+      await api.put(`/products/${editProductTarget.id}`, {
+        ...values,
+        price: parseFloat(values.price),
+      });
+      message.success("Product updated");
+      setEditProductTarget(null);
+      loadProducts();
+    } catch (err) {
+      message.error(err.response?.data?.detail || "Could not update product");
+    } finally {
+      setSavingEditProduct(false);
+    }
   };
 
   const handleImport = async (file) => {
@@ -451,7 +488,7 @@ export default function ShopDashboard() {
       ),
     },
     {
-      title: "Price", dataIndex: "price", key: "price", width: 240,
+      title: "Price", dataIndex: "price", key: "price", width: 280,
       render: (price, p) => (
         <Space>
           <Input
@@ -462,6 +499,7 @@ export default function ShopDashboard() {
             onChange={(e) => setEditing((prev) => ({ ...prev, [p.id]: e.target.value }))}
           />
           <Button size="small" onClick={() => savePrice(p.id)}>Save</Button>
+          <Button size="small" icon={<EditOutlined />} onClick={() => openEditProduct(p)}>Edit</Button>
           <Popconfirm title="Remove this product?" onConfirm={() => deleteProduct(p.id)}>
             <Button size="small" danger>Delete</Button>
           </Popconfirm>
@@ -870,6 +908,36 @@ export default function ShopDashboard() {
           onChange={(e) => setCustomerNewPassword(e.target.value)}
           style={{ marginTop: 12 }}
         />
+      </Modal>
+
+      <Modal
+        title={`Edit ${editProductTarget?.name || "Product"}`}
+        open={!!editProductTarget}
+        onCancel={() => setEditProductTarget(null)}
+        onOk={() => editForm.submit()}
+        okText="Save Changes"
+        confirmLoading={savingEditProduct}
+      >
+        <Form form={editForm} layout="vertical" onFinish={saveEditProduct}>
+          <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+            <Input placeholder="e.g. Basmati Rice" />
+          </Form.Item>
+          <Form.Item name="unit_type" label="Unit" rules={[{ required: true }]}>
+            <Input placeholder="kg, piece, litre..." />
+          </Form.Item>
+          <Form.Item name="price" label="Price" rules={[{ required: true }]}>
+            <Input type="number" step="0.01" prefix="₹" />
+          </Form.Item>
+          <Form.Item name="category" label="Category (optional)">
+            <Input />
+          </Form.Item>
+          <Form.Item name="image_url" label="Image URL (optional)">
+            <Input />
+          </Form.Item>
+          <Form.Item name="barcode" label="Barcode (optional)">
+            <Input placeholder="Leave as-is unless you need to fix a scan or correct a typo" />
+          </Form.Item>
+        </Form>
       </Modal>
     </Layout>
   );
