@@ -64,7 +64,7 @@ def fetch_thumbnail(title: str, retries: int = 3) -> str | None:
     url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{urllib.parse.quote(title)}"
     for attempt in range(retries):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "ShopCartLearningProject/1.0"})
+            req = urllib.request.Request(url, headers={"User-Agent": "CartbiLearningProject/1.0"})
             with urllib.request.urlopen(req, timeout=10) as resp:
                 data = json.load(resp)
                 thumb = data.get("thumbnail", {}).get("source")

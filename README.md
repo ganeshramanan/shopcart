@@ -1,4 +1,4 @@
-# ShopCart
+# Cartbi
 
 A generic, multi-tenant ordering & billing platform — built to fix a real problem
 (manual provision-shop orders getting billed wrong) but designed to work for

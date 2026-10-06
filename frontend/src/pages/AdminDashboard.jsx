@@ -20,7 +20,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     document.title = "Cartbi — Platform Admin";
-    return () => { document.title = "ShopCart — Order Simple, Bill Right"; };
+    return () => { document.title = "Cartbi — Order Simple, Bill Right"; };
   }, []);
 
   const load = () => {
@@ -190,7 +190,7 @@ export default function AdminDashboard() {
   return (
     <div>
       <Title level={3} style={{ marginBottom: 0 }}>Cartbi Platform Overview</Title>
-      <Text type="secondary">Manage every shop and shop owner running on ShopCart</Text>
+      <Text type="secondary">Manage every shop and shop owner running on Cartbi</Text>
 
       {error && <Text type="danger">{error}</Text>}
 

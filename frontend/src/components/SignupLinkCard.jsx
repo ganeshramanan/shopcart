@@ -45,7 +45,7 @@ export default function SignupLinkCard({ businessId, title = "Your customer sign
             type="primary"
             icon={<WhatsAppOutlined />}
             onClick={() => {
-              const text = encodeURIComponent(`Join our shop on ShopCart to place orders directly: ${signupLink}`);
+              const text = encodeURIComponent(`Join our shop on Cartbi to place orders directly: ${signupLink}`);
               const target = waPhone.trim()
                 ? `https://wa.me/${normalizeIndianPhone(waPhone)}?text=${text}`
                 : `https://wa.me/?text=${text}`;

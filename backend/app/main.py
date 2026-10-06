@@ -8,7 +8,7 @@ from app.routers import auth, businesses, products, orders, imports, admin, anal
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="ShopCart API",
+    title="Cartbi API",
     description="Generic multi-tenant ordering & billing platform — provisions, pharmacy, laundry, etc.",
     version="0.1.0",
 )
@@ -34,7 +34,7 @@ app.include_router(customer.router)
 
 @app.get("/")
 def root():
-    return {"status": "ok", "service": "ShopCart API"}
+    return {"status": "ok", "service": "Cartbi API"}
 
 
 @app.get("/health")

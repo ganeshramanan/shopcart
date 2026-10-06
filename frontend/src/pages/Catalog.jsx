@@ -158,7 +158,7 @@ export default function Catalog() {
       (it) => `${it.product_name_snapshot} — ${it.quantity} ${it.unit_type_snapshot}`
     );
     const text = [
-      `New order on ShopCart!`,
+      `New order on Cartbi!`,
       `Order #${placedOrder.id.slice(0, 8)} from ${user?.name || "a customer"}`,
       "",
       ...lines,

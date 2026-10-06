@@ -85,8 +85,8 @@ function TopBar() {
     >
       <div style={{ display: "flex", alignItems: "center", gap: 20, minWidth: 0, flex: 1 }}>
         <Link to="/" style={{ display: "flex", alignItems: "center", gap: 8, color: "#fff", flexShrink: 0 }}>
-          {isAdmin ? <SettingOutlined style={{ fontSize: 20 }} /> : <ShoppingOutlined style={{ fontSize: 20 }} />}
-          <Text strong style={{ color: "#fff", fontSize: 17 }}>{isAdmin ? "Cartbi" : "ShopCart"}</Text>
+          <ShoppingOutlined style={{ fontSize: 20 }} />
+          <Text strong style={{ color: "#fff", fontSize: 17 }}>Cartbi</Text>
         </Link>
         <nav className="topnav-links">
           {navLinks.map((link) => (

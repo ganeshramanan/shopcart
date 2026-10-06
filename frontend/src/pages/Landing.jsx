@@ -58,7 +58,7 @@ export default function Landing() {
           Billing and online ordering,<br />built for your shop
         </Title>
         <Paragraph style={{ color: "rgba(255,255,255,0.88)", fontSize: 17, maxWidth: 640, margin: "0 auto 28px" }}>
-          ShopCart helps provision stores, pharmacies, and laundries bill accurately,
+          Cartbi helps provision stores, pharmacies, and laundries bill accurately,
           take orders online, and stay organized — without juggling five different apps.
         </Paragraph>
         <Space size="middle" wrap style={{ justifyContent: "center" }}>
