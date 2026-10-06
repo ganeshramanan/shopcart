@@ -64,7 +64,12 @@ function TopBar() {
   if (isBoundCustomer) {
     navLinks.push({ to: `/shop/${user.business_id}`, icon: <ShopOutlined />, label: "Catalog" });
   }
-  if (!user || isPlainCustomer) {
+  // "Shops" only matters for a logged-in customer who hasn't picked a shop
+  // yet — for them "/" shows the actual shop directory (BusinessList). For
+  // anonymous visitors, "/" shows the Landing page instead (not a shop
+  // list), and clicking the Cartbi logo already goes there — showing a
+  // second, now-mislabeled "Shops" link to the same place is redundant.
+  if (isPlainCustomer) {
     navLinks.push({ to: "/", icon: <ShopOutlined />, label: "Shops" });
   }
   if (isBoundCustomer || isPlainCustomer) {
