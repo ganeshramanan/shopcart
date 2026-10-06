@@ -53,6 +53,25 @@ export default function NewSale({ products, businessId }) {
     setTimeout(() => setScanMessage(""), 2500);
   };
 
+  // Cheap USB/Bluetooth "HID" barcode scanners don't need any special
+  // driver or integration — to the browser they just look like a very
+  // fast typist on a keyboard: they type the barcode's digits into
+  // whatever input is focused, then send Enter. So plugging one in and
+  // clicking into this search box already "just works" at the OS level —
+  // we only need to recognize that pattern and treat it as a scan instead
+  // of a name search. If Enter is pressed and the box contains a
+  // barcode-shaped value (6+ digits, nothing else), look it up as a
+  // barcode; otherwise Enter does nothing special and normal name-search
+  // filtering continues as the user types.
+  const handleSearchKeyDown = (e) => {
+    if (e.key !== "Enter") return;
+    const value = search.trim();
+    if (/^\d{6,}$/.test(value)) {
+      handleScan(value);
+      setSearch("");
+    }
+  };
+
   const generateBill = async () => {
     if (cartLines.length === 0) {
       setError("Add at least one item before generating a bill.");
@@ -89,9 +108,11 @@ export default function NewSale({ products, businessId }) {
 
       <input
         className="catalog-search"
-        placeholder="Search products to add..."
+        placeholder="Search by name, or scan with a USB/camera scanner..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
+        onKeyDown={handleSearchKeyDown}
+        autoFocus
       />
 
       <div className="row" style={{ gap: 8, marginBottom: 12 }}>
